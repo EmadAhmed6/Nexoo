@@ -20,6 +20,7 @@ import { Text } from "@/_components/shared/Text";
 import { Button } from "@/_components/shared/Button";
 import { useUpdateProduct } from "@/features/products/hooks/useProducts";
 import { Product } from "@/features/products/types/product.types";
+import { PRODUCT_CATEGORIES } from "@/features/products/types/categories";
 
 interface EditProductModalProps {
   isOpen: boolean;
@@ -44,15 +45,7 @@ interface ImageSlot {
   publicId?: string;
 }
 
-const CATEGORY_OPTIONS = [
-  "Watches & Accessories",
-  "Luxury Fragrances",
-  "Eyewear",
-  "Leather Goods",
-  "Clothing",
-  "Electronics",
-  "Jewelry",
-];
+const CATEGORY_OPTIONS = [...PRODUCT_CATEGORIES];
 
 export function EditProductModal({
   isOpen,

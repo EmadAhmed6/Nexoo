@@ -4,7 +4,6 @@ import React, { useState, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Star,
   ShoppingBag,
@@ -26,7 +25,7 @@ import {
   useUpdateProduct,
   useDeleteProduct,
 } from "@/features/products/hooks/useProducts";
-import { useCartStore } from "@/features/cart/store/useCartStore";
+import { useAddToCart } from "@/features/cart/hooks/useCart";
 import { useAppStore } from "@/store/use-app-store";
 import { Button, Text } from "@/_components/shared";
 import { EditProductModal } from "@/features/products/components/EditProductModal";
@@ -38,7 +37,7 @@ function ProductDetailContent() {
   const productId = params?.id as string;
 
   const { data: product, isLoading, isError, error } = useProduct(productId);
-  const addItem = useCartStore((state) => state.addItem);
+  const addToCart = useAddToCart();
   const { user } = useAppStore();
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
   const { mutate: updateProduct } = useUpdateProduct(productId);
@@ -53,12 +52,14 @@ function ProductDetailContent() {
   const directEditIndexRef = useRef<number | null>(null);
   const directFileInputRef = useRef<HTMLInputElement>(null);
 
-  const isOwner =
+  const isOwner = Boolean(
     user &&
-    product &&
-    (product.userId === user._id ||
-      user.role === "Admin" ||
-      user.role === "SuperAdmin");
+      product &&
+      (!product.userId ||
+        product.userId === user._id ||
+        user.role === "Admin" ||
+        user.role === "SuperAdmin"),
+  );
 
   const handleDelete = () => {
     deleteProduct(productId, {
@@ -209,9 +210,27 @@ function ProductDetailContent() {
       : 0;
 
   const handleAddToCart = () => {
-    addItem(product, quantity);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    if (!user) {
+      toast.error("Please sign in first to add items to your cart");
+      router.push("/auth/login");
+      return;
+    }
+
+    addToCart.mutate(
+      { productId: product._id, productQuantity: quantity },
+      {
+        onSuccess: () => {
+          setAdded(true);
+          toast.success(`Added ${quantity} item(s) to cart`);
+          setTimeout(() => setAdded(false), 2000);
+        },
+        onError: (err: unknown) => {
+          const msg =
+            err instanceof Error ? err.message : "Failed to add to cart";
+          toast.error(msg);
+        },
+      },
+    );
   };
 
   return (
@@ -248,7 +267,7 @@ function ProductDetailContent() {
 
           {/* Vertical Thumbnails List */}
           {images.length > 1 && (
-            <div className="flex sm:flex-col gap-2.5 sm:gap-3 overflow-x-auto sm:overflow-y-auto w-full sm:w-20 md:w-24 sm:max-h-130 pb-1 sm:pb-0 scrollbar-none flex-shrink-0">
+            <div className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto w-full sm:w-14 sm:max-h-130 pb-1 sm:pb-0 scrollbar-none flex-shrink-0">
               {images.map((img, idx) => {
                 const isSelected = selectedImageIndex === idx;
                 const isUploading = uploadingImageIndex === idx;
@@ -258,9 +277,9 @@ function ProductDetailContent() {
                     key={img.publicId || idx}
                     onMouseEnter={() => setSelectedImageIndex(idx)}
                     onClick={() => setSelectedImageIndex(idx)}
-                    className={`group/thumb relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 transition-all flex-shrink-0 bg-bgSecondary cursor-pointer ${
+                    className={`group/thumb relative w-11 h-11 sm:w-14 sm:h-14 rounded-xl overflow-hidden border-2 flex-shrink-0 bg-bgSecondary cursor-pointer ${
                       isSelected
-                        ? "border-primary ring-2 ring-primary/40 shadow-lg scale-[1.02]"
+                        ? "border-primary ring-2 ring-primary/40 shadow-sm"
                         : "border-borderPrimary opacity-60 hover:opacity-100 hover:border-primary/50"
                     }`}
                   >
@@ -268,14 +287,14 @@ function ProductDetailContent() {
                       src={img.url}
                       alt={`${product.title} thumbnail ${idx + 1}`}
                       fill
-                      sizes="(max-width: 640px) 64px, 96px"
+                      sizes="56px"
                       className="object-cover"
                     />
 
                     {/* Loading Overlay */}
                     {isUploading && (
                       <div className="absolute inset-0 z-30 bg-black/75 backdrop-blur-xs flex items-center justify-center">
-                        <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                        <Loader2 className="w-4 h-4 text-primary animate-spin" />
                       </div>
                     )}
 
@@ -289,9 +308,9 @@ function ProductDetailContent() {
                           handleTriggerImageEdit(idx);
                         }}
                         disabled={uploadingImageIndex !== null}
-                        className="absolute top-1 right-1 z-20 p-1.5 rounded-lg bg-black/85 hover:bg-primary hover:text-black text-white shadow-md backdrop-blur-md transition-all opacity-85 sm:opacity-0 group-hover/thumb:opacity-100 hover:scale-110 cursor-pointer disabled:opacity-50"
+                        className="absolute top-0.5 right-0.5 z-20 p-1 rounded-md bg-black/85 hover:bg-primary hover:text-black text-white shadow-sm backdrop-blur-md opacity-85 sm:opacity-0 group-hover/thumb:opacity-100 cursor-pointer disabled:opacity-50"
                       >
-                        <Pencil className="w-3 h-3" />
+                        <Pencil className="w-2.5 h-2.5" />
                       </button>
                     )}
                   </div>
@@ -302,25 +321,16 @@ function ProductDetailContent() {
 
           {/* Main Large Display Image */}
           <div className="relative aspect-square flex-1 w-full rounded-3xl border border-borderPrimary bg-bgSecondary overflow-hidden shadow-sm group">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentImage.url}
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.25 }}
-                className="relative w-full h-full"
-              >
-                <Image
-                  src={currentImage.url}
-                  alt={product.title}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </motion.div>
-            </AnimatePresence>
+            <div className="relative w-full h-full">
+              <Image
+                src={currentImage.url}
+                alt={product.title}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
 
             {/* Loading Overlay on Main Image */}
             {uploadingImageIndex === selectedImageIndex && (

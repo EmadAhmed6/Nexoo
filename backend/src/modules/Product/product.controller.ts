@@ -69,7 +69,7 @@ const createProduct = asyncHandler(
 // GET ALL PRODUCTS
 const getAllProducts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const pageNumber = Number(req.query.page) || 1;
+    const page = Number(req.query.page) || 1;
     const productPerPage = Number(req.query.limit) || 10;
 
     const {
@@ -90,7 +90,7 @@ const getAllProducts = asyncHandler(
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
-    if (category) {
+    if (category && category !== "All") {
       query.category = category;
     }
 
@@ -135,14 +135,14 @@ const getAllProducts = asyncHandler(
 
     const products = await Product.find(query)
       .sort({ createdAt: -1, updatedAt: -1 })
-      .skip((pageNumber - 1) * productPerPage)
+      .skip((page - 1) * productPerPage)
       .limit(productPerPage);
 
     const totalProducts = await Product.countDocuments(query);
 
     successMsg(res, 200, "Products fetched successfully", {
       products,
-      currentPage: pageNumber,
+      currentPage: page,
       totalPages: Math.ceil(totalProducts / productPerPage),
       totalProducts,
     });

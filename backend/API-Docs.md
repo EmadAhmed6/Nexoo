@@ -47,11 +47,15 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 4   | GET    | `/users/:userId`       | Retrieve single user profile by ID                                              |  🔒  |
 | 5   | PUT    | `/users/:userId`       | Update user profile details (Owner, Admin, or SuperAdmin)                       |  🔒  |
 | 6   | DELETE | `/users/:userId`       | Delete user account permanently (Owner, Admin, or SuperAdmin)                   |  🔒  |
-| 7   | GET    | `/products`            | Retrieve products with filters (search, price range, stock, rating, discount)  |  🔒  |
+| 7   | GET    | `/products`            | Retrieve products with filters (search, price range, stock, rating, discount)  |  ❌  |
 | 8   | POST   | `/products`            | Create a new product with multiple image uploads to Cloudinary (up to 5 files)  |  🔒  |
-| 9   | GET    | `/products/:productId` | Retrieve single product details by ID                                           |  🔒  |
+| 9   | GET    | `/products/:productId` | Retrieve single product details by ID                                           |  ❌  |
 | 10  | PUT    | `/products/:productId` | Update existing product details and images (Owner or Admin)                     |  🔒  |
 | 11  | DELETE | `/products/:productId` | Delete a product by ID (Owner or Admin)                                         |  🔒  |
+| 12  | GET    | `/cart`                | Retrieve authenticated user's cart with populated product info                  |  🔒  |
+| 13  | POST   | `/cart/:productId`     | Add product to user cart with quantity (defaults to 1)                          |  🔒  |
+| 14  | PUT    | `/cart/:productId`     | Update item quantity in user cart                                               |  🔒  |
+| 15  | DELETE | `/cart/:productId`     | Remove product from user cart                                                   |  🔒  |
 
 ---
 
@@ -60,6 +64,7 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 - [Authentication Endpoints](#authentication-endpoints)
 - [User Management Endpoints](#user-management-endpoints)
 - [Product Management Endpoints](#product-management-endpoints)
+- [Cart Management Endpoints](#cart-management-endpoints)
 - [Common HTTP Status Codes](#common-http-status-codes)
 
 ---
@@ -677,6 +682,265 @@ Product not found.
   "message": "No Product found with this id"
 }
 ```
+
+---
+
+## Cart Management Endpoints
+
+---
+
+### GET /cart
+
+Retrieve the authenticated user's shopping cart. The items in the cart will have their product details (`title`, `price`, `priceAfterDiscount`, `productImages`) populated.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+
+#### Responses
+
+##### Response 200
+
+Cart fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Cart fetched successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "userId": "664fa1e2b5c7e1234567890b",
+    "cartItems": [
+      {
+        "product": {
+          "_id": "6ac92261707ab25c5d1ed396",
+          "title": "Luxury Chronograph Watch",
+          "price": 250,
+          "priceAfterDiscount": 200,
+          "productImages": [
+            {
+              "url": "https://res.cloudinary.com/.../img.jpg",
+              "publicId": "Products/sample"
+            }
+          ]
+        },
+        "productQuantity": 2,
+        "productPrice": 200
+      }
+    ],
+    "totalPrice": 400,
+    "createdAt": "2026-10-10T02:00:00.000Z",
+    "updatedAt": "2026-10-10T02:30:00.000Z"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized - Missing or invalid token.
+
+##### Response 404
+
+Cart is empty or not created yet.
+
+```json
+{
+  "status": "fail",
+  "message": "Cart is empty"
+}
+```
+
+---
+
+### POST /cart/:productId
+
+Add a product to the user's shopping cart using `productId` as a path parameter. If the product is already in the cart, its quantity will be increased by `productQuantity`. Product prices and stock are validated from the database.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description        |
+| :---------- | :----- | :------: | :----------------- |
+| `productId` | string |    ✅    | The product ID.    |
+
+#### JSON Body Parameters
+
+| Field             | Type   | Required | Description                              |
+| :---------------- | :----- | :------: | :--------------------------------------- |
+| `productQuantity` | number |    ❌    | Quantity to add (Min: 1, Defaults to 1). |
+
+```json
+{
+  "productQuantity": 2
+}
+```
+
+#### Responses
+
+##### Response 201
+
+Product added to cart successfully. Returns updated cart with populated products.
+
+```json
+{
+  "status": "success",
+  "message": "Product added to cart successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "userId": "664fa1e2b5c7e1234567890b",
+    "cartItems": [
+      {
+        "product": {
+          "_id": "6ac92261707ab25c5d1ed396",
+          "title": "Luxury Chronograph Watch",
+          "price": 250,
+          "priceAfterDiscount": 200,
+          "productImages": [ ... ]
+        },
+        "productQuantity": 2,
+        "productPrice": 200
+      }
+    ],
+    "totalPrice": 400
+  }
+}
+```
+
+##### Response 400
+
+Invalid Product ID format, invalid inputs, or requested quantity exceeds available stock.
+
+```json
+{
+  "status": "fail",
+  "message": "Requested quantity exceeds available stock"
+}
+```
+
+##### Response 401
+
+Unauthorized - Missing or invalid token.
+
+##### Response 404
+
+Product not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Product not found"
+}
+```
+
+---
+
+### PUT /cart/:productId
+
+Update the quantity of an existing item in the user's shopping cart.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description        |
+| :---------- | :----- | :------: | :----------------- |
+| `productId` | string |    ✅    | The product ID.    |
+
+#### JSON Body Parameters
+
+| Field             | Type   | Required | Description                           |
+| :---------------- | :----- | :------: | :------------------------------------ |
+| `productQuantity` | number |    ✅    | New quantity of the item (Must be >= 1). |
+
+```json
+{
+  "productQuantity": 3
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Product quantity updated successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Product quantity updated successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "cartItems": [ ... ],
+    "totalPrice": 600
+  }
+}
+```
+
+##### Response 400
+
+Invalid inputs or requested quantity exceeds available stock.
+
+##### Response 401
+
+Unauthorized - Missing or invalid token.
+
+##### Response 404
+
+Cart not found or product is not in the cart.
+
+```json
+{
+  "status": "fail",
+  "message": "Product is not found in the cart"
+}
+```
+
+---
+
+### DELETE /cart/:productId
+
+Remove an item from the user's shopping cart. If the removed item was the last remaining product, the cart is automatically deleted.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description        |
+| :---------- | :----- | :------: | :----------------- |
+| `productId` | string |    ✅    | The product ID.    |
+
+#### Responses
+
+##### Response 200
+
+Product removed from cart successfully (or cart emptied).
+
+```json
+{
+  "status": "success",
+  "message": "Product removed from cart successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "cartItems": [ ... ],
+    "totalPrice": 200
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized - Missing or invalid token.
+
+##### Response 404
+
+Cart not found or product is not in the cart.
 
 ---
 

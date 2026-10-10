@@ -40,6 +40,10 @@ const options: Options = {
         name: "Products",
         description: "Product management APIs",
       },
+      {
+        name: "Cart",
+        description: "Shopping cart management APIs",
+      },
     ],
     components: {
       securitySchemes: {

@@ -5,6 +5,7 @@ import helmet from "helmet";
 import auth from "./modules/auth/auth.routes.js";
 import users from "./modules/Users/user.routes.js";
 import products from "./modules/Product/product.routes.js";
+import cart from "./modules/Cart/cart.routes.js";
 import connectToDB from "./config/config.js";
 import { errorHandler, notFound } from "./middlewares/errors.js";
 import swaggerui from "swagger-ui-express";
@@ -26,6 +27,7 @@ app.use("/api-docs", swaggerui.serve, swaggerui.setup(spacs));
 app.use("/auth", auth);
 app.use("/users", users);
 app.use("/products", products);
+app.use("/cart", cart);
 
 // ERROR HANDLING MIDDLEWARES
 app.use(notFound);

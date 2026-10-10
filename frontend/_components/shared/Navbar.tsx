@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ShoppingBag, Plus, LogOut, UserPlus, Menu, X } from "lucide-react";
 import { useCartStore } from "@/features/cart/store/useCartStore";
+import { useCart } from "@/features/cart/hooks/useCart";
 import { useAppStore } from "@/store/use-app-store";
 import { ThemeToggle } from "@/_components/theme-toggle";
 import { Text } from "@/_components/shared/Text";
@@ -16,10 +17,12 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  const { getTotalItems, openCart } = useCartStore();
+  const { openCart } = useCartStore();
+  const { data: cart } = useCart();
   const { user, isAuthenticated, logout } = useAppStore();
 
-  const totalCartItems = getTotalItems();
+  const totalCartItems =
+    cart?.cartItems?.reduce((acc, item) => acc + item.productQuantity, 0) ?? 0;
 
   const navLinks = [
     { label: "Home", href: "/" },

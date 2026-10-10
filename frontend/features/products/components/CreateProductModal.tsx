@@ -11,10 +11,10 @@ import {
   DollarSign,
   Package,
   Layers,
-  FileText,
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PRODUCT_CATEGORIES } from "@/features/products/types/categories";
 import { useCreateProduct } from "../hooks/useProducts";
 import { Input, Button, Text } from "@/_components/shared";
 
@@ -32,15 +32,7 @@ interface ProductFormData {
   category: string;
 }
 
-const CATEGORY_OPTIONS = [
-  "Watches & Accessories",
-  "Luxury Fragrances",
-  "Eyewear",
-  "Leather Goods",
-  "Clothing",
-  "Electronics",
-  "Jewelry",
-];
+const CATEGORY_OPTIONS = [...PRODUCT_CATEGORIES];
 
 export function CreateProductModal({
   isOpen,

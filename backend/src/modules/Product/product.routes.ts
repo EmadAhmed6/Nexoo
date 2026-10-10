@@ -16,12 +16,12 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(verifyToken, getAllProducts)
+  .get(getAllProducts)
   .post(verifyToken, upload.array("productImages", 5), createProduct);
 
 router
   .route("/:productId")
-  .get(verifyToken, getProductById)
+  .get(getProductById)
   .put(verifyProductOwner, upload.array("productImages", 5), updateProduct)
   .delete(verifyProductOwner, deleteProduct);
 

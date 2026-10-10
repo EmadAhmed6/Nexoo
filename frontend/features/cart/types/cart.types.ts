@@ -1,20 +1,36 @@
 import { Product } from "@/features/products/types/product.types";
 
+// Backend cart item shape (after populate)
 export interface CartItem {
-  product: Product;
-  quantity: number;
+  product: Pick<Product, "_id" | "title" | "price" | "priceAfterDiscount" | "productImages">;
+  productQuantity: number;
+  productPrice: number;
 }
 
-export interface CartStore {
-  items: CartItem[];
+// Backend cart document shape
+export interface Cart {
+  _id: string;
+  userId: string;
+  cartItems: CartItem[];
+  totalPrice: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Payloads
+export interface AddToCartPayload {
+  productId: string;
+  productQuantity?: number;
+}
+
+export interface UpdateCartPayload {
+  productQuantity: number;
+}
+
+// UI-only store (drawer open/close)
+export interface CartUIStore {
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
-  getTotalItems: () => number;
-  getTotalPrice: () => number;
 }

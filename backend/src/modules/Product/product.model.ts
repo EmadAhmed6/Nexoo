@@ -5,6 +5,18 @@ import {
   IUpdateProductSchema,
   updateProductSchema,
 } from "./product.schema.js";
+type Category =
+  | "Electronics"
+  | "Clothes"
+  | "Shoes"
+  | "Furniture"
+  | "Bags"
+  | "Books"
+  | "Accessories"
+  | "Watches & Accessories"
+  | "Luxury Fragrances"
+  | "Eyewear"
+  | "Leather Goods";
 
 interface IProduct extends Document {
   title: string;
@@ -12,7 +24,7 @@ interface IProduct extends Document {
   price: number;
   priceAfterDiscount?: number;
   stock: number;
-  category: string;
+  category: Category;
   productImages: {
     url: string;
     publicId: string;
@@ -53,6 +65,19 @@ const ProductSchema = new Schema<IProduct>({
   },
   category: {
     type: String,
+    enum: [
+      "Electronics",
+      "Clothes",
+      "Shoes",
+      "Furniture",
+      "Bags",
+      "Books",
+      "Accessories",
+      "Watches & Accessories",
+      "Luxury Fragrances",
+      "Eyewear",
+      "Leather Goods",
+    ],
     required: true,
   },
   productImages: [

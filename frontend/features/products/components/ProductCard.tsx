@@ -6,7 +6,11 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Star, ShoppingBag, Check } from "lucide-react";
 import { Product } from "../types/product.types";
-import { useCartStore } from "@/features/cart/store/useCartStore";
+import { useAddToCart } from "@/features/cart/hooks/useCart";
+import { useAppStore } from "@/store/use-app-store";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { Text } from "@/_components/shared";
 
 interface ProductCardProps {
@@ -15,7 +19,9 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [added, setAdded] = React.useState(false);
-  const addItem = useCartStore((state) => state.addItem);
+  const addToCart = useAddToCart();
+  const isAuthenticated = useAppStore((state) => state.isAuthenticated);
+  const router = useRouter();
 
   const effectivePrice =
     product.priceAfterDiscount && product.priceAfterDiscount > 0
@@ -38,9 +44,28 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product, 1);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+
+    if (!isAuthenticated) {
+      toast.error("Please sign in first to add items to your cart");
+      router.push("/auth/login");
+      return;
+    }
+
+    addToCart.mutate(
+      { productId: product._id, productQuantity: 1 },
+      {
+        onSuccess: () => {
+          setAdded(true);
+          toast.success(`Added "${product.title}" to cart`);
+          setTimeout(() => setAdded(false), 1500);
+        },
+        onError: (err: unknown) => {
+          const msg =
+            err instanceof Error ? err.message : "Failed to add to cart";
+          toast.error(msg);
+        },
+      },
+    );
   };
 
   return (

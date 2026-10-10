@@ -2,26 +2,22 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight } from "lucide-react";
+import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "../store/useCartStore";
+import { useCart, useUpdateCartItem, useRemoveFromCart } from "../hooks/useCart";
 import { Text } from "@/_components/shared/Text";
 
 export function CartDrawer() {
-  const {
-    items,
-    isOpen,
-    closeCart,
-    updateQuantity,
-    removeItem,
-    clearCart,
-    getTotalPrice,
-    getTotalItems,
-  } = useCartStore();
+  const { isOpen, closeCart } = useCartStore();
+  const { data: cart, isLoading } = useCart();
+  const updateItem = useUpdateCartItem();
+  const removeItem = useRemoveFromCart();
 
-  const totalPrice = getTotalPrice();
-  const totalItems = getTotalItems();
+  const cartItems = cart?.cartItems ?? [];
+  const totalPrice = cart?.totalPrice ?? 0;
+  const totalItems = cartItems.reduce((acc, item) => acc + item.productQuantity, 0);
 
   return (
     <AnimatePresence>
@@ -67,7 +63,11 @@ export function CartDrawer() {
 
             {/* Items List */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
-              {items.length === 0 ? (
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : cartItems.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-6">
                   <div className="w-16 h-16 rounded-2xl bg-bgPrimary border border-borderPrimary flex items-center justify-center text-textSecondary mb-4">
                     <ShoppingBag className="w-8 h-8" />
@@ -84,15 +84,21 @@ export function CartDrawer() {
                   </button>
                 </div>
               ) : (
-                items.map(({ product, quantity }) => {
+                cartItems.map((item) => {
+                  const { product, productQuantity, productPrice } = item;
                   const effectivePrice =
-                    product.priceAfterDiscount !== undefined && product.priceAfterDiscount > 0
+                    product.priceAfterDiscount && product.priceAfterDiscount > 0
                       ? product.priceAfterDiscount
                       : product.price;
 
                   const imageUrl =
                     product.productImages?.[0]?.url ||
                     "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80";
+
+                  const isRemoving =
+                    removeItem.isPending && removeItem.variables === product._id;
+                  const isUpdating =
+                    updateItem.isPending && updateItem.variables?.productId === product._id;
 
                   return (
                     <motion.div
@@ -101,7 +107,7 @@ export function CartDrawer() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       key={product._id}
-                      className="p-3.5 rounded-2xl border border-borderPrimary bg-bgPrimary flex gap-3.5 items-center"
+                      className={`p-3.5 rounded-2xl border border-borderPrimary bg-bgPrimary flex gap-3.5 items-center transition-opacity ${isRemoving ? "opacity-50" : ""}`}
                     >
                       {/* Thumbnail */}
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-bgSecondary flex-shrink-0 border border-borderPrimary">
@@ -128,13 +134,17 @@ export function CartDrawer() {
                             </Text>
                           )}
                         </div>
+                        <Text size="xs" color="secondary" className="text-[10px] mt-0.5">
+                          Subtotal: {(productPrice * productQuantity).toFixed(2)} EGP
+                        </Text>
                       </div>
 
                       {/* Quantity Controller */}
                       <div className="flex flex-col items-end gap-2">
                         <button
-                          onClick={() => removeItem(product._id)}
-                          className="text-textSecondary hover:text-textError transition-colors"
+                          onClick={() => removeItem.mutate(product._id)}
+                          disabled={isRemoving}
+                          className="text-textSecondary hover:text-textError transition-colors disabled:opacity-50"
                           title="Remove item"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -142,18 +152,34 @@ export function CartDrawer() {
 
                         <div className="flex items-center border border-borderPrimary rounded-lg bg-bgSecondary">
                           <button
-                            onClick={() => updateQuantity(product._id, quantity - 1)}
-                            className="p-1 text-textSecondary hover:text-textPrimary"
+                            onClick={() =>
+                              updateItem.mutate({
+                                productId: product._id,
+                                payload: { productQuantity: productQuantity - 1 },
+                              })
+                            }
+                            disabled={isUpdating || productQuantity <= 1}
+                            className="p-1 text-textSecondary hover:text-textPrimary disabled:opacity-40"
                             aria-label="Decrease quantity"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
-                          <span className="px-2 text-xs font-bold text-textPrimary">
-                            {quantity}
+                          <span className="px-2 text-xs font-bold text-textPrimary min-w-[1.5rem] text-center">
+                            {isUpdating ? (
+                              <Loader2 className="w-3 h-3 animate-spin inline" />
+                            ) : (
+                              productQuantity
+                            )}
                           </span>
                           <button
-                            onClick={() => updateQuantity(product._id, quantity + 1)}
-                            className="p-1 text-textSecondary hover:text-textPrimary"
+                            onClick={() =>
+                              updateItem.mutate({
+                                productId: product._id,
+                                payload: { productQuantity: productQuantity + 1 },
+                              })
+                            }
+                            disabled={isUpdating}
+                            className="p-1 text-textSecondary hover:text-textPrimary disabled:opacity-40"
                             aria-label="Increase quantity"
                           >
                             <Plus className="w-3 h-3" />
@@ -167,11 +193,11 @@ export function CartDrawer() {
             </div>
 
             {/* Footer / Summary */}
-            {items.length > 0 && (
+            {cartItems.length > 0 && (
               <div className="p-5 border-t border-borderPrimary bg-bgSecondary space-y-3.5">
                 <div className="flex justify-between items-center text-xs text-textSecondary">
                   <span>Subtotal:</span>
-                  <Text font="semiBold" size="xs">{totalPrice} EGP</Text>
+                  <Text font="semiBold" size="xs">{totalPrice.toFixed(2)} EGP</Text>
                 </div>
                 <div className="flex justify-between items-center text-xs text-textSecondary">
                   <span>Shipping:</span>
@@ -179,16 +205,10 @@ export function CartDrawer() {
                 </div>
                 <div className="pt-2 border-t border-borderPrimary flex justify-between items-center">
                   <Text font="bold" size="sm">Total Amount:</Text>
-                  <Text font="black" size="lg" color="accent">{totalPrice} EGP</Text>
+                  <Text font="black" size="lg" color="accent">{totalPrice.toFixed(2)} EGP</Text>
                 </div>
 
                 <div className="flex gap-2.5 pt-1">
-                  <button
-                    onClick={clearCart}
-                    className="px-3 py-2.5 rounded-xl border border-borderPrimary text-textSecondary hover:text-textError hover:border-textError/40 text-xs font-semibold transition-colors"
-                  >
-                    Clear
-                  </button>
                   <Link
                     href="/checkout"
                     onClick={closeCart}

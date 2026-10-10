@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AlertCircle, RefreshCw, Sparkles } from "lucide-react";
+import { AlertCircle, RefreshCw, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import { useProducts } from "../hooks/useProducts";
 import { Product, ProductFilters } from "../types/product.types";
@@ -9,13 +9,18 @@ import { Text } from "@/_components/shared";
 
 interface ProductGridProps {
   filters?: ProductFilters;
+  onPageChange?: (page: number) => void;
 }
 
-export function ProductGrid({ filters }: ProductGridProps) {
+export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
   const { data, isLoading, isError, error, refetch } = useProducts(filters);
 
   const products: Product[] =
     data?.products && data.products.length > 0 ? data.products : [];
+
+  const currentPage = data?.currentPage || filters?.page || 1;
+  const totalPages = data?.totalPages || 1;
+  const totalProducts = data?.totalProducts || products.length;
 
   if (isLoading) {
     return (
@@ -59,7 +64,7 @@ export function ProductGrid({ filters }: ProductGridProps) {
   }
 
   return (
-    <div>
+    <div className="space-y-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <Text
@@ -76,15 +81,73 @@ export function ProductGrid({ filters }: ProductGridProps) {
           </Text>
         </div>
         <span className="text-xs font-semibold px-3 py-1 rounded-full border border-borderPrimary bg-bgSecondary text-textSecondary">
-          {products.length} products
+          {totalProducts} products
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <ProductCard key={product._id} product={product} />
-        ))}
-      </div>
+      {products.length === 0 ? (
+        <div className="py-16 text-center border border-dashed border-borderPrimary rounded-3xl p-8">
+          <Text font="bold" size="lg" className="mb-1">
+            No products found
+          </Text>
+          <Text size="xs" color="secondary">
+            Try adjusting your search or filters to find what you are looking for.
+          </Text>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductCard key={product._id} product={product} />
+          ))}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && onPageChange && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-borderPrimary">
+          <Text size="xs" color="secondary">
+            Showing page <span className="font-bold text-textPrimary">{currentPage}</span> of{" "}
+            <span className="font-bold text-textPrimary">{totalPages}</span> ({totalProducts} total)
+          </Text>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="p-2 rounded-xl border border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textPrimary hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+              const isCurrent = p === currentPage;
+              return (
+                <button
+                  key={p}
+                  onClick={() => onPageChange(p)}
+                  className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${
+                    isCurrent
+                      ? "bg-primary text-black shadow-md scale-105"
+                      : "border border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textPrimary hover:border-primary/40"
+                  }`}
+                >
+                  {p}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="p-2 rounded-xl border border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textPrimary hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              aria-label="Next page"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
