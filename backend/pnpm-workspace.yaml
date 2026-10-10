@@ -1,0 +1,5 @@
+allowBuilds:
+  '@scarf/scarf': false
+  bcrypt: false
+  esbuild: false
+  node-base64: false

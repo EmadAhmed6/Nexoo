@@ -15,6 +15,8 @@ const CATEGORIES = [
   "Clothing",
 ];
 
+// asfASFASFSAF
+
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");

@@ -1,0 +1,251 @@
+import asyncHandler from "express-async-handler";
+import { Request, Response } from "express";
+
+import { sendError, successMsg } from "../../middlewares/errors.js";
+import {
+  Product,
+  validateCreateProduct,
+  validateUpdateProduct,
+} from "./product.model.js";
+import cloudinary from "../../config/cloudinary.js";
+
+export interface IProductQuery {
+  minPrice?: string;
+  maxPrice?: string;
+  category?: string;
+  search?: string;
+  inStock?: string;
+  rating?: string;
+  minRating?: string;
+  maxRating?: string;
+  hasDiscount?: string;
+  page?: string;
+  limit?: string;
+}
+// CREATE A NEW PRODUCT
+const createProduct = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { error, success } = validateCreateProduct(req.body);
+    const { title, description, price, priceAfterDiscount, stock, category } =
+      req.body;
+
+    if (!success) {
+      sendError(res, 400, error.issues[0]?.message || "Invalid Inputs");
+      return;
+    }
+
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      sendError(res, 400, "No File Uploaded");
+      return;
+    }
+
+    const uploadedFiles = files.map(async (file) => {
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: "Products",
+        resource_type: "auto",
+      });
+      return { url: result.secure_url, publicId: result.public_id };
+    });
+
+    const uploadedImages = await Promise.all(uploadedFiles);
+
+    const newProduct = new Product({
+      title,
+      description,
+      price,
+      priceAfterDiscount: priceAfterDiscount || undefined,
+      stock,
+      category,
+      productImages: uploadedImages,
+      userId: req.user?.id,
+    });
+
+    const finalProduct = await newProduct.save();
+    successMsg(res, 201, "Product created successfully", finalProduct);
+  },
+);
+
+// GET ALL PRODUCTS
+const getAllProducts = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const pageNumber = Number(req.query.page) || 1;
+    const productPerPage = Number(req.query.limit) || 10;
+
+    const {
+      minPrice,
+      maxPrice,
+      category,
+      search,
+      inStock,
+      minRating,
+      maxRating,
+      hasDiscount,
+    } = req.query as IProductQuery;
+
+    const query: any = {};
+
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+    if (category) {
+      query.category = category;
+    }
+
+    if (search) {
+      const searchNum = Number(search);
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+      ];
+      if (!isNaN(searchNum)) {
+        query.$or.push({ price: searchNum }, { stock: searchNum });
+      }
+    }
+
+    if (minRating || maxRating) {
+      query.ratingAverage = {};
+      if (minRating) query.ratingAverage.$gte = Number(minRating);
+      if (maxRating) query.ratingAverage.$lte = Number(maxRating);
+    }
+
+    if (inStock !== undefined) {
+      if (inStock === "true") {
+        query.stock = { $gt: 0 };
+      } else if (inStock === "false") {
+        query.stock = { $lte: 0 };
+      }
+    }
+
+    if (hasDiscount !== undefined) {
+      if (hasDiscount === "true") {
+        query.priceAfterDiscount = { $exists: true, $ne: null };
+        query.$expr = { $lt: ["$priceAfterDiscount", "$price"] };
+      } else if (hasDiscount === "false") {
+        query.$or = [
+          { priceAfterDiscount: { $exists: false } },
+          { priceAfterDiscount: null },
+          { priceAfterDiscount: { $gte: "$price" } },
+        ];
+      }
+    }
+
+    const products = await Product.find(query)
+      .sort({ createdAt: -1, updatedAt: -1 })
+      .skip((pageNumber - 1) * productPerPage)
+      .limit(productPerPage);
+
+    const totalProducts = await Product.countDocuments(query);
+
+    successMsg(res, 200, "Products fetched successfully", {
+      products,
+      currentPage: pageNumber,
+      totalPages: Math.ceil(totalProducts / productPerPage),
+      totalProducts,
+    });
+  },
+);
+
+// GET PRODUCT BY ID
+const getProductById = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const productId = req.params.productId as string;
+    const product = await Product.findById(productId);
+    if (!product) {
+      sendError(res, 404, "No Product found with this id");
+      return;
+    }
+    successMsg(res, 200, "Product fetched successfully", product);
+  },
+);
+
+const updateProduct = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { error, success } = validateUpdateProduct(req.body);
+    if (!success) {
+      sendError(res, 400, error.issues[0]?.message || "Invalid Inputs");
+      return;
+    }
+    // Product Id
+    const productId = req.params.productId as string;
+    const product = await Product.findById(productId);
+    if (!product) {
+      sendError(res, 404, "No Product found with this id");
+      return;
+    }
+
+    const files = req.files as Express.Multer.File[];
+    let updatedImages: { url: string; publicId: string }[] = [];
+    if (req.body.existingImages) {
+      updatedImages =
+        typeof req.body.existingImages === "string"
+          ? JSON.parse(req.body.existingImages)
+          : req.body.existingImages;
+    } else {
+      updatedImages = product.productImages;
+    }
+
+    if (files && files.length > 0) {
+      const uploadedFiles = files.map(async (file) => {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "Products",
+        });
+        return {
+          url: result.secure_url,
+          publicId: result.public_id,
+        };
+      });
+      const newUploadedImages = await Promise.all(uploadedFiles);
+      if (!newUploadedImages) {
+        sendError(res, 500, "Failed to upload images");
+        return;
+      }
+      updatedImages.push(...newUploadedImages);
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      {
+        $set: {
+          title: req.body.title,
+          description: req.body.description,
+          price: req.body.price,
+          priceAfterDiscount: req.body.priceAfterDiscount,
+          stock: req.body.stock,
+          category: req.body.category,
+          productImages: updatedImages,
+        },
+      },
+      { returnDocument: "after", runValidators: true },
+    );
+    if (!updatedProduct) {
+      sendError(res, 500, "Failed to update Product");
+      return;
+    }
+    successMsg(res, 200, "Product updated successfully", updatedProduct);
+  },
+);
+
+const deleteProduct = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const productId = req.params.productId as string;
+    const product = await Product.findById(productId);
+    if (!product) {
+      sendError(res, 404, "No Product found with this id");
+      return;
+    }
+    await Product.findByIdAndDelete(productId);
+    successMsg(res, 200, "Product deleted successfully", null);
+  },
+);
+
+export {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+};
