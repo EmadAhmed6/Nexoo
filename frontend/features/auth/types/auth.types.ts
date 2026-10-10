@@ -1,0 +1,28 @@
+export interface User {
+  _id: string;
+  fullName: string;
+  username: string;
+  email: string;
+  phone?: string;
+  role: "User" | "Admin" | "SuperAdmin";
+  profileImage?: string;
+  createdAt?: string;
+}
+
+export interface AuthResponseData extends User {
+  token?: string;
+  accessToken?: string;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterCredentials {
+  fullName: string;
+  username: string;
+  email: string;
+  password: string;
+  phone: string;
+}

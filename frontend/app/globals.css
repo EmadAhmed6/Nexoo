@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Shadcn UI Theme Tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Nexo Custom Semantic Color Tokens */
+  --color-bgPrimary: var(--bg-primary);
+  --color-bgSecondary: var(--bg-secondary);
+
+  --color-textPrimary: var(--text-primary);
+  --color-textPrimary2: var(--text-primary2);
+  --color-textSecondary: var(--text-secondary);
+  --color-textError: var(--text-error);
+
+  --color-borderPrimary: var(--border-primary);
+
+  --color-primary: var(--primary);
+  --color-primaryHover: var(--primary-hover);
+  --color-ringPrimary: var(--ring-primary);
+
+  --font-sans:
+    var(--font-plus-jakarta-sans), var(--font-cairo), "Plus Jakarta Sans",
+    "Cairo", sans-serif;
+}
+
+@layer base {
+  :root {
+    /* الخلفيات: خلفية هادئة وفخمة، مع تباين ممتاز للبطاقات */
+    --bg-primary: #0f1115; /* أسود داكن فخم جداً (مودرن ودارك مود شيك، أو ممكن تخليه فاتح #fbfbfb لو متجر فاتح) */
+    --bg-secondary: #161920; /* للبطاقات والـ Cards (أفتح شوية من الخلفية عشان تبرز) */
+
+    /* النصوص: تدرجات الأسود/الرمادي الراقي مع الخلفيات الفاتحة، أو النصوص البيضاء والرمادية الواضحة للدارك مود */
+    --text-primary: #f3f4f6; /* أبيض ناصع هادئ للنصوص الأساسية */
+    --text-secondary: #9ca3af; /* رمادي هادئ للنصوص الفرعية والوصف */
+    --text-muted: #6b7280; /* للنصوص الضعيفة زي التاريخ أو الحقوق */
+
+    /* اللون الأساسي (Primary): الدهبي المستوحى بدقة من اللوجو */
+    --primary: #d4af37; /* الدهبي اللامع الفاخر للزرار والأيقونات والـ Badges */
+    --primary-hover: #b8972b; /* درجة أغمق شوية عند الـ Hover */
+    --primary-light: rgba(
+      212,
+      175,
+      55,
+      0.15
+    ); /* خلفية شفافة للدهبي تنفع للـ Badges والـ Alerts */
+
+    /* الحدود والخطوط الفاصلة */
+    --border-primary: #272a33; /* حدود ناعمة ومظلمة تليق بالفخامة */
+
+    /* حالات خاصة */
+    --text-error: #ef4444; /* أحمر هادئ للـ Errors */
+    --success: #10b981; /* أخضر هادئ للنجاح */
+    /* Shadcn Variables Mapped Natively */
+    --background: #f8f9fa;
+    --foreground: #111827;
+    --card: #ffffff;
+    --card-foreground: #111827;
+    --popover: #ffffff;
+    --popover-foreground: #111827;
+    --secondary: #ffffff;
+    --secondary-foreground: #1f2937;
+    --muted: #f3f4f6;
+    --muted-foreground: #6b7280;
+    --accent: #f3f4f6;
+    --accent-foreground: #111827;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #e5e7eb;
+    --input: #e5e7eb;
+    --ring: #c5a059;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* --- Nexo Dark Luxury (Midnight Navy-Black & Gold) --- */
+    --bg-primary: #0f1115; /* أسود داكن فخم جداً (مودرن ودارك مود شيك، أو ممكن تخليه فاتح #fbfbfb لو متجر فاتح) */
+    --bg-secondary: #161920; /* للبطاقات والـ Cards (أفتح شوية من الخلفية عشان تبرز) */
+
+    /* النصوص: تدرجات الأسود/الرمادي الراقي مع الخلفيات الفاتحة، أو النصوص البيضاء والرمادية الواضحة للدارك مود */
+    --text-primary: #f3f4f6; /* أبيض ناصع هادئ للنصوص الأساسية */
+    --text-secondary: #9ca3af; /* رمادي هادئ للنصوص الفرعية والوصف */
+    --text-muted: #6b7280; /* للنصوص الضعيفة زي التاريخ أو الحقوق */
+
+    /* اللون الأساسي (Primary): الدهبي المستوحى بدقة من اللوجو */
+    --primary: #d4af37; /* الدهبي اللامع الفاخر للزرار والأيقونات والـ Badges */
+    --primary-hover: #b8972b; /* درجة أغمق شوية عند الـ Hover */
+    --primary-light: rgba(
+      212,
+      175,
+      55,
+      0.15
+    ); /* خلفية شفافة للدهبي تنفع للـ Badges والـ Alerts */
+
+    /* الحدود والخطوط الفاصلة */
+    --border-primary: #272a33; /* حدود ناعمة ومظلمة تليق بالفخامة */
+
+    /* حالات خاصة */
+    --text-error: #ef4444; /* أحمر هادئ للـ Errors */
+
+    /* Shadcn Variables Mapped Natively */
+    --background: #0b0f19;
+    --foreground: #f9fafb;
+    --card: #131b2e;
+    --card-foreground: #f9fafb;
+    --popover: #131b2e;
+    --popover-foreground: #f9fafb;
+    --secondary: #131b2e;
+    --secondary-foreground: #f3f4f6;
+    --muted: #1c263c;
+    --muted-foreground: #9ca3af;
+    --accent: #1c263c;
+    --accent-foreground: #f9fafb;
+    --destructive: #f87171;
+    --destructive-foreground: #ffffff;
+    --border: #1f2937;
+    --input: #1f2937;
+    --ring: #e5c158;
+  }
+
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  button[disabled] {
+    cursor: not-allowed;
+  }
+}
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+button[disabled] {
+  cursor: not-allowed;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
