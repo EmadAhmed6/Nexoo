@@ -5,7 +5,6 @@ import { Search } from "lucide-react";
 import { ProductGrid } from "@/features/products/components/ProductGrid";
 import { SaleGrid } from "@/features/products/components/SaleGrid";
 import { ProductFilters } from "@/features/products/types/product.types";
-// product safsaf
 const CATEGORIES = [
   "All",
   "Watches & Accessories",
@@ -14,8 +13,6 @@ const CATEGORIES = [
   "Leather Goods",
   "Clothing",
 ];
-
-// asfASFASFSAF
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -31,13 +28,14 @@ export default function HomePage() {
 
   // Are any filters active (besides default)?
   const hasActiveFilter =
-    selectedCategory !== "All" ||
-    searchQuery.trim().length > 0 ||
-    inStockOnly;
+    selectedCategory !== "All" || searchQuery.trim().length > 0 || inStockOnly;
 
   return (
     <div className="flex-1 flex flex-col">
-      <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-14">
+      <section
+        id="products"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-14"
+      >
         {/* Filter controls toolbar */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
