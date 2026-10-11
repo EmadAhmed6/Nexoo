@@ -8,10 +8,6 @@ import { useCartStore } from "../store/useCartStore";
 
 export const CART_QUERY_KEY = ["cart"] as const;
 
-/**
- * Fetch the user's cart from the backend.
- * Only runs when the user is authenticated.
- */
 export function useCart() {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
 
@@ -32,10 +28,6 @@ export function useCart() {
   });
 }
 
-/**
- * Add a product to the cart.
- * Opens the cart drawer on success.
- */
 export function useAddToCart() {
   const queryClient = useQueryClient();
   const openCart = useCartStore((s) => s.openCart);
@@ -49,9 +41,6 @@ export function useAddToCart() {
   });
 }
 
-/**
- * Update the quantity of a cart item.
- */
 export function useUpdateCartItem() {
   const queryClient = useQueryClient();
 
@@ -69,16 +58,30 @@ export function useUpdateCartItem() {
   });
 }
 
-/**
- * Remove a product from the cart.
- */
 export function useRemoveFromCart() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (productId: string) => cartApi.removeFromCart(productId),
+    onSuccess: (response) => {
+      if (response?.data !== undefined) {
+        queryClient.setQueryData(CART_QUERY_KEY, response.data);
+      } else {
+        queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+      }
+    },
+  });
+}
+
+export function useClearCart() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => cartApi.clearCart(),
     onSuccess: () => {
+      queryClient.setQueryData(CART_QUERY_KEY, null);
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
     },
   });
 }
+

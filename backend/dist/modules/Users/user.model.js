@@ -22,19 +22,33 @@ const UserSchema = new Schema({
         maxLength: 100,
         required: true,
     },
+    phone: {
+        type: String,
+        trim: true,
+    },
+    addresses: [
+        {
+            street: { type: String, required: true },
+            city: { type: String, required: true },
+            state: { type: String, required: true },
+            postalCode: { type: String },
+            phone: { type: String, required: true },
+            isDefault: { type: Boolean, default: false },
+        },
+    ],
     password: {
         type: String,
         required: true,
         minlength: 6,
     },
     profilePicture: {
-        type: {
-            url: String,
-            publicId: { type: String, default: null },
+        url: {
+            type: String,
+            default: "",
         },
-        default: {
-            url: "",
-            publicId: null,
+        publicId: {
+            type: String,
+            default: null,
         },
     },
     role: {
@@ -51,6 +65,10 @@ const UserSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
 }, { timestamps: true });
 UserSchema.methods.generateAccessToken = function () {
     return jwt.sign({
@@ -58,7 +76,7 @@ UserSchema.methods.generateAccessToken = function () {
         role: this.role,
         username: this.username,
     }, process.env.JWT_SECRET_KEY, {
-        expiresIn: "15m",
+        expiresIn: "7d",
     });
 };
 export const User = model("User", UserSchema);

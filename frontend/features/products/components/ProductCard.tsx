@@ -37,16 +37,14 @@ export function ProductCard({ product }: ProductCardProps) {
         )
       : 0;
 
-  const imageUrl =
-    product.productImages?.[0]?.url ||
-    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80";
+  const imageUrl = product.productImages?.[0]?.url;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error("Please sign in first to add items to your cart");
+      toast.error("Please sign in first");
       router.push("/auth/login");
       return;
     }
@@ -56,13 +54,11 @@ export function ProductCard({ product }: ProductCardProps) {
       {
         onSuccess: () => {
           setAdded(true);
-          toast.success(`Added "${product.title}" to cart`);
+          toast.success("Added to cart");
           setTimeout(() => setAdded(false), 1500);
         },
-        onError: (err: unknown) => {
-          const msg =
-            err instanceof Error ? err.message : "Failed to add to cart";
-          toast.error(msg);
+        onError: () => {
+          toast.error("Failed to add to cart");
         },
       },
     );
@@ -71,110 +67,95 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/products/${product._id}`} className="block h-full group">
       <motion.div
-        whileHover={{ y: -6 }}
-        transition={{ duration: 0.2 }}
-        className="h-full relative rounded-2xl border border-borderPrimary bg-bgSecondary overflow-hidden shadow-sm hover:border-primary/50 hover:shadow-lg transition-all flex flex-col justify-between"
+        whileHover={{ y: -8 }}
+        transition={{ duration: 0.25 }}
+        className="h-full relative rounded-3xl border border-borderPrimary bg-bgSecondary overflow-hidden shadow-sm hover:border-primary/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
       >
         {/* Product Image & Badges */}
-        <div className="relative aspect-square w-full bg-bgPrimary overflow-hidden">
+        <div className="relative aspect-[4/3.8] w-full bg-bgPrimary overflow-hidden">
           <Image
             src={imageUrl}
             alt={product.title}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+            className="object-cover group-hover:scale-108 transition-transform duration-500"
           />
 
           {/* Badges */}
-          <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-10">
+          <div className="absolute top-3.5 right-3.5 flex flex-col gap-1.5 z-10">
             {discountPercentage > 0 && (
-              <span className="px-2.5 py-1 rounded-full bg-primary text-textPrimary font-extrabold text-[11px] shadow-sm">
-                {discountPercentage}%
+              <span className="px-3.5 py-1.5 rounded-full bg-primary text-black font-black text-xs shadow-md tracking-tight">
+                {discountPercentage}% OFF
               </span>
             )}
             {product.stock <= 5 && product.stock > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-textError/90 text-white font-medium text-[10px]">
+              <span className="px-2.5 py-1 rounded-full bg-textError/95 text-white font-bold text-[11px] text-center shadow-sm">
                 Only {product.stock} left
               </span>
             )}
           </div>
 
-          <span className="absolute bottom-3 left-3 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-black/60 text-white backdrop-blur-md z-10">
+          <span className="absolute bottom-3.5 left-3.5 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-black/70 text-white backdrop-blur-md z-10">
             {product.category}
           </span>
         </div>
 
         {/* Info Content */}
-        <div className="p-4 flex flex-col flex-1 justify-between">
+        <div className="p-5 sm:p-5.5 flex flex-col flex-1 justify-between gap-4">
           <div>
             {/* Rating */}
-            <div className="flex items-center gap-1 mb-1.5 text-xs text-textSecondary">
-              <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-              <Text as="span" size="xs" font="bold" color="primary">
+            <div className="flex items-center gap-1.5 mb-2 text-xs text-textSecondary">
+              <Star className="w-4 h-4 fill-primary text-primary" />
+              <span className="text-xs font-bold text-primary">
                 {product.ratingAverage || 4.8}
-              </Text>
-              <Text
-                as="span"
-                size="xs"
-                color="secondary"
-                className="text-[11px]"
-              >
-                ({product.ratingQuantity || 24})
-              </Text>
+              </span>
+              <span className="text-[11px] text-textSecondary">
+                ({product.ratingQuantity || 24} reviews)
+              </span>
             </div>
 
-            <Text
-              as="h3"
-              size="sm"
-              font="bold"
-              className="group-hover:text-primary transition-colors line-clamp-1 mb-1"
-            >
+            <h3 className="text-base sm:text-[17px] font-extrabold text-textPrimary group-hover:text-primary transition-colors line-clamp-1 mb-1.5 tracking-tight">
               {product.title}
-            </Text>
+            </h3>
 
-            <Text size="xs" color="secondary" className="line-clamp-2 mb-3">
+            <p className="text-xs sm:text-[13px] text-textSecondary line-clamp-2 leading-relaxed">
               {product.description}
-            </Text>
+            </p>
           </div>
 
           {/* Price & Action */}
-          <div className="pt-3 border-t border-borderPrimary flex items-center justify-between mt-auto">
+          <div className="pt-3.5 border-t border-borderPrimary flex items-center justify-between mt-auto">
             <div>
-              <div className="flex items-baseline gap-1.5">
-                <Text as="span" size="base" font="black" color="accent">
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg sm:text-xl font-black text-primary">
                   {effectivePrice} EGP
-                </Text>
+                </span>
                 {product.priceAfterDiscount &&
                   product.priceAfterDiscount < product.price && (
-                    <Text
-                      as="span"
-                      size="xs"
-                      color="secondary"
-                      className="line-through"
-                    >
+                    <span className="text-xs font-medium text-textSecondary line-through">
                       {product.price} EGP
-                    </Text>
+                    </span>
                   )}
               </div>
-              <Text size="xs" color="secondary" className="text-[10px]">
-                Inclusive of taxes
-              </Text>
+              <span className="text-[10px] text-textSecondary">
+                Inclusive of all taxes
+              </span>
             </div>
 
             <motion.button
               whileTap={{ scale: 0.92 }}
               onClick={handleAddToCart}
-              className={`p-2.5 rounded-xl border transition-all z-10 ${
+              className={`p-3 rounded-2xl border transition-all z-10 shadow-sm ${
                 added
                   ? "bg-emerald-500 text-white border-emerald-500"
-                  : "bg-bgPrimary border-borderPrimary hover:border-primary text-textPrimary hover:text-primary"
+                  : "bg-bgPrimary border-borderPrimary hover:border-primary text-textPrimary hover:text-primary hover:bg-primary/10"
               }`}
               title="Add to cart"
             >
               {added ? (
-                <Check className="w-4 h-4" />
+                <Check className="w-4.5 h-4.5 text-white" />
               ) : (
-                <ShoppingBag className="w-4 h-4" />
+                <ShoppingBag className="w-4.5 h-4.5" />
               )}
             </motion.button>
           </div>

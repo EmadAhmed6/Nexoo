@@ -42,32 +42,21 @@
 
 @layer base {
   :root {
-    /* الخلفيات: خلفية هادئة وفخمة، مع تباين ممتاز للبطاقات */
-    --bg-primary: #0f1115; /* أسود داكن فخم جداً (مودرن ودارك مود شيك، أو ممكن تخليه فاتح #fbfbfb لو متجر فاتح) */
-    --bg-secondary: #161920; /* للبطاقات والـ Cards (أفتح شوية من الخلفية عشان تبرز) */
+    --bg-primary: #fff;
+    --bg-secondary: #161920;
 
-    /* النصوص: تدرجات الأسود/الرمادي الراقي مع الخلفيات الفاتحة، أو النصوص البيضاء والرمادية الواضحة للدارك مود */
-    --text-primary: #f3f4f6; /* أبيض ناصع هادئ للنصوص الأساسية */
-    --text-secondary: #9ca3af; /* رمادي هادئ للنصوص الفرعية والوصف */
-    --text-muted: #6b7280; /* للنصوص الضعيفة زي التاريخ أو الحقوق */
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
 
-    /* اللون الأساسي (Primary): الدهبي المستوحى بدقة من اللوجو */
-    --primary: #d4af37; /* الدهبي اللامع الفاخر للزرار والأيقونات والـ Badges */
-    --primary-hover: #b8972b; /* درجة أغمق شوية عند الـ Hover */
-    --primary-light: rgba(
-      212,
-      175,
-      55,
-      0.15
-    ); /* خلفية شفافة للدهبي تنفع للـ Badges والـ Alerts */
+    --primary: #d4af37;
+    --primary-hover: #b8972b;
+    --primary-light: rgba(212, 175, 55, 0.15);
 
-    /* الحدود والخطوط الفاصلة */
-    --border-primary: #272a33; /* حدود ناعمة ومظلمة تليق بالفخامة */
+    --border-primary: #272a33;
+    --text-error: #ef4444;
+    --success: #10b981;
 
-    /* حالات خاصة */
-    --text-error: #ef4444; /* أحمر هادئ للـ Errors */
-    --success: #10b981; /* أخضر هادئ للنجاح */
-    /* Shadcn Variables Mapped Natively */
     --background: #f8f9fa;
     --foreground: #111827;
     --card: #ffffff;

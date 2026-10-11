@@ -114,7 +114,7 @@ UserSchema.methods.generateAccessToken = function (this: IUser): string {
     },
     process.env.JWT_SECRET_KEY as string,
     {
-      expiresIn: "15m",
+      expiresIn: "7d",
     },
   );
 };

@@ -34,4 +34,11 @@ export const cartApi = {
   removeFromCart: async (productId: string) => {
     return apiDelete<Cart | null>(`/cart/${productId}`);
   },
+
+  /**
+   * DELETE /cart — Clear authenticated user's cart
+   */
+  clearCart: async () => {
+    return apiDelete<{ cartItems: []; totalPrice: number }>("/cart");
+  },
 };

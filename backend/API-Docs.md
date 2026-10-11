@@ -39,23 +39,31 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 
 ---
 
-| #   | Method | Endpoint               | Description                                                                     | Auth |
-| :-- | :----- | :--------------------- | :------------------------------------------------------------------------------ | :--: |
-| 1   | POST   | `/auth/register`       | Register a new user account and obtain access token                             |  ❌  |
-| 2   | POST   | `/auth/login`          | Authenticate existing user with email & password and retrieve access token      |  ❌  |
-| 3   | GET    | `/users`               | Retrieve list of all registered users (passwords excluded)                      |  🔒  |
-| 4   | GET    | `/users/:userId`       | Retrieve single user profile by ID                                              |  🔒  |
-| 5   | PUT    | `/users/:userId`       | Update user profile details (Owner, Admin, or SuperAdmin)                       |  🔒  |
-| 6   | DELETE | `/users/:userId`       | Delete user account permanently (Owner, Admin, or SuperAdmin)                   |  🔒  |
-| 7   | GET    | `/products`            | Retrieve products with filters (search, price range, stock, rating, discount)  |  ❌  |
-| 8   | POST   | `/products`            | Create a new product with multiple image uploads to Cloudinary (up to 5 files)  |  🔒  |
-| 9   | GET    | `/products/:productId` | Retrieve single product details by ID                                           |  ❌  |
-| 10  | PUT    | `/products/:productId` | Update existing product details and images (Owner or Admin)                     |  🔒  |
-| 11  | DELETE | `/products/:productId` | Delete a product by ID (Owner or Admin)                                         |  🔒  |
-| 12  | GET    | `/cart`                | Retrieve authenticated user's cart with populated product info                  |  🔒  |
-| 13  | POST   | `/cart/:productId`     | Add product to user cart with quantity (defaults to 1)                          |  🔒  |
-| 14  | PUT    | `/cart/:productId`     | Update item quantity in user cart                                               |  🔒  |
-| 15  | DELETE | `/cart/:productId`     | Remove product from user cart                                                   |  🔒  |
+| #   | Method | Endpoint                 | Description                                                                     | Auth |
+| :-- | :----- | :----------------------- | :------------------------------------------------------------------------------ | :--: |
+| 1   | POST   | `/auth/register`         | Register a new user account and obtain access token                             |  ❌  |
+| 2   | POST   | `/auth/login`            | Authenticate existing user with email & password and retrieve access token      |  ❌  |
+| 3   | GET    | `/users`                 | Retrieve list of all registered users (passwords excluded)                      |  🔒  |
+| 4   | GET    | `/users/:userId`         | Retrieve single user profile by ID                                              |  🔒  |
+| 5   | PUT    | `/users/:userId`         | Update user profile details (Owner, Admin, or SuperAdmin)                       |  🔒  |
+| 6   | DELETE | `/users/:userId`         | Delete user account permanently (Owner, Admin, or SuperAdmin)                   |  🔒  |
+| 7   | GET    | `/products`              | Retrieve products with filters (search, price range, stock, rating, discount)  |  ❌  |
+| 8   | POST   | `/products`              | Create a new product with multiple image uploads to Cloudinary (up to 5 files)  |  🔒  |
+| 9   | GET    | `/products/:productId`   | Retrieve single product details by ID                                           |  ❌  |
+| 10  | PUT    | `/products/:productId`   | Update existing product details and images (Owner or Admin)                     |  🔒  |
+| 11  | DELETE | `/products/:productId`   | Delete a product by ID (Owner or Admin)                                         |  🔒  |
+| 12  | GET    | `/cart`                  | Retrieve authenticated user's cart with populated product info                  |  🔒  |
+| 13  | POST   | `/cart/:productId`       | Add product to user cart with quantity (defaults to 1)                          |  🔒  |
+| 14  | PUT    | `/cart/:productId`       | Update item quantity in user cart                                               |  🔒  |
+| 15  | DELETE | `/cart/:productId`       | Remove product from user cart                                                   |  🔒  |
+| 16  | DELETE | `/cart`                  | Clear entire user shopping cart                                                 |  🔒  |
+| 17  | POST   | `/orders`                | Create new order from user's current cart                                       |  🔒  |
+| 18  | GET    | `/orders`                | Retrieve list of all orders belonging to authenticated user                     |  🔒  |
+| 19  | GET    | `/orders/:orderId`       | Retrieve single order details by ID                                             |  🔒  |
+| 20  | POST   | `/orders/paypal/create`  | Create PayPal transaction and obtain approval redirect URL                      |  🔒  |
+| 21  | POST   | `/orders/paypal/capture` | Capture PayPal payment after buyer approval                                     |  🔒  |
+| 22  | PUT    | `/orders/:orderId`       | Update shipping address or payment method of pending order                      |  🔒  |
+| 23  | DELETE | `/orders/:orderId`       | Cancel and delete a pending order                                               |  🔒  |
 
 ---
 
@@ -65,6 +73,7 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 - [User Management Endpoints](#user-management-endpoints)
 - [Product Management Endpoints](#product-management-endpoints)
 - [Cart Management Endpoints](#cart-management-endpoints)
+- [Order & Checkout Endpoints](#order--checkout-endpoints)
 - [Common HTTP Status Codes](#common-http-status-codes)
 
 ---
@@ -941,6 +950,352 @@ Unauthorized - Missing or invalid token.
 ##### Response 404
 
 Cart not found or product is not in the cart.
+
+---
+
+### DELETE /cart
+
+Clear the authenticated user's entire shopping cart.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+
+#### Responses
+
+##### Response 200
+
+Cart cleared successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Cart cleared successfully",
+  "data": {
+    "totalPrice": 0,
+    "cartItems": []
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized - Missing or invalid token.
+
+##### Response 404
+
+Cart was not found.
+
+---
+
+## Order & Checkout Endpoints
+
+### POST /orders
+
+Create a new order from the items currently in the authenticated user's cart. Upon successful creation, the cart is automatically deleted.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+- `Content-Type: application/json`
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `shippingAddress.address` | string | ✅ | Street address (Min 5 chars). |
+| `shippingAddress.city` | string | ✅ | City name (Min 2 chars). |
+| `shippingAddress.state` | string | ✅ | State or governorate (Min 2 chars). |
+| `shippingAddress.country` | string | ✅ | Country name (Min 2 chars). |
+| `shippingAddress.postalCode` | string | ✅ | Exactly 5 digits postal code (e.g. `11371`). |
+| `shippingAddress.phone` | string | ✅ | Phone number starting with `01` (11 digits). |
+| `paymentMethod` | string | ✅ | Payment method enum: `"Paypal"`, `"Stripe"`, or `"COD"`. |
+
+```json
+{
+  "shippingAddress": {
+    "address": "15 El-Tahrir Street, Apt 4B",
+    "city": "Cairo",
+    "state": "Cairo",
+    "country": "Egypt",
+    "postalCode": "11371",
+    "phone": "01012345678"
+  },
+  "paymentMethod": "Paypal"
+}
+```
+
+#### Responses
+
+##### Response 201
+
+Order created successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Order created successfully",
+  "data": {
+    "_id": "67092147385a812bf0e54321",
+    "user": "664fa1e2b5c7e1234567890b",
+    "orderItems": [
+      {
+        "product": "6ac92261707ab25c5d1ed396",
+        "productQuantity": 2,
+        "productPrice": 2500,
+        "productTitle": "Luxury Chronograph Watch",
+        "productImage": [
+          {
+            "url": "https://res.cloudinary.com/...",
+            "publicId": "watches/watch1"
+          }
+        ]
+      }
+    ],
+    "shippingAddress": {
+      "address": "15 El-Tahrir Street, Apt 4B",
+      "city": "Cairo",
+      "state": "Cairo",
+      "country": "Egypt",
+      "postalCode": "11371",
+      "phone": "01012345678"
+    },
+    "pricing": {
+      "itemsPrice": 5000,
+      "shippingPrice": 0,
+      "taxPrice": 0,
+      "totalOrderPrice": 5000
+    },
+    "payment": {
+      "paymentMethod": "Paypal",
+      "isPaid": false
+    },
+    "orderStatus": {
+      "status": "Pending",
+      "isDelivered": false
+    },
+    "createdAt": "2026-10-11T14:30:00.000Z",
+    "updatedAt": "2026-10-11T14:30:00.000Z"
+  }
+}
+```
+
+##### Response 400
+
+Validation error (e.g. invalid phone number format or missing required address fields).
+
+##### Response 404
+
+Cart is empty or not found.
+
+---
+
+### GET /orders
+
+Retrieve all orders placed by the authenticated user, sorted in descending order of creation.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+
+#### Responses
+
+##### Response 200
+
+Orders fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Orders fetched successfully",
+  "data": [
+    {
+      "_id": "67092147385a812bf0e54321",
+      "pricing": {
+        "totalOrderPrice": 5000
+      },
+      "payment": {
+        "paymentMethod": "Paypal",
+        "isPaid": true
+      },
+      "orderStatus": {
+        "status": "Processing"
+      }
+    }
+  ]
+}
+```
+
+---
+
+### GET /orders/:orderId
+
+Retrieve details of a single order belonging to the authenticated user.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `orderId` | string | ✅ | Order ID to fetch. |
+
+#### Responses
+
+##### Response 200
+
+Order fetched successfully.
+
+##### Response 404
+
+Order was not found.
+
+---
+
+### POST /orders/paypal/create
+
+Initialize a PayPal checkout session for an unpaid order and retrieve the approval URL for customer redirect.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+- `Content-Type: application/json`
+
+#### Request Body
+
+```json
+{
+  "orderId": "67092147385a812bf0e54321"
+}
+```
+
+#### Responses
+
+##### Response 200
+
+PayPal order created successfully.
+
+```json
+{
+  "status": "success",
+  "message": "PayPal order created successfully",
+  "data": {
+    "paypalOrderId": "5O190127TN364715T",
+    "approvalUrl": "https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T"
+  }
+}
+```
+
+##### Response 400
+
+This order is already paid.
+
+##### Response 404
+
+Order not found.
+
+---
+
+### POST /orders/paypal/capture
+
+Capture payment funds after the customer approves the transaction on PayPal. Updates the order payment status to paid.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+- `Content-Type: application/json`
+
+#### Request Body
+
+```json
+{
+  "paypalOrderId": "5O190127TN364715T",
+  "orderId": "67092147385a812bf0e54321"
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Payment captured successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Payment captured successfully",
+  "data": {
+    "_id": "67092147385a812bf0e54321",
+    "payment": {
+      "paymentMethod": "Paypal",
+      "isPaid": true,
+      "paidAt": "2026-10-11T14:32:00.000Z",
+      "paymentResult": {
+        "id": "5O190127TN364715T",
+        "status": "COMPLETED"
+      }
+    },
+    "orderStatus": {
+      "status": "Processing"
+    }
+  }
+}
+```
+
+---
+
+### PUT /orders/:orderId
+
+Update shipping address or payment method for an order that is still in `Pending` status.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+- `Content-Type: application/json`
+
+#### Request Body
+
+```json
+{
+  "shippingAddress": {
+    "address": "20 Nile Corniche, 5th Floor",
+    "city": "Giza",
+    "state": "Giza",
+    "country": "Egypt",
+    "postalCode": "12511",
+    "phone": "01123456789"
+  },
+  "paymentMethod": "COD"
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Order updated successfully.
+
+##### Response 400
+
+You cannot update an order that is already being processed or shipped.
+
+---
+
+### DELETE /orders/:orderId
+
+Cancel and delete an order (only if it belongs to the user and is still in `Pending` status).
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+
+#### Responses
+
+##### Response 200
+
+Order deleted successfully.
 
 ---
 

@@ -43,23 +43,17 @@ export function LoginForm() {
 
     login(data, {
       onSuccess: () => {
-        const msg = "Logged in successfully! Redirecting...";
-        setSuccessMessage(msg);
-        toast.success("Welcome back!", {
-          description: "You have successfully logged in to Nexo.",
-        });
+        setSuccessMessage("Logged in successfully!");
+        toast.success("Welcome back!");
         setTimeout(() => {
           router.push("/");
           router.refresh();
-        }, 1200);
+        }, 1000);
       },
       onError: (err) => {
-        const msg =
-          err.message || "Failed to log in. Please check your credentials.";
+        const msg = err.message || "Invalid credentials";
         setServerError(msg);
-        toast.error("Login failed", {
-          description: msg,
-        });
+        toast.error("Invalid credentials");
       },
     });
   };

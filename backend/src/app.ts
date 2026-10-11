@@ -6,6 +6,7 @@ import auth from "./modules/auth/auth.routes.js";
 import users from "./modules/Users/user.routes.js";
 import products from "./modules/Product/product.routes.js";
 import cart from "./modules/Cart/cart.routes.js";
+import orders from "./modules/Order/order.routes.js";
 import connectToDB from "./config/config.js";
 import { errorHandler, notFound } from "./middlewares/errors.js";
 import swaggerui from "swagger-ui-express";
@@ -28,6 +29,7 @@ app.use("/auth", auth);
 app.use("/users", users);
 app.use("/products", products);
 app.use("/cart", cart);
+app.use("/orders", orders);
 
 // ERROR HANDLING MIDDLEWARES
 app.use(notFound);

@@ -44,6 +44,10 @@ const options: Options = {
         name: "Cart",
         description: "Shopping cart management APIs",
       },
+      {
+        name: "Orders",
+        description: "Order processing and PayPal checkout APIs",
+      },
     ],
     components: {
       securitySchemes: {

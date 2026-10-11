@@ -1,0 +1,141 @@
+import { model, Schema, Types } from "mongoose";
+import { CreateOrderSchema, UpdateOrderSchema, } from "./order.schema.js";
+const OrderSchema = new Schema({
+    user: {
+        type: Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    orderItems: [
+        {
+            product: {
+                type: Types.ObjectId,
+                ref: "Product",
+                required: true,
+            },
+            productQuantity: {
+                type: Number,
+                required: true,
+            },
+            productPrice: {
+                type: Number,
+                required: true,
+            },
+            productTitle: {
+                type: String,
+                required: true,
+            },
+            productImage: {
+                type: [
+                    {
+                        url: {
+                            type: String,
+                            required: true,
+                        },
+                        publicId: {
+                            type: String,
+                            required: true,
+                        },
+                    },
+                ],
+                required: true,
+            },
+        },
+    ],
+    shippingAddress: {
+        address: {
+            type: String,
+            required: true,
+        },
+        city: {
+            type: String,
+            required: true,
+        },
+        state: {
+            type: String,
+            required: true,
+        },
+        country: {
+            type: String,
+            required: true,
+        },
+        postalCode: {
+            type: String,
+        },
+        phone: {
+            type: String,
+            required: true,
+        },
+    },
+    pricing: {
+        itemsPrice: {
+            type: Number,
+            required: true,
+        },
+        shippingPrice: {
+            type: Number,
+            required: true,
+        },
+        taxPrice: {
+            type: Number,
+            required: true,
+        },
+        totalOrderPrice: {
+            type: Number,
+            required: true,
+        },
+    },
+    payment: {
+        paymentMethod: {
+            type: String,
+            enum: ["Paypal", "Stripe", "COD"],
+            required: true,
+        },
+        isPaid: {
+            type: Boolean,
+            required: true,
+        },
+        paidAt: {
+            type: Date,
+        },
+        paymentResult: {
+            type: {
+                id: {
+                    type: String,
+                },
+                status: {
+                    type: String,
+                },
+                update_time: {
+                    type: String,
+                },
+                email_address: {
+                    type: String,
+                },
+            },
+        },
+    },
+    orderStatus: {
+        status: {
+            type: String,
+            enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+            required: true,
+        },
+        isDelivered: {
+            type: Boolean,
+            required: true,
+        },
+        deliveredAt: {
+            type: Date,
+        },
+    },
+}, { timestamps: true });
+const Order = model("Order", OrderSchema);
+const validateCreateOrder = (order) => {
+    return CreateOrderSchema.safeParse(order);
+};
+const validateUpdateOrder = (order) => {
+    return UpdateOrderSchema.safeParse(order);
+};
+export { Order, validateCreateOrder, validateUpdateOrder };
+//# sourceMappingURL=order.model.js.map

@@ -4,11 +4,13 @@ import {
   addToCart,
   updateCart,
   removeFromCart,
+  clearCart,
 } from "./cart.controller.js";
 import { verifyToken } from "../../middlewares/verifyToken.js";
+
 const router = express.Router();
 
-router.route("/").get(verifyToken, getCart);
+router.route("/").get(verifyToken, getCart).delete(verifyToken, clearCart);
 router
   .route("/:productId")
   .post(verifyToken, addToCart)

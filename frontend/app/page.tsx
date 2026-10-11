@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, SlidersHorizontal, X, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProductGrid } from "@/features/products/components/ProductGrid";
@@ -10,18 +10,42 @@ import {
   PRODUCT_CATEGORIES,
   CATEGORY_ICONS,
 } from "@/features/products/types/categories";
+import { Sidebar } from "@/_components/shared";
+
+import { useSearchParams } from "next/navigation";
 
 const ALL_TABS = ["All", ...PRODUCT_CATEGORIES] as const;
 
-export default function HomePage() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams.get("search") || "";
+
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(urlSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [page, setPage] = useState(1);
 
+  useEffect(() => {
+    const q = searchParams.get("search");
+    if (q !== null) {
+      setSearchQuery(q);
+      setDebouncedSearch(q.trim());
+      setPage(1);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const filters: ProductFilters = {
     category: selectedCategory !== "All" ? selectedCategory : undefined,
-    search: searchQuery.trim() || undefined,
+    search: debouncedSearch || undefined,
     inStock: inStockOnly ? "true" : undefined,
     page,
   };
@@ -33,7 +57,6 @@ export default function HomePage() {
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    setPage(1);
   };
 
   const handleInStockToggle = () => {
@@ -42,21 +65,31 @@ export default function HomePage() {
   };
 
   const hasActiveFilter =
-    selectedCategory !== "All" || searchQuery.trim().length > 0 || inStockOnly;
+    selectedCategory !== "All" || debouncedSearch.length > 0 || inStockOnly;
 
   const clearAll = () => {
     setSelectedCategory("All");
     setSearchQuery("");
+    setDebouncedSearch("");
     setInStockOnly(false);
     setPage(1);
   };
 
   return (
     <div className="flex-1 flex flex-col">
-      <section
-        id="products"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-12"
-      >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full flex flex-col md:flex-row items-start gap-8">
+        {/* Desktop Sidebar Aside */}
+        <Sidebar
+          className="hidden md:block"
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleCategoryChange}
+        />
+
+        {/* Main Content Area */}
+        <section
+          id="products"
+          className="flex-1 min-w-0 w-full space-y-12"
+        >
         {/* ── Search & Filters Row ─────────────────────────────────────── */}
         <div className="space-y-5">
           {/* Top row */}
@@ -131,7 +164,9 @@ export default function HomePage() {
               {ALL_TABS.map((cat) => {
                 const isSelected = selectedCategory === cat;
                 const Icon =
-                  cat === "All" ? null : CATEGORY_ICONS[cat as keyof typeof CATEGORY_ICONS];
+                  cat === "All"
+                    ? null
+                    : CATEGORY_ICONS[cat as keyof typeof CATEGORY_ICONS];
 
                 return (
                   <motion.button
@@ -203,6 +238,21 @@ export default function HomePage() {
         {/* ── Main Product Grid ────────────────────────────────────────── */}
         <ProductGrid filters={filters} onPageChange={setPage} />
       </section>
+      </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <HomeContent />
+    </React.Suspense>
   );
 }

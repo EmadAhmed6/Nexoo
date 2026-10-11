@@ -1,0 +1,206 @@
+import { Document, model, Schema, Types } from "mongoose";
+import {
+  CreateOrderSchema,
+  UpdateOrderSchema,
+  ICreateOrderSchema,
+  IUpdateOrderSchema,
+} from "./order.schema.js";
+
+interface IOrderItem {
+  product: Types.ObjectId;
+  productQuantity: number;
+  productPrice: number;
+  productTitle: string;
+  productImage: { url: string; publicId: string }[];
+}
+
+interface IShippingAddress {
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode?: string;
+  phone: string;
+}
+
+interface IPricing {
+  itemsPrice: number;
+  shippingPrice: number;
+  taxPrice: number;
+  totalOrderPrice: number;
+}
+interface IPaymentResult {
+  id?: string;
+  status?: string;
+  update_time?: string;
+  email_address?: string;
+}
+
+interface IPayment {
+  paymentMethod: "Paypal" | "Stripe" | "COD";
+  isPaid: boolean;
+  paidAt?: Date;
+  paymentResult?: IPaymentResult;
+}
+
+interface IOrderStatus {
+  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  isDelivered: boolean;
+  deliveredAt?: Date;
+}
+
+interface IOrder extends Document {
+  user: Types.ObjectId;
+  orderItems: IOrderItem[];
+  shippingAddress: IShippingAddress;
+  pricing: IPricing;
+  payment: IPayment;
+  orderStatus: IOrderStatus;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const OrderSchema = new Schema<IOrder>(
+  {
+    user: {
+      type: Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    orderItems: [
+      {
+        product: {
+          type: Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        productQuantity: {
+          type: Number,
+          required: true,
+        },
+        productPrice: {
+          type: Number,
+          required: true,
+        },
+        productTitle: {
+          type: String,
+          required: true,
+        },
+        productImage: {
+          type: [
+            {
+              url: {
+                type: String,
+                required: true,
+              },
+              publicId: {
+                type: String,
+                required: true,
+              },
+            },
+          ],
+          required: true,
+        },
+      },
+    ],
+    shippingAddress: {
+      address: {
+        type: String,
+        required: true,
+      },
+      city: {
+        type: String,
+        required: true,
+      },
+      state: {
+        type: String,
+        required: true,
+      },
+      country: {
+        type: String,
+        required: true,
+      },
+      postalCode: {
+        type: String,
+      },
+      phone: {
+        type: String,
+        required: true,
+      },
+    },
+    pricing: {
+      itemsPrice: {
+        type: Number,
+        required: true,
+      },
+      shippingPrice: {
+        type: Number,
+        required: true,
+      },
+      taxPrice: {
+        type: Number,
+        required: true,
+      },
+      totalOrderPrice: {
+        type: Number,
+        required: true,
+      },
+    },
+    payment: {
+      paymentMethod: {
+        type: String,
+        enum: ["Paypal", "Stripe", "COD"],
+        required: true,
+      },
+      isPaid: {
+        type: Boolean,
+        required: true,
+      },
+      paidAt: {
+        type: Date,
+      },
+      paymentResult: {
+        type: {
+          id: {
+            type: String,
+          },
+          status: {
+            type: String,
+          },
+          update_time: {
+            type: String,
+          },
+          email_address: {
+            type: String,
+          },
+        },
+      },
+    },
+    orderStatus: {
+      status: {
+        type: String,
+        enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+        required: true,
+      },
+      isDelivered: {
+        type: Boolean,
+        required: true,
+      },
+      deliveredAt: {
+        type: Date,
+      },
+    },
+  },
+  { timestamps: true },
+);
+
+const Order = model<IOrder>("Order", OrderSchema);
+
+const validateCreateOrder = (order: ICreateOrderSchema) => {
+  return CreateOrderSchema.safeParse(order);
+};
+const validateUpdateOrder = (order: IUpdateOrderSchema) => {
+  return UpdateOrderSchema.safeParse(order);
+};
+
+export { Order, validateCreateOrder, validateUpdateOrder };

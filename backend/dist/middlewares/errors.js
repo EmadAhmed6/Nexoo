@@ -11,8 +11,7 @@ const errorHandler = (err, req, res, next) => {
 const sendError = (res, statusCode, errorMessage) => {
     return res.status(statusCode).json({
         success: false,
-        message: "Request failed",
-        data: { message: errorMessage },
+        message: errorMessage,
     });
 };
 const successMsg = (res, statusCode, successMessage, data) => {

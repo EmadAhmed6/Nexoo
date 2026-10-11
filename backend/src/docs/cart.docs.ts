@@ -241,3 +241,43 @@
  *       404:
  *         description: Cart or product in cart not found
  */
+
+// DELETE /cart
+/**
+ * @swagger
+ * /cart:
+ *   delete:
+ *     summary: Clear entire cart
+ *     description: Completely delete the authenticated user's shopping cart.
+ *     tags:
+ *       - Cart
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cart cleared successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Cart cleared successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalPrice:
+ *                       type: number
+ *                       example: 0
+ *                     cartItems:
+ *                       type: array
+ *                       example: []
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       404:
+ *         description: Cart was not found
+ */

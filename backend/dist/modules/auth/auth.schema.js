@@ -9,6 +9,7 @@ const RegisterSchema = z.object({
         .string()
         .min(3)
         .max(50)
+        .trim()
         .regex(/^[a-zA-Z0-9_]+$/, "Username must contain only letters, numbers, and underscores"),
     fullName: z
         .string()
@@ -17,13 +18,9 @@ const RegisterSchema = z.object({
         .trim(),
     email: z.string().email("Invalid email address").trim(),
     password: passwordSchema,
+    phone: z.string().length(11, "Phone number must be 11 digits"),
 });
 const LoginSchema = z.object({
-    username: z
-        .string()
-        .min(3)
-        .max(50)
-        .regex(/^[a-zA-Z0-9_]+$/, "Username must contain only letters, numbers, and underscores"),
     email: z.string().email("Invalid email address").trim(),
     password: passwordSchema,
 });

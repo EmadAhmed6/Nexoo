@@ -5,6 +5,7 @@ const UserSchema = z.object({
         .string()
         .min(3)
         .max(50)
+        .trim()
         .regex(/^[a-zA-Z0-9_]+$/, "Username must contain only letters, numbers, and underscores"),
     fullName: z
         .string()
@@ -13,14 +14,5 @@ const UserSchema = z.object({
         .trim(),
     email: z.string().email("Invalid email address").trim(),
     password: passwordSchema,
-    role: z.enum(["User", "Admin", "SuperAdmin"]).default("User"),
-    provider: z.enum(["local", "google"]).default("local"),
-    profilePicture: z
-        .object({
-        url: z.string().optional(),
-        publicId: z.string().optional(),
-    })
-        .optional(),
-    isVerified: z.boolean().default(false),
 });
 //# sourceMappingURL=user.schema.js.map

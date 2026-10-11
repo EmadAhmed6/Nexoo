@@ -10,14 +10,38 @@ import { Product } from "../Product/product.model.js";
 const getCart = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?.id;
-    const cart = await Cart.findOne({ userId }).populate({
-      path: "cartItems.product",
-      select: "title price priceAfterDiscount productImages",
-    });
+    const { page = 1, limit = 10 } = req.query as {
+      page: string | undefined;
+      limit: string | undefined;
+    };
+    const cart = await Cart.findOne({ userId })
+      .populate({
+        path: "cartItems.product",
+        select: "title price priceAfterDiscount productImages",
+      })
+      .limit(Number(limit))
+      .skip((Number(page) - 1) * Number(limit));
     if (!cart) {
       sendError(res, 404, "Cart is empty");
       return;
     }
+
+    // Filter out items whose referenced product was deleted from DB
+    const validItems = cart.cartItems.filter((item: any) => item.product != null);
+    if (validItems.length !== cart.cartItems.length) {
+      cart.cartItems = validItems as any;
+      cart.totalPrice = validItems.reduce(
+        (sum: number, item: any) => sum + item.productQuantity * item.productPrice,
+        0,
+      );
+      await cart.save();
+    }
+
+    if (cart.cartItems.length === 0) {
+      sendError(res, 404, "Cart is empty");
+      return;
+    }
+
     successMsg(res, 200, "Cart fetched successfully", cart);
   },
 );
@@ -33,13 +57,11 @@ const addToCart = asyncHandler(
       sendError(res, 400, "Invalid Product ID format");
       return;
     }
-
     const { success, error } = validateCreateCart(req.body);
     if (!success) {
       sendError(res, 400, error.issues[0]?.message || "Invalid Inputs");
       return;
     }
-
     const product = await Product.findById(productId);
     if (!product) {
       sendError(res, 404, "Product not found");
@@ -47,7 +69,6 @@ const addToCart = asyncHandler(
     }
 
     const productPrice = product.priceAfterDiscount || product.price;
-
     let cart = await Cart.findOne({ userId });
     let existingQuantity = productQuantity;
     if (cart) {
@@ -58,7 +79,6 @@ const addToCart = asyncHandler(
         existingQuantity += existingItem.productQuantity;
       }
     }
-
     if (product.stock < existingQuantity) {
       sendError(res, 400, "Requested quantity exceeds available stock");
       return;
@@ -169,6 +189,7 @@ const removeFromCart = asyncHandler(
       sendError(res, 404, "Cart was not found");
       return;
     }
+
     const itemIndex = cart.cartItems.findIndex(
       (item) => item.product.toString() === productId?.toString(),
     );
@@ -176,24 +197,48 @@ const removeFromCart = asyncHandler(
       sendError(res, 404, "Product is not found in the cart");
       return;
     }
+
     cart.cartItems.splice(itemIndex, 1);
     let totalPrice = 0;
     cart.cartItems.forEach(
       (item) => (totalPrice += item.productQuantity * item.productPrice),
     );
     cart.totalPrice = totalPrice;
+
     if (cart.cartItems.length === 0) {
       await Cart.findByIdAndDelete(cart._id);
-      successMsg(res, 200, "Cart is now empty and removed", null);
+      successMsg(res, 200, "Cart is now empty and removed", {
+        cartItems: [],
+        totalPrice: 0,
+      });
       return;
     }
+
     await cart.save();
     await cart.populate({
       path: "cartItems.product",
       select: "title price priceAfterDiscount productImages",
     });
+
     successMsg(res, 200, "Product removed from cart successfully", cart);
   },
 );
 
-export { getCart, addToCart, updateCart, removeFromCart };
+// CLEAR CART
+const clearCart = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.id as string;
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      sendError(res, 404, "Cart was not found");
+      return;
+    }
+    await Cart.findByIdAndDelete(cart._id);
+    successMsg(res, 200, "Cart cleared successfully", {
+      totalPrice: 0,
+      cartItems: [],
+    });
+  },
+);
+
+export { getCart, addToCart, updateCart, removeFromCart, clearCart };

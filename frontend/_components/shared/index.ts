@@ -10,3 +10,4 @@ export { Text, textVariants } from "./Text";
 export type { TextProps } from "./Text";
 
 export { Navbar } from "./Navbar";
+export { Sidebar } from "./Sidebar";

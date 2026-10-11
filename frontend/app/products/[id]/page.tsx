@@ -65,13 +65,11 @@ function ProductDetailContent() {
     deleteProduct(productId, {
       onSuccess: () => {
         setDeleteModalOpen(false);
-        toast.success("Product deleted successfully");
+        toast.success("Product deleted");
         router.push("/");
       },
-      onError: (err: unknown) => {
-        const message =
-          err instanceof Error ? err.message : "Please try again.";
-        toast.error("Failed to delete product", { description: message });
+      onError: () => {
+        toast.error("Failed to delete product");
       },
     });
   };
@@ -116,17 +114,15 @@ function ProductDetailContent() {
 
     updateProduct(formData, {
       onSuccess: () => {
-        toast.success(`Image #${targetIdx + 1} updated successfully!`);
+        toast.success("Image updated");
         setUploadingImageIndex(null);
         directEditIndexRef.current = null;
         if (directFileInputRef.current) {
           directFileInputRef.current.value = "";
         }
       },
-      onError: (err: unknown) => {
-        const message =
-          err instanceof Error ? err.message : "Failed to replace image.";
-        toast.error("Failed to update image", { description: message });
+      onError: () => {
+        toast.error("Failed to update image");
         setUploadingImageIndex(null);
         directEditIndexRef.current = null;
         if (directFileInputRef.current) {
@@ -211,7 +207,7 @@ function ProductDetailContent() {
 
   const handleAddToCart = () => {
     if (!user) {
-      toast.error("Please sign in first to add items to your cart");
+      toast.error("Please sign in first");
       router.push("/auth/login");
       return;
     }
@@ -221,13 +217,11 @@ function ProductDetailContent() {
       {
         onSuccess: () => {
           setAdded(true);
-          toast.success(`Added ${quantity} item(s) to cart`);
+          toast.success("Added to cart");
           setTimeout(() => setAdded(false), 2000);
         },
-        onError: (err: unknown) => {
-          const msg =
-            err instanceof Error ? err.message : "Failed to add to cart";
-          toast.error(msg);
+        onError: () => {
+          toast.error("Failed to add to cart");
         },
       },
     );
