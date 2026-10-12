@@ -64,6 +64,12 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 21  | POST   | `/orders/paypal/capture` | Capture PayPal payment after buyer approval                                     |  🔒  |
 | 22  | PUT    | `/orders/:orderId`       | Update shipping address or payment method of pending order                      |  🔒  |
 | 23  | DELETE | `/orders/:orderId`       | Cancel and delete a pending order                                               |  🔒  |
+| 24  | GET    | `/coupons`               | Retrieve list of all coupons (Admin only)                                       |  🔒  |
+| 25  | POST   | `/coupons`               | Create a new discount coupon (Admin only)                                       |  🔒  |
+| 26  | POST   | `/coupons/apply`         | Apply coupon code to user cart and recalculate prices                           |  🔒  |
+| 27  | DELETE | `/coupons/remove`        | Remove applied coupon from user cart                                            |  🔒  |
+| 28  | PUT    | `/coupons/:couponId`     | Update coupon details, validity dates, or status (Admin only)                   |  🔒  |
+| 29  | DELETE | `/coupons/:couponId`     | Delete unused coupon (Admin only)                                               |  🔒  |
 
 ---
 
@@ -74,6 +80,7 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 - [Product Management Endpoints](#product-management-endpoints)
 - [Cart Management Endpoints](#cart-management-endpoints)
 - [Order & Checkout Endpoints](#order--checkout-endpoints)
+- [Coupon Management Endpoints](#coupon-management-endpoints)
 - [Common HTTP Status Codes](#common-http-status-codes)
 
 ---
@@ -1296,6 +1303,275 @@ Cancel and delete an order (only if it belongs to the user and is still in `Pend
 ##### Response 200
 
 Order deleted successfully.
+
+---
+
+## Coupon Management Endpoints
+
+### GET /coupons
+
+Retrieve list of all created coupons (Admin or SuperAdmin only), sorted by creation date descending.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_admin_jwt_token>`
+
+#### Responses
+
+##### Response 200
+
+```json
+{
+  "status": "success",
+  "message": "Coupons fetched successfully",
+  "data": [
+    {
+      "_id": "673f8e4b1a2b3c4d5e6f7a8b",
+      "couponCode": "SUMMER20",
+      "discountType": "percentage",
+      "discountValue": 20,
+      "usageLimit": 50,
+      "usedCount": 4,
+      "isActive": true,
+      "startDate": "2026-06-01T00:00:00.000Z",
+      "expireDate": "2026-08-31T23:59:59.000Z",
+      "createdAt": "2026-05-30T10:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+##### Response 401
+
+Missing or invalid bearer token.
+
+##### Response 403
+
+Requester does not have Admin or SuperAdmin role.
+
+---
+
+### POST /coupons
+
+Create a new discount coupon (Admin or SuperAdmin only).
+
+#### Request Headers
+
+- `Authorization: Bearer <your_admin_jwt_token>`
+- `Content-Type: application/json`
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `couponCode` | `string` | Yes | Unique coupon identifier code (case-insensitive, auto-uppercased) |
+| `discountType` | `string` | Yes | Either `"percentage"` or `"fixed"` |
+| `discountValue` | `number` | Yes | Value of discount (1–100 for percentage, > 0 for fixed amount) |
+| `usageLimit` | `number` | No | Maximum number of times the coupon can be redeemed (default: 10) |
+| `startDate` | `string` | Yes | ISO Date string indicating when coupon validity begins |
+| `expireDate` | `string` | Yes | ISO Date string indicating when coupon expires (must be after `startDate`) |
+| `isActive` | `boolean` | No | Whether the coupon is immediately active (default: `true`) |
+
+```json
+{
+  "couponCode": "WELCOME10",
+  "discountType": "percentage",
+  "discountValue": 10,
+  "usageLimit": 100,
+  "startDate": "2026-10-01",
+  "expireDate": "2026-12-31",
+  "isActive": true
+}
+```
+
+#### Responses
+
+##### Response 201
+
+```json
+{
+  "status": "success",
+  "message": "Coupon created successfully",
+  "data": {
+    "_id": "673f8e4b1a2b3c4d5e6f7a8b",
+    "couponCode": "WELCOME10",
+    "discountType": "percentage",
+    "discountValue": 10,
+    "usageLimit": 100,
+    "usedCount": 0,
+    "isActive": true,
+    "startDate": "2026-10-01T00:00:00.000Z",
+    "expireDate": "2026-12-31T00:00:00.000Z",
+    "createdAt": "2026-10-12T15:00:00.000Z",
+    "updatedAt": "2026-10-12T15:00:00.000Z"
+  }
+}
+```
+
+##### Response 400
+
+Validation error (e.g., duplicate code, percentage > 100, or `startDate` after `expireDate`).
+
+---
+
+### POST /coupons/apply
+
+Apply a discount coupon to the authenticated user's current shopping cart and calculate new total price.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+- `Content-Type: application/json`
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `couponCode` | `string` | Yes | The code of the coupon to apply |
+
+```json
+{
+  "couponCode": "WELCOME10"
+}
+```
+
+#### Responses
+
+##### Response 200
+
+```json
+{
+  "status": "success",
+  "message": "Coupon applied successfully",
+  "data": {
+    "originalTotal": 1250,
+    "discountAmount": 125,
+    "finalPrice": 1125,
+    "couponCode": "WELCOME10"
+  }
+}
+```
+
+##### Response 400
+
+Coupon is inactive, has expired, or exceeded its usage limit.
+
+##### Response 404
+
+Coupon code does not exist or user cart is empty.
+
+---
+
+### DELETE /coupons/remove
+
+Remove currently applied coupon from the authenticated user's shopping cart.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_jwt_token>`
+
+#### Responses
+
+##### Response 200
+
+```json
+{
+  "status": "success",
+  "message": "Coupon removed successfully",
+  "data": null
+}
+```
+
+##### Response 404
+
+User cart is empty or not found.
+
+---
+
+### PUT /coupons/:couponId
+
+Update details, dates, or active status of an existing coupon (Admin or SuperAdmin only).
+
+#### Request Headers
+
+- `Authorization: Bearer <your_admin_jwt_token>`
+- `Content-Type: application/json`
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `couponCode` | `string` | No | New unique coupon code |
+| `discountType` | `string` | No | Either `"percentage"` or `"fixed"` |
+| `discountValue` | `number` | No | New discount numeric value |
+| `usageLimit` | `number` | No | New maximum usage limit |
+| `startDate` | `string` | No | New validity start date |
+| `expireDate` | `string` | No | New validity expiration date |
+| `isActive` | `boolean` | No | Activate or deactivate coupon |
+
+```json
+{
+  "isActive": false
+}
+```
+
+#### Responses
+
+##### Response 200
+
+```json
+{
+  "status": "success",
+  "message": "Coupon updated successfully",
+  "data": {
+    "_id": "673f8e4b1a2b3c4d5e6f7a8b",
+    "couponCode": "WELCOME10",
+    "discountType": "percentage",
+    "discountValue": 10,
+    "usageLimit": 100,
+    "usedCount": 0,
+    "isActive": false,
+    "startDate": "2026-10-01T00:00:00.000Z",
+    "expireDate": "2026-12-31T00:00:00.000Z",
+    "updatedAt": "2026-10-12T16:30:00.000Z"
+  }
+}
+```
+
+##### Response 404
+
+Coupon with specified ID does not exist.
+
+---
+
+### DELETE /coupons/:couponId
+
+Delete an unused coupon by ID (Admin or SuperAdmin only). Coupons that have already been redeemed by customers cannot be deleted to maintain order history integrity.
+
+#### Request Headers
+
+- `Authorization: Bearer <your_admin_jwt_token>`
+
+#### Responses
+
+##### Response 200
+
+```json
+{
+  "status": "success",
+  "message": "Coupon deleted successfully",
+  "data": null
+}
+```
+
+##### Response 400
+
+Coupon cannot be deleted as it has already been redeemed (`usedCount > 0`).
+
+##### Response 404
+
+Coupon with specified ID does not exist.
 
 ---
 

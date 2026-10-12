@@ -42,13 +42,15 @@ export function Sidebar({
       label: "Home",
       href: "/",
       icon: Home,
-      isActive: pathname === "/" && (!selectedCategory || selectedCategory === "All"),
+      isActive:
+        pathname === "/" && (!selectedCategory || selectedCategory === "All"),
     },
     {
       label: "Products",
       href: "/#products",
       icon: Sparkles,
-      isActive: pathname === "/" && selectedCategory && selectedCategory !== "All",
+      isActive:
+        pathname === "/" && selectedCategory && selectedCategory !== "All",
     },
     ...(isAuthenticated
       ? [
@@ -105,7 +107,9 @@ export function Sidebar({
                     <ChevronRight
                       className={cn(
                         "w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5",
-                        isActive ? "text-black opacity-80" : "opacity-0 group-hover:opacity-100",
+                        isActive
+                          ? "text-black opacity-80"
+                          : "opacity-0 group-hover:opacity-100",
                       )}
                     />
                   </Link>
@@ -187,17 +191,6 @@ export function Sidebar({
               </div>
             )}
           </div>
-        </div>
-
-        {/* Nexo Perks Badge */}
-        <div className="p-4 rounded-3xl border border-borderPrimary bg-bgSecondary/60 backdrop-blur-md space-y-2">
-          <div className="flex items-center gap-2 text-primary text-xs font-bold">
-            <ShieldCheck className="w-4 h-4" />
-            <span>Nexo Concierge</span>
-          </div>
-          <p className="text-[11px] text-textSecondary leading-relaxed">
-            Curated luxury, verified authenticity, and complimentary express shipping.
-          </p>
         </div>
       </aside>
 

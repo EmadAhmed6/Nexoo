@@ -1,3 +1,13 @@
+export interface UserAddress {
+  _id?: string;
+  street: string;
+  city: string;
+  state: string;
+  postalCode?: string;
+  phone: string;
+  isDefault?: boolean;
+}
+
 export interface User {
   _id: string;
   fullName: string;
@@ -7,6 +17,10 @@ export interface User {
   role: "User" | "Admin" | "SuperAdmin";
   profileImage?: string;
   createdAt?: string;
+  updatedAt?: string;
+  addresses?: UserAddress[];
+  isActive?: boolean;
+  isVerified?: boolean;
 }
 
 export interface AuthResponseData extends User {

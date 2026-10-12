@@ -48,6 +48,10 @@ const options: Options = {
         name: "Orders",
         description: "Order processing and PayPal checkout APIs",
       },
+      {
+        name: "Coupons",
+        description: "Coupons and discount management APIs",
+      },
     ],
     components: {
       securitySchemes: {

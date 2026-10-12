@@ -8,10 +8,11 @@ import {
 import {
   verifyToken,
   verifyAuthorizedToken,
+  verifyAdminToken,
 } from "../../middlewares/verifyToken.js";
 const router = express.Router();
 
-router.route("/").get(verifyToken, getUsers);
+router.route("/").get(verifyAdminToken, getUsers);
 router
   .route("/:userId")
   .get(verifyToken, GetUserById)

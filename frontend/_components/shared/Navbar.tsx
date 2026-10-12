@@ -16,9 +16,11 @@ import {
   Package,
   Sparkles,
   ChevronRight,
+  ChevronDown,
   ShieldCheck,
-  User,
+  User as UserIcon,
   Search,
+  LayoutDashboard,
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/store/useCartStore";
 import { useCart } from "@/features/cart/hooks/useCart";
@@ -55,6 +57,23 @@ export function Navbar() {
     0,
   );
 
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  React.useEffect(() => {
+    setUserMenuOpen(false);
+  }, [pathname]);
+
   const navLinks = [
     {
       label: "Home",
@@ -71,10 +90,26 @@ export function Navbar() {
     ...(isAuthenticated
       ? [
           {
+            label: "My Profile",
+            href: "/profile",
+            icon: UserIcon,
+            desc: "Manage account settings & details",
+          },
+          {
             label: "My Orders",
             href: "/orders",
             icon: Package,
             desc: "Track shipments & order history",
+          },
+        ]
+      : []),
+    ...(isAuthenticated && (user?.role === "Admin" || user?.role === "SuperAdmin")
+      ? [
+          {
+            label: "Dashboard",
+            href: "/admin",
+            icon: LayoutDashboard,
+            desc: "Manage products, coupons & users",
           },
         ]
       : []),
@@ -133,37 +168,124 @@ export function Navbar() {
               {/* User Auth Info / Links */}
               <div className="hidden sm:flex items-center gap-2">
                 {isAuthenticated && user ? (
-                  <div className="flex items-center gap-2.5 pl-2 border-l border-borderPrimary">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-bold">
-                        {user.fullName ? user.fullName[0].toUpperCase() : "U"}
-                      </div>
-                      <div className="flex flex-col text-left">
-                        <Text
-                          size="xs"
-                          font="bold"
-                          className="leading-tight line-clamp-1"
-                        >
-                          {user.fullName || user.username}
-                        </Text>
-                        <Text
-                          size="xs"
-                          color="secondary"
-                          className="text-[10px] leading-none"
-                        >
-                          {user.role || "Member"}
-                        </Text>
-                      </div>
+                  <div className="relative pl-2 border-l border-borderPrimary" ref={userMenuRef}>
+                    <div className="flex items-center gap-1.5 p-1 rounded-xl border border-transparent hover:border-borderPrimary hover:bg-bgPrimary/60 transition-all">
+                      {/* Clicking on avatar or name links directly to profile */}
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-2 group"
+                        title="View & Edit Profile"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-primary text-xs font-black shadow-sm group-hover:scale-105 group-hover:border-primary transition-all">
+                          {user.fullName ? user.fullName[0].toUpperCase() : "U"}
+                        </div>
+                        <div className="flex flex-col text-left">
+                          <Text
+                            size="xs"
+                            font="bold"
+                            className="leading-tight line-clamp-1 group-hover:text-primary transition-colors max-w-[120px]"
+                          >
+                            {user.fullName || user.username}
+                          </Text>
+                          <Text
+                            size="xs"
+                            color="secondary"
+                            className="text-[10px] leading-none"
+                          >
+                            {user.role || "Member"}
+                          </Text>
+                        </div>
+                      </Link>
+
+                      {/* Dropdown toggle button */}
+                      <button
+                        onClick={() => setUserMenuOpen((prev) => !prev)}
+                        className="p-1 rounded-lg text-textSecondary hover:text-textPrimary hover:bg-bgSecondary transition-colors"
+                        aria-label="Open user dropdown menu"
+                        aria-expanded={userMenuOpen}
+                      >
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                            userMenuOpen ? "rotate-180 text-primary" : ""
+                          }`}
+                        />
+                      </button>
                     </div>
 
-                    <button
-                      onClick={logout}
-                      className="p-2 rounded-xl text-textSecondary hover:text-textError hover:bg-bgPrimary transition-colors"
-                      title="Sign Out"
-                      aria-label="Sign Out"
-                    >
-                      <LogOut className="w-4 h-4" />
-                    </button>
+                    {/* Dropdown Menu Panel */}
+                    <AnimatePresence>
+                      {userMenuOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 6, scale: 0.95 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 mt-2 w-64 rounded-2xl border border-borderPrimary bg-bgSecondary p-2 shadow-2xl z-50 divide-y divide-borderPrimary"
+                        >
+                          {/* Header: Link to Profile */}
+                          <Link
+                            href="/profile"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-bgPrimary transition-colors group mb-1.5"
+                          >
+                            <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0 group-hover:scale-105 transition-transform">
+                              {user.fullName ? user.fullName[0].toUpperCase() : "U"}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-textPrimary truncate group-hover:text-primary transition-colors">
+                                {user.fullName || user.username}
+                              </p>
+                              <p className="text-[10px] text-textSecondary truncate">{user.email}</p>
+                              <span className="inline-block text-[10px] text-primary font-semibold mt-0.5">
+                                Edit profile →
+                              </span>
+                            </div>
+                          </Link>
+
+                          {/* Menu Items */}
+                          <div className="py-1.5 space-y-1">
+                            {/* Profile Link */}
+                            <Link
+                              href="/profile"
+                              onClick={() => setUserMenuOpen(false)}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-textSecondary hover:text-textPrimary hover:bg-bgPrimary transition-colors"
+                            >
+                              <UserIcon className="w-4 h-4 text-primary" />
+                              <span>My Profile</span>
+                            </Link>
+
+                            {/* Dashboard Link (if Admin or SuperAdmin) */}
+                            {(user.role === "Admin" || user.role === "SuperAdmin") && (
+                              <Link
+                                href="/admin"
+                                onClick={() => setUserMenuOpen(false)}
+                                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-primary hover:bg-primary/10 transition-colors"
+                              >
+                                <LayoutDashboard className="w-4 h-4 text-primary" />
+                                <span>Dashboard</span>
+                                <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold uppercase">
+                                  Admin
+                                </span>
+                              </Link>
+                            )}
+                          </div>
+
+                          {/* Logout Action */}
+                          <div className="pt-1.5">
+                            <button
+                              onClick={() => {
+                                setUserMenuOpen(false);
+                                logout();
+                              }}
+                              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-textSecondary hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                            >
+                              <LogOut className="w-4 h-4" />
+                              <span>Logout</span>
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -330,20 +452,25 @@ export function Navbar() {
               {/* Sidebar Footer / User Account */}
               <div className="p-5 border-t border-borderPrimary bg-bgPrimary/50 space-y-4">
                 {isAuthenticated && user ? (
-                  <div className="p-3.5 rounded-2xl border border-borderPrimary bg-bgPrimary flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-3.5 rounded-2xl border border-borderPrimary bg-bgPrimary flex items-center justify-between gap-3">
+                    <Link
+                      href="/profile"
+                      onClick={() => setSidebarOpen(false)}
+                      className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+                      title="View & Edit Profile"
+                    >
                       <div className="w-9 h-9 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
                         {user.fullName ? user.fullName[0].toUpperCase() : "U"}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-textPrimary truncate">
+                        <p className="text-xs font-bold text-textPrimary truncate hover:text-primary transition-colors">
                           {user.fullName || user.username}
                         </p>
                         <p className="text-[10px] text-textSecondary truncate">
                           {user.email}
                         </p>
                       </div>
-                    </div>
+                    </Link>
 
                     <button
                       onClick={() => {

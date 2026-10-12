@@ -27,6 +27,8 @@ interface IPricing {
   itemsPrice: number;
   shippingPrice: number;
   taxPrice: number;
+  couponCode: string | null;
+  discountPrice: number;
   totalOrderPrice: number;
 }
 interface IPaymentResult {
@@ -140,6 +142,14 @@ const OrderSchema = new Schema<IOrder>(
       taxPrice: {
         type: Number,
         required: true,
+      },
+      couponCode: {
+        type: String,
+        default: null,
+      },
+      discountPrice: {
+        type: Number,
+        default: 0,
       },
       totalOrderPrice: {
         type: Number,

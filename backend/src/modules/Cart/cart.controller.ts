@@ -5,6 +5,7 @@ import { sendError, successMsg } from "../../middlewares/errors.js";
 import { Cart, validateCreateCart, validateUpdateCart } from "./cart.model.js";
 import { Types } from "mongoose";
 import { Product } from "../Product/product.model.js";
+import { Coupon } from "../Coupons/coupon.model.js";
 
 // GET CART
 const getCart = asyncHandler(
@@ -26,12 +27,14 @@ const getCart = asyncHandler(
       return;
     }
 
-    // Filter out items whose referenced product was deleted from DB
-    const validItems = cart.cartItems.filter((item: any) => item.product != null);
+    const validItems = cart.cartItems.filter(
+      (item: any) => item.product != null,
+    );
     if (validItems.length !== cart.cartItems.length) {
       cart.cartItems = validItems as any;
       cart.totalPrice = validItems.reduce(
-        (sum: number, item: any) => sum + item.productQuantity * item.productPrice,
+        (sum: number, item: any) =>
+          sum + item.productQuantity * item.productPrice,
         0,
       );
       await cart.save();
@@ -212,6 +215,25 @@ const removeFromCart = asyncHandler(
         totalPrice: 0,
       });
       return;
+    }
+
+    if (cart.couponApplied) {
+      const coupon = await Coupon.findOne({ couponCode: cart.couponApplied });
+      if (coupon && coupon.isActive && new Date() <= coupon.expireDate) {
+        let discountAmount = 0;
+        if (coupon.discountType === "percentage") {
+          discountAmount = (cart.totalPrice * coupon.discountValue) / 100;
+        } else {
+          discountAmount = coupon.discountValue;
+        }
+        cart.totalPriceAfterDiscount = Math.max(
+          0,
+          cart.totalPrice - discountAmount,
+        );
+      } else {
+        cart.couponApplied = undefined;
+        cart.totalPriceAfterDiscount = undefined;
+      }
     }
 
     await cart.save();

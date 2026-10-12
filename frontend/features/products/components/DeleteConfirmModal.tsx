@@ -5,12 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, X, AlertTriangle, Loader2 } from "lucide-react";
 import { Text } from "@/_components/shared/Text";
 
-interface DeleteConfirmModalProps {
+export interface DeleteConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   isPending?: boolean;
+  title?: string;
+  itemName?: string;
   productTitle?: string;
+  description?: string;
+  noticeText?: string;
 }
 
 export function DeleteConfirmModal({
@@ -18,8 +22,14 @@ export function DeleteConfirmModal({
   onClose,
   onConfirm,
   isPending = false,
+  title,
+  itemName,
   productTitle,
+  description,
+  noticeText = "This action cannot be undone.",
 }: DeleteConfirmModalProps) {
+  const displayName = itemName || productTitle;
+  const modalTitle = title || (productTitle ? "Delete Product" : "Confirm Deletion");
   // Close on Escape key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -80,27 +90,33 @@ export function DeleteConfirmModal({
 
               {/* Modal Title */}
               <Text as="h3" size="xl" font="black" className="tracking-tight text-textPrimary">
-                Delete Product
+                {modalTitle}
               </Text>
 
               {/* Warning Description */}
               <p className="mt-2 text-sm text-textSecondary leading-relaxed">
-                Are you sure you want to delete{" "}
-                {productTitle ? (
-                  <span className="font-semibold text-textPrimary">
-                    &quot;{productTitle}&quot;
-                  </span>
+                {description ? (
+                  description
                 ) : (
-                  "this product"
+                  <>
+                    Are you sure you want to delete{" "}
+                    {displayName ? (
+                      <span className="font-semibold text-textPrimary">
+                        &quot;{displayName}&quot;
+                      </span>
+                    ) : (
+                      "this item"
+                    )}
+                    ? This action cannot be undone and will permanently remove this item from the system.
+                  </>
                 )}
-                ? This action cannot be undone and will permanently remove this item from the store.
               </p>
 
               {/* Alert Notice */}
               <div className="mt-4 w-full p-3 rounded-xl bg-textError/5 border border-textError/20 flex items-center gap-2.5 text-left">
                 <AlertTriangle className="w-4 h-4 text-textError flex-shrink-0" />
                 <span className="text-xs text-textError font-medium">
-                  All associated data and images will be permanently deleted.
+                  {noticeText}
                 </span>
               </div>
 

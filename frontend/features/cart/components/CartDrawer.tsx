@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -12,10 +12,13 @@ import {
   Loader2,
   Sparkles,
   PackageOpen,
+  Tag,
+  XCircle,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useCartStore } from "../store/useCartStore";
 import {
   useCart,
@@ -23,6 +26,7 @@ import {
   useRemoveFromCart,
   useClearCart,
 } from "../hooks/useCart";
+import { useApplyCoupon, useRemoveCoupon } from "@/features/coupons/hooks/useCoupons";
 import { Text } from "@/_components/shared/Text";
 import { cn } from "@/lib/utils";
 
@@ -254,12 +258,73 @@ function CartItemCard({
 
 interface SummaryFooterProps {
   subtotal: number;
+  discountedTotal?: number;
+  couponCode?: string;
+  couponInput: string;
+  setCouponInput: (v: string) => void;
+  isApplying: boolean;
+  isRemoving: boolean;
+  onApplyCoupon: () => void;
+  onRemoveCoupon: () => void;
   onClose: () => void;
 }
 
-function SummaryFooter({ subtotal, onClose }: SummaryFooterProps) {
+function SummaryFooter({
+  subtotal,
+  discountedTotal,
+  couponCode,
+  couponInput,
+  setCouponInput,
+  isApplying,
+  isRemoving,
+  onApplyCoupon,
+  onRemoveCoupon,
+  onClose,
+}: SummaryFooterProps) {
+  const hasCoupon = !!couponCode;
+  const displayTotal = discountedTotal !== undefined ? discountedTotal : subtotal;
+  const discount = hasCoupon && discountedTotal !== undefined ? subtotal - discountedTotal : 0;
+
   return (
     <div className="p-5 border-t border-borderPrimary bg-bgSecondary space-y-4">
+      {/* Coupon section */}
+      {hasCoupon ? (
+        <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/30">
+          <div className="flex items-center gap-2">
+            <Tag className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-bold text-primary">{couponCode}</span>
+            <span className="text-[11px] text-emerald-400 font-semibold">-{discount.toFixed(2)} EGP</span>
+          </div>
+          <button
+            onClick={onRemoveCoupon}
+            disabled={isRemoving}
+            className="p-1 rounded-lg text-textSecondary hover:text-red-400 transition-colors"
+            title="Remove coupon"
+          >
+            {isRemoving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={couponInput}
+            onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+            onKeyDown={(e) => e.key === "Enter" && couponInput.trim() && onApplyCoupon()}
+            placeholder="Coupon code"
+            className="flex-1 px-3 py-2 rounded-xl border border-borderPrimary bg-bgPrimary text-xs text-textPrimary placeholder:text-textSecondary focus:outline-none focus:border-primary transition-colors"
+          />
+          <button
+            onClick={onApplyCoupon}
+            disabled={isApplying || !couponInput.trim()}
+            className="px-3 py-2 rounded-xl bg-primary hover:bg-primaryHover text-black text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+          >
+            {isApplying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Tag className="w-3.5 h-3.5" />}
+            Apply
+          </button>
+        </div>
+      )}
+
       {/* Breakdown */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
@@ -270,6 +335,12 @@ function SummaryFooter({ subtotal, onClose }: SummaryFooterProps) {
             {subtotal.toFixed(2)} EGP
           </Text>
         </div>
+        {hasCoupon && discount > 0 && (
+          <div className="flex items-center justify-between">
+            <Text size="xs" color="secondary">Discount</Text>
+            <span className="text-xs font-bold text-emerald-400">-{discount.toFixed(2)} EGP</span>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <Text size="xs" color="secondary">
             Shipping
@@ -288,7 +359,7 @@ function SummaryFooter({ subtotal, onClose }: SummaryFooterProps) {
           Total Amount
         </Text>
         <Text font="black" size="xl" color="accent">
-          {subtotal.toFixed(2)} EGP
+          {displayTotal.toFixed(2)} EGP
         </Text>
       </div>
 
@@ -318,15 +389,41 @@ export function CartDrawer() {
   const updateItem = useUpdateCartItem();
   const removeItem = useRemoveFromCart();
   const clearCart = useClearCart();
+  const applyCoupon = useApplyCoupon();
+  const removeCoupon = useRemoveCoupon();
+
+  const [couponInput, setCouponInput] = useState("");
 
   const cartItems = (cart?.cartItems ?? []).filter(
     (item) => Boolean(item && item.product),
   );
   const totalPrice = cart?.totalPrice ?? 0;
+  const totalPriceAfterDiscount = cart?.totalPriceAfterDiscount;
+  const couponApplied = (cart as any)?.couponApplied as string | undefined;
   const totalItems = cartItems.reduce(
     (acc, item) => acc + item.productQuantity,
     0,
   );
+
+  const handleApplyCoupon = () => {
+    if (!couponInput.trim()) return;
+    applyCoupon.mutate(couponInput.trim(), {
+      onSuccess: (res) => {
+        toast.success(`Coupon applied! You saved ${(res.data?.discountAmount ?? 0).toFixed(2)} EGP`);
+        setCouponInput("");
+      },
+      onError: (err: any) => {
+        toast.error(err?.message || "Invalid coupon code");
+      },
+    });
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCoupon.mutate(undefined, {
+      onSuccess: () => toast.success("Coupon removed"),
+      onError: () => toast.error("Failed to remove coupon"),
+    });
+  };
 
   return (
     <AnimatePresence>
@@ -492,7 +589,18 @@ export function CartDrawer() {
                   exit={{ opacity: 0, y: 20 }}
                   transition={{ duration: 0.25 }}
                 >
-                  <SummaryFooter subtotal={totalPrice} onClose={closeCart} />
+                <SummaryFooter
+                  subtotal={totalPrice}
+                  discountedTotal={totalPriceAfterDiscount}
+                  couponCode={couponApplied}
+                  couponInput={couponInput}
+                  setCouponInput={setCouponInput}
+                  isApplying={applyCoupon.isPending}
+                  isRemoving={removeCoupon.isPending}
+                  onApplyCoupon={handleApplyCoupon}
+                  onRemoveCoupon={handleRemoveCoupon}
+                  onClose={closeCart}
+                />
                 </motion.div>
               )}
             </AnimatePresence>

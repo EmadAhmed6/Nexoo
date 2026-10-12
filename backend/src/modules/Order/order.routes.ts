@@ -8,7 +8,10 @@ import {
   createPayPalOrder,
   capturePayPalPayment,
 } from "./order.controller.js";
-import { verifyOrderOwner, verifyToken } from "../../middlewares/verifyToken.js";
+import {
+  verifyOrderOwner,
+  verifyToken,
+} from "../../middlewares/verifyToken.js";
 
 const router = express.Router();
 

@@ -1,14 +1,15 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
+import { sendError, successMsg } from "../../middlewares/errors.js";
 import checkoutNodeJssdk from "@paypal/checkout-server-sdk";
 import paypalClient from "../../config/paypal.js";
-import { sendError, successMsg } from "../../middlewares/errors.js";
 import { Cart } from "../Cart/cart.model.js";
 import {
   Order,
   validateCreateOrder,
   validateUpdateOrder,
 } from "./order.model.js";
+import { Coupon } from "../Coupons/coupon.model.js";
 
 // GET USER ORDERS
 const getOrders = asyncHandler(
@@ -51,6 +52,7 @@ const createOrder = asyncHandler(
       sendError(res, 400, error.issues[0]?.message || "Invalid Inputs");
       return;
     }
+
     const userId = req.user?.id;
     const { shippingAddress, paymentMethod } = req.body;
 
@@ -78,8 +80,7 @@ const createOrder = asyncHandler(
     const shippingPrice = 0;
     const totalOrderPrice = itemsPrice + shippingPrice + taxPrice;
 
-    // For PayPal or COD, payment is not completed at creation
-    const isPaid = paymentMethod === "Stripe";
+    const isPaid = paymentMethod === "Paypal";
     const paidAt = isPaid ? new Date() : undefined;
     const order = await Order.create({
       user: userId,
@@ -101,6 +102,13 @@ const createOrder = asyncHandler(
         isDelivered: false,
       },
     });
+    
+    if (cart.couponApplied) {
+      await Coupon.findOneAndUpdate(
+        { couponCode: cart.couponApplied },
+        { $inc: { usedCount: 1 } },
+      );
+    }
 
     await Cart.findByIdAndDelete(cart._id);
     successMsg(res, 201, "Order created successfully", order);

@@ -14,7 +14,8 @@ interface ICart extends Document {
   userId: Types.ObjectId;
   cartItems: ICartItems[];
   totalPrice: number;
-  totalPriceAfterDiscount: number;
+  totalPriceAfterDiscount: number | undefined;
+  couponApplied: string | undefined;
 }
 
 const CartSchema = new Schema<ICart>(
@@ -48,6 +49,11 @@ const CartSchema = new Schema<ICart>(
     totalPriceAfterDiscount: {
       type: Number,
       required: false,
+    },
+    couponApplied: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   { timestamps: true },

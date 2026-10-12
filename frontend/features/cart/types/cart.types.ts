@@ -13,6 +13,8 @@ export interface Cart {
   userId: string;
   cartItems: CartItem[];
   totalPrice: number;
+  totalPriceAfterDiscount?: number;
+  couponApplied?: string;
   createdAt?: string;
   updatedAt?: string;
 }
