@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Tag,
   Plus,
@@ -88,7 +88,7 @@ export default function AdminCouponsPage() {
     return true;
   });
 
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
 
   return (
     <div className="space-y-6 max-w-6xl">

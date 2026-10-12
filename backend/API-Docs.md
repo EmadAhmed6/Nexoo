@@ -39,37 +39,37 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 
 ---
 
-| #   | Method | Endpoint                 | Description                                                                     | Auth |
-| :-- | :----- | :----------------------- | :------------------------------------------------------------------------------ | :--: |
-| 1   | POST   | `/auth/register`         | Register a new user account and obtain access token                             |  ❌  |
-| 2   | POST   | `/auth/login`            | Authenticate existing user with email & password and retrieve access token      |  ❌  |
-| 3   | GET    | `/users`                 | Retrieve list of all registered users (passwords excluded)                      |  🔒  |
-| 4   | GET    | `/users/:userId`         | Retrieve single user profile by ID                                              |  🔒  |
-| 5   | PUT    | `/users/:userId`         | Update user profile details (Owner, Admin, or SuperAdmin)                       |  🔒  |
-| 6   | DELETE | `/users/:userId`         | Delete user account permanently (Owner, Admin, or SuperAdmin)                   |  🔒  |
+| #   | Method | Endpoint                 | Description                                                                    | Auth |
+| :-- | :----- | :----------------------- | :----------------------------------------------------------------------------- | :--: |
+| 1   | POST   | `/auth/register`         | Register a new user account and obtain access token                            |  ❌  |
+| 2   | POST   | `/auth/login`            | Authenticate existing user with email & password and retrieve access token     |  ❌  |
+| 3   | GET    | `/users`                 | Retrieve list of all registered users (passwords excluded)                     |  🔒  |
+| 4   | GET    | `/users/:userId`         | Retrieve single user profile by ID                                             |  🔒  |
+| 5   | PUT    | `/users/:userId`         | Update user profile details (Owner, Admin, or SuperAdmin)                      |  🔒  |
+| 6   | DELETE | `/users/:userId`         | Delete user account permanently (Owner, Admin, or SuperAdmin)                  |  🔒  |
 | 7   | GET    | `/products`              | Retrieve products with filters (search, price range, stock, rating, discount)  |  ❌  |
-| 8   | POST   | `/products`              | Create a new product with multiple image uploads to Cloudinary (up to 5 files)  |  🔒  |
-| 9   | GET    | `/products/:productId`   | Retrieve single product details by ID                                           |  ❌  |
-| 10  | PUT    | `/products/:productId`   | Update existing product details and images (Owner or Admin)                     |  🔒  |
-| 11  | DELETE | `/products/:productId`   | Delete a product by ID (Owner or Admin)                                         |  🔒  |
-| 12  | GET    | `/cart`                  | Retrieve authenticated user's cart with populated product info                  |  🔒  |
-| 13  | POST   | `/cart/:productId`       | Add product to user cart with quantity (defaults to 1)                          |  🔒  |
-| 14  | PUT    | `/cart/:productId`       | Update item quantity in user cart                                               |  🔒  |
-| 15  | DELETE | `/cart/:productId`       | Remove product from user cart                                                   |  🔒  |
-| 16  | DELETE | `/cart`                  | Clear entire user shopping cart                                                 |  🔒  |
-| 17  | POST   | `/orders`                | Create new order from user's current cart                                       |  🔒  |
-| 18  | GET    | `/orders`                | Retrieve list of all orders belonging to authenticated user                     |  🔒  |
-| 19  | GET    | `/orders/:orderId`       | Retrieve single order details by ID                                             |  🔒  |
-| 20  | POST   | `/orders/paypal/create`  | Create PayPal transaction and obtain approval redirect URL                      |  🔒  |
-| 21  | POST   | `/orders/paypal/capture` | Capture PayPal payment after buyer approval                                     |  🔒  |
-| 22  | PUT    | `/orders/:orderId`       | Update shipping address or payment method of pending order                      |  🔒  |
-| 23  | DELETE | `/orders/:orderId`       | Cancel and delete a pending order                                               |  🔒  |
-| 24  | GET    | `/coupons`               | Retrieve list of all coupons (Admin only)                                       |  🔒  |
-| 25  | POST   | `/coupons`               | Create a new discount coupon (Admin only)                                       |  🔒  |
-| 26  | POST   | `/coupons/apply`         | Apply coupon code to user cart and recalculate prices                           |  🔒  |
-| 27  | DELETE | `/coupons/remove`        | Remove applied coupon from user cart                                            |  🔒  |
-| 28  | PUT    | `/coupons/:couponId`     | Update coupon details, validity dates, or status (Admin only)                   |  🔒  |
-| 29  | DELETE | `/coupons/:couponId`     | Delete unused coupon (Admin only)                                               |  🔒  |
+| 8   | POST   | `/products`              | Create a new product with multiple image uploads to Cloudinary (up to 5 files) |  🔒  |
+| 9   | GET    | `/products/:productId`   | Retrieve single product details by ID                                          |  ❌  |
+| 10  | PUT    | `/products/:productId`   | Update existing product details and images (Owner or Admin)                    |  🔒  |
+| 11  | DELETE | `/products/:productId`   | Delete a product by ID (Owner or Admin)                                        |  🔒  |
+| 12  | GET    | `/cart`                  | Retrieve authenticated user's cart with populated product info                 |  🔒  |
+| 13  | POST   | `/cart/:productId`       | Add product to user cart with quantity (defaults to 1)                         |  🔒  |
+| 14  | PUT    | `/cart/:productId`       | Update item quantity in user cart                                              |  🔒  |
+| 15  | DELETE | `/cart/:productId`       | Remove product from user cart                                                  |  🔒  |
+| 16  | DELETE | `/cart`                  | Clear entire user shopping cart                                                |  🔒  |
+| 17  | POST   | `/orders`                | Create new order from user's current cart                                      |  🔒  |
+| 18  | GET    | `/orders`                | Retrieve list of all orders belonging to authenticated user                    |  🔒  |
+| 19  | GET    | `/orders/:orderId`       | Retrieve single order details by ID                                            |  🔒  |
+| 20  | POST   | `/orders/paypal/create`  | Create PayPal transaction and obtain approval redirect URL                     |  🔒  |
+| 21  | POST   | `/orders/paypal/capture` | Capture PayPal payment after buyer approval                                    |  🔒  |
+| 22  | PUT    | `/orders/:orderId`       | Update shipping address or payment method of pending order                     |  🔒  |
+| 23  | DELETE | `/orders/:orderId`       | Cancel and delete a pending order                                              |  🔒  |
+| 24  | GET    | `/coupons`               | Retrieve list of all coupons (Admin only)                                      |  🔒  |
+| 25  | POST   | `/coupons`               | Create a new discount coupon (Admin only)                                      |  🔒  |
+| 26  | POST   | `/coupons/apply`         | Apply coupon code to user cart and recalculate prices                          |  🔒  |
+| 27  | DELETE | `/coupons/remove`        | Remove applied coupon from user cart                                           |  🔒  |
+| 28  | PUT    | `/coupons/:couponId`     | Update coupon details, validity dates, or status (Admin only)                  |  🔒  |
+| 29  | DELETE | `/coupons/:couponId`     | Delete unused coupon (Admin only)                                              |  🔒  |
 
 ---
 
@@ -91,15 +91,31 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 
 Register a new user account on the platform.
 
+#### Request Headers
+
+| Header         | Value              |
+| :------------- | :----------------- |
+| `Content-Type` | `application/json` |
+
 #### Request Body
 
-| Field      | Type   | Required | Description                                                                                  |
-| :--------- | :----- | :------: | :------------------------------------------------------------------------------------------- |
-| `fullName` | string |    ✅    | Full name of the user (Min length: 4, Max length: 100).                                      |
-| `username` | string |    ✅    | Unique username (Min length: 3, Max length: 50, letters, digits, and underscores only).      |
-| `email`    | string |    ✅    | Valid and unique email address.                                                              |
+| Field      | Type   | Required | Description                                                                                 |
+| :--------- | :----- | :------: | :------------------------------------------------------------------------------------------ |
+| `fullName` | string |    ✅    | Full name of the user (Min length: 4, Max length: 100).                                     |
+| `username` | string |    ✅    | Unique username (Min length: 3, Max length: 50, letters, digits, and underscores only).     |
+| `email`    | string |    ✅    | Valid and unique email address.                                                             |
 | `password` | string |    ✅    | Password (Min 6, Max 72 chars, must contain uppercase letter, lowercase letter, and digit). |
 | `phone`    | string |    ✅    | Phone number (Must be exactly 11 digits).                                                   |
+
+```json
+{
+  "fullName": "Ahmed Mohamed",
+  "username": "ahmed_dev",
+  "email": "ahmed@example.com",
+  "password": "Password1",
+  "phone": "01012345678"
+}
+```
 
 #### Responses
 
@@ -150,12 +166,25 @@ Invalid input validation or email already exists.
 
 Log in an existing user using their email and password to retrieve their JWT access token.
 
+#### Request Headers
+
+| Header         | Value              |
+| :------------- | :----------------- |
+| `Content-Type` | `application/json` |
+
 #### Request Body
 
-| Field      | Type   | Required | Description                      |
-| :--------- | :----- | :------: | :------------------------------- |
-| `email`    | string |    ✅    | Registered email address.        |
-| `password` | string |    ✅    | The user's account password.     |
+| Field      | Type   | Required | Description                  |
+| :--------- | :----- | :------: | :--------------------------- |
+| `email`    | string |    ✅    | Registered email address.    |
+| `password` | string |    ✅    | The user's account password. |
+
+```json
+{
+  "email": "ahmed@example.com",
+  "password": "Password1"
+}
+```
 
 #### Responses
 
@@ -201,11 +230,11 @@ Invalid credentials or user does not exist.
 
 Retrieve a list of all users registered on the platform. Requires authentication.
 
-#### Headers
+#### Request Headers
 
-| Header          | Type   | Required | Description                   |
-| :-------------- | :----- | :------: | :---------------------------- |
-| `Authorization` | string |    ✅    | Bearer token (`Bearer <JWT>`) |
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
 
 #### Responses
 
@@ -224,7 +253,9 @@ Users fetched successfully.
       "username": "ahmed_dev",
       "email": "ahmed@example.com",
       "phone": "01012345678",
-      "role": "User"
+      "role": "User",
+      "isActive": true,
+      "createdAt": "2026-10-09T18:00:00.000Z"
     }
   ]
 }
@@ -247,11 +278,17 @@ Unauthorized. No token provided or token invalid.
 
 Retrieve detailed profile information for a single user by ID. Requires authentication.
 
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
 #### Path Parameters
 
-| Parameter | Type   | Required | Description       |
-| :-------- | :----- | :------: | :---------------- |
-| `userId`  | string |    ✅    | The user's ID.    |
+| Parameter | Type   | Required | Description    |
+| :-------- | :----- | :------: | :------------- |
+| `userId`  | string |    ✅    | The user's ID. |
 
 #### Responses
 
@@ -268,8 +305,28 @@ User profile retrieved successfully.
     "fullName": "Ahmed Mohamed",
     "username": "ahmed_dev",
     "email": "ahmed@example.com",
-    "role": "User"
+    "phone": "01012345678",
+    "role": "User",
+    "isActive": true,
+    "addresses": [],
+    "profilePicture": {
+      "url": "",
+      "publicId": null
+    },
+    "createdAt": "2026-10-09T18:00:00.000Z",
+    "updatedAt": "2026-10-09T18:00:00.000Z"
   }
+}
+```
+
+##### Response 401
+
+Unauthorized. No token provided or token invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
 }
 ```
 
@@ -290,18 +347,33 @@ User does not exist.
 
 Update user details. Restricted to the account owner, an Admin, or a SuperAdmin.
 
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
+
 #### Path Parameters
 
-| Parameter | Type   | Required | Description       |
-| :-------- | :----- | :------: | :---------------- |
-| `userId`  | string |    ✅    | The user's ID.    |
+| Parameter | Type   | Required | Description    |
+| :-------- | :----- | :------: | :------------- |
+| `userId`  | string |    ✅    | The user's ID. |
 
 #### Request Body
 
-| Field      | Type   | Required | Description              |
-| :--------- | :----- | :------: | :----------------------- |
-| `fullName` | string |    ❌    | Updated full name.       |
-| `phone`    | string |    ❌    | Updated phone number.    |
+| Field      | Type   | Required | Description                                                                  |
+| :--------- | :----- | :------: | :--------------------------------------------------------------------------- |
+| `fullName` | string |    ❌    | Updated full name.                                                           |
+| `phone`    | string |    ❌    | Updated phone number.                                                        |
+| `role`     | string |    ❌    | Updated role (`"User"`, `"Admin"`, or `"SuperAdmin"`). SuperAdmin only.      |
+
+```json
+{
+  "fullName": "Ahmed Mohamed Updated",
+  "phone": "01198765432"
+}
+```
 
 #### Responses
 
@@ -317,8 +389,22 @@ User updated successfully.
     "_id": "664fa1e2b5c7e1234567890a",
     "fullName": "Ahmed Mohamed Updated",
     "username": "ahmed_dev",
-    "email": "ahmed@example.com"
+    "email": "ahmed@example.com",
+    "phone": "01198765432",
+    "role": "User",
+    "updatedAt": "2026-10-10T10:00:00.000Z"
   }
+}
+```
+
+##### Response 401
+
+Unauthorized. No token provided or token invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
 }
 ```
 
@@ -333,17 +419,34 @@ Forbidden. The requester is neither the owner nor an Admin.
 }
 ```
 
+##### Response 404
+
+User does not exist.
+
+```json
+{
+  "status": "fail",
+  "message": "User not found"
+}
+```
+
 ---
 
 ### DELETE /users/:userId
 
 Permanently delete a user account. Restricted to the account owner, an Admin, or a SuperAdmin.
 
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
 #### Path Parameters
 
-| Parameter | Type   | Required | Description       |
-| :-------- | :----- | :------: | :---------------- |
-| `userId`  | string |    ✅    | The user's ID.    |
+| Parameter | Type   | Required | Description    |
+| :-------- | :----- | :------: | :------------- |
+| `userId`  | string |    ✅    | The user's ID. |
 
 #### Responses
 
@@ -359,6 +462,17 @@ User deleted successfully.
 }
 ```
 
+##### Response 401
+
+Unauthorized. No token provided or token invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
 ##### Response 403
 
 Forbidden. Requester is not authorized.
@@ -370,28 +484,39 @@ Forbidden. Requester is not authorized.
 }
 ```
 
+##### Response 404
+
+User does not exist.
+
+```json
+{
+  "status": "fail",
+  "message": "User not found"
+}
+```
+
 ---
 
 ## Product Management Endpoints
 
 ### GET /products
 
-Retrieve products catalog with full support for pagination, search, price filtering, category filtering, stock status, ratings, and discounts. Requires authentication.
+Retrieve the products catalog with full support for pagination, search, price filtering, category filtering, stock status, ratings, and discounts. No authentication required.
 
 #### Query Parameters
 
-| Parameter     | Type    | Required | Description                                                                                     |
-| :------------ | :------ | :------: | :---------------------------------------------------------------------------------------------- |
-| `page`        | integer |    ❌    | Page number (Default: `1`).                                                                     |
-| `limit`       | integer |    ❌    | Number of items per page (Default: `10`).                                                       |
-| `search`      | string  |    ❌    | Search keyword matching title, description, category, price, or stock.                         |
-| `category`    | string  |    ❌    | Filter by product category.                                                                     |
-| `minPrice`    | number  |    ❌    | Minimum product price (`price >= minPrice`).                                                    |
-| `maxPrice`    | number  |    ❌    | Maximum product price (`price <= maxPrice`).                                                    |
-| `inStock`     | string  |    ❌    | Filter by availability: `"true"` for products in stock (`> 0`), `"false"` for out of stock (`<= 0`). |
-| `minRating`   | number  |    ❌    | Minimum average rating (`ratingAverage >= minRating`).                                          |
-| `maxRating`   | number  |    ❌    | Maximum average rating (`ratingAverage <= maxRating`).                                          |
-| `hasDiscount` | string  |    ❌    | Filter by discount presence: `"true"` (has active discount), `"false"` (no discount).          |
+| Parameter     | Type    | Required | Description                                                                                           |
+| :------------ | :------ | :------: | :---------------------------------------------------------------------------------------------------- |
+| `page`        | integer |    ❌    | Page number (Default: `1`).                                                                           |
+| `limit`       | integer |    ❌    | Number of items per page (Default: `10`).                                                             |
+| `search`      | string  |    ❌    | Search keyword matching title, description, category, price, or stock.                               |
+| `category`    | string  |    ❌    | Filter by product category.                                                                           |
+| `minPrice`    | number  |    ❌    | Minimum product price (`price >= minPrice`).                                                          |
+| `maxPrice`    | number  |    ❌    | Maximum product price (`price <= maxPrice`).                                                          |
+| `inStock`     | string  |    ❌    | Filter by availability: `"true"` for in stock (`> 0`), `"false"` for out of stock (`<= 0`).          |
+| `minRating`   | number  |    ❌    | Minimum average rating (`ratingAverage >= minRating`).                                                |
+| `maxRating`   | number  |    ❌    | Maximum average rating (`ratingAverage <= maxRating`).                                                |
+| `hasDiscount` | string  |    ❌    | Filter by discount: `"true"` (has active discount), `"false"` (no discount).                         |
 
 #### Responses
 
@@ -437,24 +562,26 @@ Products retrieved successfully.
 
 ### POST /products
 
-Create a new product with multiple image uploads to Cloudinary (up to 5 images). Requires authentication; the authenticated user is automatically saved as the product owner (`userId`).
+Create a new product with multiple image uploads to Cloudinary (up to 5 images). Requires authentication. The authenticated user is automatically saved as the product owner (`userId`).
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
-- `Content-Type: multipart/form-data`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `multipart/form-data`     |
 
 #### Form Data Fields
 
-| Field                | Type    | Required | Description                                       |
-| :------------------- | :------ | :------: | :------------------------------------------------ |
-| `title`              | string  |    ✅    | Product title (Min length: 4, Max length: 100).   |
-| `description`        | string  |    ✅    | Product description (Min 10, Max 1000 chars).      |
-| `price`              | number  |    ✅    | Original price (Must be >= 0).                    |
-| `priceAfterDiscount` | number  |    ❌    | Discounted price (Must be >= 0).                  |
-| `stock`              | number  |    ❌    | Available stock quantity (Default: `0`).          |
-| `category`           | string  |    ✅    | Product category (Min length: 3).                 |
-| `productImages`      | files[] |    ✅    | Up to 5 image files to upload to Cloudinary.      |
+| Field                | Type    | Required | Description                                     |
+| :------------------- | :------ | :------: | :---------------------------------------------- |
+| `title`              | string  |    ✅    | Product title (Min length: 4, Max length: 100). |
+| `description`        | string  |    ✅    | Product description (Min 10, Max 1000 chars).   |
+| `price`              | number  |    ✅    | Original price (Must be >= 0).                  |
+| `priceAfterDiscount` | number  |    ❌    | Discounted price (Must be >= 0).                |
+| `stock`              | number  |    ❌    | Available stock quantity (Default: `0`).        |
+| `category`           | string  |    ✅    | Product category (Min length: 3).               |
+| `productImages`      | files[] |    ✅    | Up to 5 image files to upload to Cloudinary.    |
 
 #### Responses
 
@@ -502,19 +629,26 @@ Validation error or no image files provided.
 
 ##### Response 401
 
-Unauthorized - Missing or invalid token.
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
 
 ---
 
 ### GET /products/:productId
 
-Retrieve single product details by ID. Requires authentication.
+Retrieve single product details by ID. No authentication required.
 
 #### Path Parameters
 
-| Parameter   | Type   | Required | Description        |
-| :---------- | :----- | :------: | :----------------- |
-| `productId` | string |    ✅    | The product ID.    |
+| Parameter   | Type   | Required | Description     |
+| :---------- | :----- | :------: | :-------------- |
+| `productId` | string |    ✅    | The product ID. |
 
 #### Responses
 
@@ -535,9 +669,16 @@ Product retrieved successfully.
     "priceAfterDiscount": 150,
     "stock": 25,
     "category": "Clothing",
-    "productImages": [ ... ],
+    "productImages": [
+      {
+        "url": "https://res.cloudinary.com/dgypt8dkr/image/upload/.../sample.jpg",
+        "publicId": "Products/sample123"
+      }
+    ],
     "ratingAverage": 4.5,
-    "ratingQuantity": 12
+    "ratingQuantity": 12,
+    "createdAt": "2026-10-09T18:00:00.000Z",
+    "updatedAt": "2026-10-09T18:00:00.000Z"
   }
 }
 ```
@@ -564,27 +705,29 @@ Update existing product details and images. Requires authentication. **Only the 
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
-- `Content-Type: multipart/form-data`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `multipart/form-data`     |
 
 #### Path Parameters
 
-| Parameter   | Type   | Required | Description        |
-| :---------- | :----- | :------: | :----------------- |
-| `productId` | string |    ✅    | The product ID.    |
+| Parameter   | Type   | Required | Description     |
+| :---------- | :----- | :------: | :-------------- |
+| `productId` | string |    ✅    | The product ID. |
 
 #### Form Data Fields
 
-| Field                | Type    | Required | Description                                                                                 |
-| :------------------- | :------ | :------: | :------------------------------------------------------------------------------------------ |
-| `title`              | string  |    ❌    | Updated title (Min 4, Max 100).                                                             |
-| `description`        | string  |    ❌    | Updated description (Min 10, Max 1000).                                                     |
-| `price`              | number  |    ❌    | Updated original price.                                                                     |
-| `priceAfterDiscount` | number  |    ❌    | Updated discounted price.                                                                   |
-| `stock`              | number  |    ❌    | Updated stock count.                                                                        |
-| `category`           | string  |    ❌    | Updated category.                                                                           |
+| Field                | Type    | Required | Description                                                                                |
+| :------------------- | :------ | :------: | :----------------------------------------------------------------------------------------- |
+| `title`              | string  |    ❌    | Updated title (Min 4, Max 100).                                                            |
+| `description`        | string  |    ❌    | Updated description (Min 10, Max 1000).                                                    |
+| `price`              | number  |    ❌    | Updated original price.                                                                    |
+| `priceAfterDiscount` | number  |    ❌    | Updated discounted price.                                                                  |
+| `stock`              | number  |    ❌    | Updated stock count.                                                                       |
+| `category`           | string  |    ❌    | Updated category.                                                                          |
 | `existingImages`     | string  |    ❌    | JSON string of images to retain: `[{"url":"...","publicId":"..."}]`. Defaults to current. |
-| `productImages`      | files[] |    ❌    | Optional new/replacement files to upload (up to 5 total images).                            |
+| `productImages`      | files[] |    ❌    | Optional new/replacement files to upload (up to 5 total images).                           |
 
 #### Responses
 
@@ -605,7 +748,12 @@ Product updated successfully.
     "priceAfterDiscount": 180,
     "stock": 30,
     "category": "Clothing",
-    "productImages": [ ... ],
+    "productImages": [
+      {
+        "url": "https://res.cloudinary.com/dgypt8dkr/image/upload/.../img1.jpg",
+        "publicId": "Products/img1"
+      }
+    ],
     "ratingAverage": 4.5,
     "ratingQuantity": 12,
     "updatedAt": "2026-10-10T02:00:00.000Z"
@@ -617,13 +765,27 @@ Product updated successfully.
 
 Validation error.
 
+```json
+{
+  "status": "fail",
+  "message": "Validation error description"
+}
+```
+
 ##### Response 401
 
-Unauthorized - Missing or invalid token.
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
 
 ##### Response 403
 
-Forbidden - User is not the owner of this product or an Admin.
+Forbidden. User is not the owner of this product or an Admin.
 
 ```json
 {
@@ -651,13 +813,15 @@ Delete a product by ID. Requires authentication. **Only the product owner (`user
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
 
 #### Path Parameters
 
-| Parameter   | Type   | Required | Description        |
-| :---------- | :----- | :------: | :----------------- |
-| `productId` | string |    ✅    | The product ID.    |
+| Parameter   | Type   | Required | Description     |
+| :---------- | :----- | :------: | :-------------- |
+| `productId` | string |    ✅    | The product ID. |
 
 #### Responses
 
@@ -675,11 +839,18 @@ Product deleted successfully.
 
 ##### Response 401
 
-Unauthorized - Missing or invalid token.
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
 
 ##### Response 403
 
-Forbidden - User is not the owner of this product or an Admin.
+Forbidden. User is not the owner of this product or an Admin.
 
 ```json
 {
@@ -703,15 +874,15 @@ Product not found.
 
 ## Cart Management Endpoints
 
----
-
 ### GET /cart
 
 Retrieve the authenticated user's shopping cart. The items in the cart will have their product details (`title`, `price`, `priceAfterDiscount`, `productImages`) populated.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
 
 #### Responses
 
@@ -753,7 +924,14 @@ Cart fetched successfully.
 
 ##### Response 401
 
-Unauthorized - Missing or invalid token.
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
 
 ##### Response 404
 
@@ -770,23 +948,26 @@ Cart is empty or not created yet.
 
 ### POST /cart/:productId
 
-Add a product to the user's shopping cart using `productId` as a path parameter. If the product is already in the cart, its quantity will be increased by `productQuantity`. Product prices and stock are validated from the database.
+Add a product to the user's shopping cart. If the product is already in the cart, its quantity is increased by `productQuantity`. Product prices and stock are validated from the database.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
 
 #### Path Parameters
 
-| Parameter   | Type   | Required | Description        |
-| :---------- | :----- | :------: | :----------------- |
-| `productId` | string |    ✅    | The product ID.    |
+| Parameter   | Type   | Required | Description     |
+| :---------- | :----- | :------: | :-------------- |
+| `productId` | string |    ✅    | The product ID. |
 
-#### JSON Body Parameters
+#### Request Body
 
-| Field             | Type   | Required | Description                              |
-| :---------------- | :----- | :------: | :--------------------------------------- |
-| `productQuantity` | number |    ❌    | Quantity to add (Min: 1, Defaults to 1). |
+| Field             | Type   | Required | Description                             |
+| :---------------- | :----- | :------: | :-------------------------------------- |
+| `productQuantity` | number |    ❌    | Quantity to add (Min: 1, Default: `1`). |
 
 ```json
 {
@@ -814,7 +995,12 @@ Product added to cart successfully. Returns updated cart with populated products
           "title": "Luxury Chronograph Watch",
           "price": 250,
           "priceAfterDiscount": 200,
-          "productImages": [ ... ]
+          "productImages": [
+            {
+              "url": "https://res.cloudinary.com/.../img.jpg",
+              "publicId": "Products/sample"
+            }
+          ]
         },
         "productQuantity": 2,
         "productPrice": 200
@@ -827,7 +1013,7 @@ Product added to cart successfully. Returns updated cart with populated products
 
 ##### Response 400
 
-Invalid Product ID format, invalid inputs, or requested quantity exceeds available stock.
+Invalid Product ID, invalid inputs, or requested quantity exceeds available stock.
 
 ```json
 {
@@ -838,7 +1024,14 @@ Invalid Product ID format, invalid inputs, or requested quantity exceeds availab
 
 ##### Response 401
 
-Unauthorized - Missing or invalid token.
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
 
 ##### Response 404
 
@@ -859,18 +1052,21 @@ Update the quantity of an existing item in the user's shopping cart.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
 
 #### Path Parameters
 
-| Parameter   | Type   | Required | Description        |
-| :---------- | :----- | :------: | :----------------- |
-| `productId` | string |    ✅    | The product ID.    |
+| Parameter   | Type   | Required | Description     |
+| :---------- | :----- | :------: | :-------------- |
+| `productId` | string |    ✅    | The product ID. |
 
-#### JSON Body Parameters
+#### Request Body
 
-| Field             | Type   | Required | Description                           |
-| :---------------- | :----- | :------: | :------------------------------------ |
+| Field             | Type   | Required | Description                              |
+| :---------------- | :----- | :------: | :--------------------------------------- |
 | `productQuantity` | number |    ✅    | New quantity of the item (Must be >= 1). |
 
 ```json
@@ -891,7 +1087,19 @@ Product quantity updated successfully.
   "message": "Product quantity updated successfully",
   "data": {
     "_id": "664fa1e2b5c7e1234567890a",
-    "cartItems": [ ... ],
+    "userId": "664fa1e2b5c7e1234567890b",
+    "cartItems": [
+      {
+        "product": {
+          "_id": "6ac92261707ab25c5d1ed396",
+          "title": "Luxury Chronograph Watch",
+          "price": 250,
+          "priceAfterDiscount": 200
+        },
+        "productQuantity": 3,
+        "productPrice": 200
+      }
+    ],
     "totalPrice": 600
   }
 }
@@ -901,9 +1109,23 @@ Product quantity updated successfully.
 
 Invalid inputs or requested quantity exceeds available stock.
 
+```json
+{
+  "status": "fail",
+  "message": "Requested quantity exceeds available stock"
+}
+```
+
 ##### Response 401
 
-Unauthorized - Missing or invalid token.
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
 
 ##### Response 404
 
@@ -924,19 +1146,21 @@ Remove an item from the user's shopping cart. If the removed item was the last r
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
 
 #### Path Parameters
 
-| Parameter   | Type   | Required | Description        |
-| :---------- | :----- | :------: | :----------------- |
-| `productId` | string |    ✅    | The product ID.    |
+| Parameter   | Type   | Required | Description     |
+| :---------- | :----- | :------: | :-------------- |
+| `productId` | string |    ✅    | The product ID. |
 
 #### Responses
 
 ##### Response 200
 
-Product removed from cart successfully (or cart emptied).
+Product removed from cart successfully.
 
 ```json
 {
@@ -944,19 +1168,34 @@ Product removed from cart successfully (or cart emptied).
   "message": "Product removed from cart successfully",
   "data": {
     "_id": "664fa1e2b5c7e1234567890a",
-    "cartItems": [ ... ],
-    "totalPrice": 200
+    "userId": "664fa1e2b5c7e1234567890b",
+    "cartItems": [],
+    "totalPrice": 0
   }
 }
 ```
 
 ##### Response 401
 
-Unauthorized - Missing or invalid token.
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
 
 ##### Response 404
 
 Cart not found or product is not in the cart.
+
+```json
+{
+  "status": "fail",
+  "message": "Product is not found in the cart"
+}
+```
 
 ---
 
@@ -966,7 +1205,9 @@ Clear the authenticated user's entire shopping cart.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
 
 #### Responses
 
@@ -987,11 +1228,25 @@ Cart cleared successfully.
 
 ##### Response 401
 
-Unauthorized - Missing or invalid token.
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
 
 ##### Response 404
 
 Cart was not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Cart is empty"
+}
+```
 
 ---
 
@@ -1003,20 +1258,22 @@ Create a new order from the items currently in the authenticated user's cart. Up
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
-- `Content-Type: application/json`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `shippingAddress.address` | string | ✅ | Street address (Min 5 chars). |
-| `shippingAddress.city` | string | ✅ | City name (Min 2 chars). |
-| `shippingAddress.state` | string | ✅ | State or governorate (Min 2 chars). |
-| `shippingAddress.country` | string | ✅ | Country name (Min 2 chars). |
-| `shippingAddress.postalCode` | string | ✅ | Exactly 5 digits postal code (e.g. `11371`). |
-| `shippingAddress.phone` | string | ✅ | Phone number starting with `01` (11 digits). |
-| `paymentMethod` | string | ✅ | Payment method enum: `"Paypal"`, `"Stripe"`, or `"COD"`. |
+| Field                        | Type   | Required | Description                                               |
+| :--------------------------- | :----- | :------: | :-------------------------------------------------------- |
+| `shippingAddress.address`    | string |    ✅    | Street address (Min 5 chars).                             |
+| `shippingAddress.city`       | string |    ✅    | City name (Min 2 chars).                                  |
+| `shippingAddress.state`      | string |    ✅    | State or governorate (Min 2 chars).                       |
+| `shippingAddress.country`    | string |    ✅    | Country name (Min 2 chars).                               |
+| `shippingAddress.postalCode` | string |    ✅    | Exactly 5 digits postal code (e.g. `11371`).              |
+| `shippingAddress.phone`      | string |    ✅    | Phone number starting with `01` (11 digits).              |
+| `paymentMethod`              | string |    ✅    | Payment method enum: `"Paypal"`, `"Stripe"`, or `"COD"`. |
 
 ```json
 {
@@ -1091,9 +1348,34 @@ Order created successfully.
 
 Validation error (e.g. invalid phone number format or missing required address fields).
 
+```json
+{
+  "status": "fail",
+  "message": "Validation error description"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
 ##### Response 404
 
 Cart is empty or not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Cart is empty"
+}
+```
 
 ---
 
@@ -1103,7 +1385,9 @@ Retrieve all orders placed by the authenticated user, sorted in descending order
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
 
 #### Responses
 
@@ -1118,18 +1402,50 @@ Orders fetched successfully.
   "data": [
     {
       "_id": "67092147385a812bf0e54321",
+      "orderItems": [
+        {
+          "product": "6ac92261707ab25c5d1ed396",
+          "productQuantity": 2,
+          "productPrice": 2500,
+          "productTitle": "Luxury Chronograph Watch",
+          "productImage": [
+            {
+              "url": "https://res.cloudinary.com/...",
+              "publicId": "watches/watch1"
+            }
+          ]
+        }
+      ],
       "pricing": {
+        "itemsPrice": 5000,
+        "shippingPrice": 0,
+        "taxPrice": 0,
         "totalOrderPrice": 5000
       },
       "payment": {
         "paymentMethod": "Paypal",
-        "isPaid": true
+        "isPaid": true,
+        "paidAt": "2026-10-11T14:32:00.000Z"
       },
       "orderStatus": {
-        "status": "Processing"
-      }
+        "status": "Processing",
+        "isDelivered": false
+      },
+      "createdAt": "2026-10-11T14:30:00.000Z",
+      "updatedAt": "2026-10-11T14:32:00.000Z"
     }
   ]
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
 }
 ```
 
@@ -1141,13 +1457,15 @@ Retrieve details of a single order belonging to the authenticated user.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
 
 #### Path Parameters
 
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `orderId` | string | ✅ | Order ID to fetch. |
+| Parameter | Type   | Required | Description        |
+| :-------- | :----- | :------: | :----------------- |
+| `orderId` | string |    ✅    | Order ID to fetch. |
 
 #### Responses
 
@@ -1155,9 +1473,77 @@ Retrieve details of a single order belonging to the authenticated user.
 
 Order fetched successfully.
 
+```json
+{
+  "status": "success",
+  "message": "Order fetched successfully",
+  "data": {
+    "_id": "67092147385a812bf0e54321",
+    "user": "664fa1e2b5c7e1234567890b",
+    "orderItems": [
+      {
+        "product": "6ac92261707ab25c5d1ed396",
+        "productQuantity": 2,
+        "productPrice": 2500,
+        "productTitle": "Luxury Chronograph Watch",
+        "productImage": [
+          {
+            "url": "https://res.cloudinary.com/...",
+            "publicId": "watches/watch1"
+          }
+        ]
+      }
+    ],
+    "shippingAddress": {
+      "address": "15 El-Tahrir Street, Apt 4B",
+      "city": "Cairo",
+      "state": "Cairo",
+      "country": "Egypt",
+      "postalCode": "11371",
+      "phone": "01012345678"
+    },
+    "pricing": {
+      "itemsPrice": 5000,
+      "shippingPrice": 0,
+      "taxPrice": 0,
+      "totalOrderPrice": 5000
+    },
+    "payment": {
+      "paymentMethod": "Paypal",
+      "isPaid": true,
+      "paidAt": "2026-10-11T14:32:00.000Z"
+    },
+    "orderStatus": {
+      "status": "Processing",
+      "isDelivered": false
+    },
+    "createdAt": "2026-10-11T14:30:00.000Z",
+    "updatedAt": "2026-10-11T14:32:00.000Z"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
 ##### Response 404
 
 Order was not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
+}
+```
 
 ---
 
@@ -1167,10 +1553,16 @@ Initialize a PayPal checkout session for an unpaid order and retrieve the approv
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
-- `Content-Type: application/json`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
 
 #### Request Body
+
+| Field     | Type   | Required | Description                     |
+| :-------- | :----- | :------: | :------------------------------ |
+| `orderId` | string |    ✅    | The ID of the order to pay for. |
 
 ```json
 {
@@ -1199,22 +1591,54 @@ PayPal order created successfully.
 
 This order is already paid.
 
+```json
+{
+  "status": "fail",
+  "message": "This order is already paid"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
 ##### Response 404
 
 Order not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
+}
+```
 
 ---
 
 ### POST /orders/paypal/capture
 
-Capture payment funds after the customer approves the transaction on PayPal. Updates the order payment status to paid.
+Capture payment funds after the customer approves the transaction on PayPal. Updates the order payment status to paid and transitions order status to `Processing`.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
-- `Content-Type: application/json`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
 
 #### Request Body
+
+| Field           | Type   | Required | Description                            |
+| :-------------- | :----- | :------: | :------------------------------------- |
+| `paypalOrderId` | string |    ✅    | The PayPal transaction ID to capture.  |
+| `orderId`       | string |    ✅    | The Nexo order ID to mark as paid.     |
 
 ```json
 {
@@ -1245,9 +1669,43 @@ Payment captured successfully.
       }
     },
     "orderStatus": {
-      "status": "Processing"
+      "status": "Processing",
+      "isDelivered": false
     }
   }
+}
+```
+
+##### Response 400
+
+Payment capture failed or order already paid.
+
+```json
+{
+  "status": "fail",
+  "message": "This order is already paid"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+Order not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
 }
 ```
 
@@ -1259,10 +1717,28 @@ Update shipping address or payment method for an order that is still in `Pending
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
-- `Content-Type: application/json`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
+
+#### Path Parameters
+
+| Parameter | Type   | Required | Description   |
+| :-------- | :----- | :------: | :------------ |
+| `orderId` | string |    ✅    | The order ID. |
 
 #### Request Body
+
+| Field                        | Type   | Required | Description                                                  |
+| :--------------------------- | :----- | :------: | :----------------------------------------------------------- |
+| `shippingAddress.address`    | string |    ❌    | Updated street address.                                      |
+| `shippingAddress.city`       | string |    ❌    | Updated city name.                                           |
+| `shippingAddress.state`      | string |    ❌    | Updated state or governorate.                                |
+| `shippingAddress.country`    | string |    ❌    | Updated country name.                                        |
+| `shippingAddress.postalCode` | string |    ❌    | Updated 5-digit postal code.                                 |
+| `shippingAddress.phone`      | string |    ❌    | Updated phone number (11 digits, starts with `01`).          |
+| `paymentMethod`              | string |    ❌    | Updated payment method: `"Paypal"`, `"Stripe"`, or `"COD"`. |
 
 ```json
 {
@@ -1284,19 +1760,83 @@ Update shipping address or payment method for an order that is still in `Pending
 
 Order updated successfully.
 
+```json
+{
+  "status": "success",
+  "message": "Order updated successfully",
+  "data": {
+    "_id": "67092147385a812bf0e54321",
+    "shippingAddress": {
+      "address": "20 Nile Corniche, 5th Floor",
+      "city": "Giza",
+      "state": "Giza",
+      "country": "Egypt",
+      "postalCode": "12511",
+      "phone": "01123456789"
+    },
+    "payment": {
+      "paymentMethod": "COD",
+      "isPaid": false
+    },
+    "orderStatus": {
+      "status": "Pending",
+      "isDelivered": false
+    },
+    "updatedAt": "2026-10-12T10:00:00.000Z"
+  }
+}
+```
+
 ##### Response 400
 
-You cannot update an order that is already being processed or shipped.
+Cannot update an order that is already being processed or shipped.
+
+```json
+{
+  "status": "fail",
+  "message": "You cannot update an order that is already being processed"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+Order not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
+}
+```
 
 ---
 
 ### DELETE /orders/:orderId
 
-Cancel and delete an order (only if it belongs to the user and is still in `Pending` status).
+Cancel and delete an order. Only allowed if the order belongs to the authenticated user and is still in `Pending` status.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter | Type   | Required | Description   |
+| :-------- | :----- | :------: | :------------ |
+| `orderId` | string |    ✅    | The order ID. |
 
 #### Responses
 
@@ -1304,21 +1844,66 @@ Cancel and delete an order (only if it belongs to the user and is still in `Pend
 
 Order deleted successfully.
 
+```json
+{
+  "status": "success",
+  "message": "Order deleted successfully",
+  "data": null
+}
+```
+
+##### Response 400
+
+Cannot delete an order that is no longer pending.
+
+```json
+{
+  "status": "fail",
+  "message": "You cannot cancel an order that is already being processed"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+Order not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
+}
+```
+
 ---
 
 ## Coupon Management Endpoints
 
 ### GET /coupons
 
-Retrieve list of all created coupons (Admin or SuperAdmin only), sorted by creation date descending.
+Retrieve list of all created coupons. **Admin or SuperAdmin only.** Sorted by creation date descending.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_admin_jwt_token>`
+| Header          | Value                           |
+| :-------------- | :------------------------------ |
+| `Authorization` | `Bearer <your_admin_jwt_token>` |
 
 #### Responses
 
 ##### Response 200
+
+Coupons fetched successfully.
 
 ```json
 {
@@ -1346,32 +1931,48 @@ Retrieve list of all created coupons (Admin or SuperAdmin only), sorted by creat
 
 Missing or invalid bearer token.
 
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
 ##### Response 403
 
 Requester does not have Admin or SuperAdmin role.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
 
 ---
 
 ### POST /coupons
 
-Create a new discount coupon (Admin or SuperAdmin only).
+Create a new discount coupon. **Admin or SuperAdmin only.**
 
 #### Request Headers
 
-- `Authorization: Bearer <your_admin_jwt_token>`
-- `Content-Type: application/json`
+| Header          | Value                           |
+| :-------------- | :------------------------------ |
+| `Authorization` | `Bearer <your_admin_jwt_token>` |
+| `Content-Type`  | `application/json`              |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `couponCode` | `string` | Yes | Unique coupon identifier code (case-insensitive, auto-uppercased) |
-| `discountType` | `string` | Yes | Either `"percentage"` or `"fixed"` |
-| `discountValue` | `number` | Yes | Value of discount (1–100 for percentage, > 0 for fixed amount) |
-| `usageLimit` | `number` | No | Maximum number of times the coupon can be redeemed (default: 10) |
-| `startDate` | `string` | Yes | ISO Date string indicating when coupon validity begins |
-| `expireDate` | `string` | Yes | ISO Date string indicating when coupon expires (must be after `startDate`) |
-| `isActive` | `boolean` | No | Whether the coupon is immediately active (default: `true`) |
+| Field           | Type    | Required | Description                                                                    |
+| :-------------- | :------ | :------: | :----------------------------------------------------------------------------- |
+| `couponCode`    | string  |    ✅    | Unique coupon identifier code (case-insensitive, auto-uppercased).             |
+| `discountType`  | string  |    ✅    | Either `"percentage"` or `"fixed"`.                                            |
+| `discountValue` | number  |    ✅    | Value of discount (1-100 for percentage, > 0 for fixed amount).                |
+| `usageLimit`    | number  |    ❌    | Maximum number of times the coupon can be redeemed (Default: `10`).            |
+| `startDate`     | string  |    ✅    | ISO date string indicating when coupon validity begins.                        |
+| `expireDate`    | string  |    ✅    | ISO date string indicating when coupon expires (must be after `startDate`).    |
+| `isActive`      | boolean |    ❌    | Whether the coupon is immediately active (Default: `true`).                    |
 
 ```json
 {
@@ -1388,6 +1989,8 @@ Create a new discount coupon (Admin or SuperAdmin only).
 #### Responses
 
 ##### Response 201
+
+Coupon created successfully.
 
 ```json
 {
@@ -1411,24 +2014,55 @@ Create a new discount coupon (Admin or SuperAdmin only).
 
 ##### Response 400
 
-Validation error (e.g., duplicate code, percentage > 100, or `startDate` after `expireDate`).
+Validation error (e.g. duplicate code, percentage > 100, or `startDate` after `expireDate`).
+
+```json
+{
+  "status": "fail",
+  "message": "Coupon code already exists"
+}
+```
+
+##### Response 401
+
+Missing or invalid bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Requester does not have Admin or SuperAdmin role.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
 
 ---
 
 ### POST /coupons/apply
 
-Apply a discount coupon to the authenticated user's current shopping cart and calculate new total price.
+Apply a discount coupon to the authenticated user's current shopping cart and calculate the new total price.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
-- `Content-Type: application/json`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `couponCode` | `string` | Yes | The code of the coupon to apply |
+| Field        | Type   | Required | Description                      |
+| :----------- | :----- | :------: | :------------------------------- |
+| `couponCode` | string |    ✅    | The code of the coupon to apply. |
 
 ```json
 {
@@ -1439,6 +2073,8 @@ Apply a discount coupon to the authenticated user's current shopping cart and ca
 #### Responses
 
 ##### Response 200
+
+Coupon applied successfully.
 
 ```json
 {
@@ -1457,23 +2093,52 @@ Apply a discount coupon to the authenticated user's current shopping cart and ca
 
 Coupon is inactive, has expired, or exceeded its usage limit.
 
+```json
+{
+  "status": "fail",
+  "message": "Coupon has expired"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
 ##### Response 404
 
 Coupon code does not exist or user cart is empty.
+
+```json
+{
+  "status": "fail",
+  "message": "Coupon not found"
+}
+```
 
 ---
 
 ### DELETE /coupons/remove
 
-Remove currently applied coupon from the authenticated user's shopping cart.
+Remove the currently applied coupon from the authenticated user's shopping cart.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_jwt_token>`
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
 
 #### Responses
 
 ##### Response 200
+
+Coupon removed successfully.
 
 ```json
 {
@@ -1483,32 +2148,58 @@ Remove currently applied coupon from the authenticated user's shopping cart.
 }
 ```
 
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
 ##### Response 404
 
 User cart is empty or not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Cart is empty"
+}
+```
 
 ---
 
 ### PUT /coupons/:couponId
 
-Update details, dates, or active status of an existing coupon (Admin or SuperAdmin only).
+Update details, dates, or active status of an existing coupon. **Admin or SuperAdmin only.**
 
 #### Request Headers
 
-- `Authorization: Bearer <your_admin_jwt_token>`
-- `Content-Type: application/json`
+| Header          | Value                           |
+| :-------------- | :------------------------------ |
+| `Authorization` | `Bearer <your_admin_jwt_token>` |
+| `Content-Type`  | `application/json`              |
+
+#### Path Parameters
+
+| Parameter  | Type   | Required | Description      |
+| :--------- | :----- | :------: | :--------------- |
+| `couponId` | string |    ✅    | The coupon's ID. |
 
 #### Request Body
 
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `couponCode` | `string` | No | New unique coupon code |
-| `discountType` | `string` | No | Either `"percentage"` or `"fixed"` |
-| `discountValue` | `number` | No | New discount numeric value |
-| `usageLimit` | `number` | No | New maximum usage limit |
-| `startDate` | `string` | No | New validity start date |
-| `expireDate` | `string` | No | New validity expiration date |
-| `isActive` | `boolean` | No | Activate or deactivate coupon |
+| Field           | Type    | Required | Description                         |
+| :-------------- | :------ | :------: | :---------------------------------- |
+| `couponCode`    | string  |    ❌    | New unique coupon code.             |
+| `discountType`  | string  |    ❌    | Either `"percentage"` or `"fixed"`. |
+| `discountValue` | number  |    ❌    | New discount numeric value.         |
+| `usageLimit`    | number  |    ❌    | New maximum usage limit.            |
+| `startDate`     | string  |    ❌    | New validity start date (ISO).      |
+| `expireDate`    | string  |    ❌    | New validity expiration date (ISO). |
+| `isActive`      | boolean |    ❌    | Activate or deactivate coupon.      |
 
 ```json
 {
@@ -1519,6 +2210,8 @@ Update details, dates, or active status of an existing coupon (Admin or SuperAdm
 #### Responses
 
 ##### Response 200
+
+Coupon updated successfully.
 
 ```json
 {
@@ -1539,23 +2232,62 @@ Update details, dates, or active status of an existing coupon (Admin or SuperAdm
 }
 ```
 
+##### Response 401
+
+Missing or invalid bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Requester does not have Admin or SuperAdmin role.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
 ##### Response 404
 
 Coupon with specified ID does not exist.
+
+```json
+{
+  "status": "fail",
+  "message": "Coupon not found"
+}
+```
 
 ---
 
 ### DELETE /coupons/:couponId
 
-Delete an unused coupon by ID (Admin or SuperAdmin only). Coupons that have already been redeemed by customers cannot be deleted to maintain order history integrity.
+Delete an unused coupon by ID. **Admin or SuperAdmin only.** Coupons that have already been redeemed by customers cannot be deleted to maintain order history integrity.
 
 #### Request Headers
 
-- `Authorization: Bearer <your_admin_jwt_token>`
+| Header          | Value                           |
+| :-------------- | :------------------------------ |
+| `Authorization` | `Bearer <your_admin_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter  | Type   | Required | Description      |
+| :--------- | :----- | :------: | :--------------- |
+| `couponId` | string |    ✅    | The coupon's ID. |
 
 #### Responses
 
 ##### Response 200
+
+Coupon deleted successfully.
 
 ```json
 {
@@ -1569,20 +2301,56 @@ Delete an unused coupon by ID (Admin or SuperAdmin only). Coupons that have alre
 
 Coupon cannot be deleted as it has already been redeemed (`usedCount > 0`).
 
+```json
+{
+  "status": "fail",
+  "message": "Cannot delete a coupon that has already been used"
+}
+```
+
+##### Response 401
+
+Missing or invalid bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Requester does not have Admin or SuperAdmin role.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
 ##### Response 404
 
 Coupon with specified ID does not exist.
+
+```json
+{
+  "status": "fail",
+  "message": "Coupon not found"
+}
+```
 
 ---
 
 ## Common HTTP Status Codes
 
-| Code  | Meaning               | Description                                                              |
-| :---- | :-------------------- | :----------------------------------------------------------------------- |
-| `200` | **OK**                | Request succeeded and data is returned.                                  |
-| `201` | **Created**           | Resource created successfully (e.g. register, create product).            |
-| `400` | **Bad Request**       | Request body or parameter validation failed or duplicate resource.       |
-| `401` | **Unauthorized**      | Missing or invalid authentication token.                                 |
-| `403` | **Forbidden**         | Authenticated, but requester is not authorized for the action.           |
-| `404` | **Not Found**         | Requested resource ID does not exist.                                    |
-| `500` | **Internal Error**    | Server error or unhandled exception.                                     |
+| Code  | Meaning            | Description                                                        |
+| :---- | :----------------- | :----------------------------------------------------------------- |
+| `200` | **OK**             | Request succeeded and data is returned.                            |
+| `201` | **Created**        | Resource created successfully (e.g. register, create product).     |
+| `400` | **Bad Request**    | Request body or parameter validation failed or duplicate resource. |
+| `401` | **Unauthorized**   | Missing or invalid authentication token.                           |
+| `403` | **Forbidden**      | Authenticated, but requester is not authorized for the action.     |
+| `404` | **Not Found**      | Requested resource ID does not exist.                              |
+| `500` | **Internal Error** | Server error or unhandled exception.                               |
