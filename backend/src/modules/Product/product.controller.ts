@@ -229,6 +229,7 @@ const updateProduct = asyncHandler(
   },
 );
 
+// DELETE PRODUCT
 const deleteProduct = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const productId = req.params.productId as string;
@@ -239,6 +240,22 @@ const deleteProduct = asyncHandler(
     }
     await Product.findByIdAndDelete(productId);
     successMsg(res, 200, "Product deleted successfully", null);
+  },
+);
+
+// RATE PRODUCT
+
+const rateProduct = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const productId = req.params.productId;
+    const product = await Product.findById(productId);
+    const userId = req.user?.id;
+    if (!product) {
+      sendError(res, 404, "No Product found with this id");
+      return;
+    }
+
+    // 
   },
 );
 

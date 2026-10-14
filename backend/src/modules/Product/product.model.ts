@@ -29,6 +29,7 @@ interface IProduct extends Document {
     url: string;
     publicId: string;
   }[];
+  ratings: number;
   ratingAverage: number;
   ratingQuantity: number;
   userId?: Schema.Types.ObjectId | string;
@@ -92,6 +93,12 @@ const ProductSchema = new Schema<IProduct>({
       },
     },
   ],
+  ratings: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5,
+  },
   ratingAverage: {
     type: Number,
     default: 0,

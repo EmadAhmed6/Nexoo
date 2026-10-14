@@ -70,6 +70,10 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 27  | DELETE | `/coupons/remove`        | Remove applied coupon from user cart                                           |  🔒  |
 | 28  | PUT    | `/coupons/:couponId`     | Update coupon details, validity dates, or status (Admin only)                  |  🔒  |
 | 29  | DELETE | `/coupons/:couponId`     | Delete unused coupon (Admin only)                                              |  🔒  |
+| 30  | GET    | `/reviews/:productId`    | Retrieve all reviews and ratings for a product with reviewer details           |  ❌  |
+| 31  | POST   | `/reviews/:productId`    | Submit a new review or update existing review (recalculates product ratings)   |  🔒  |
+| 32  | PUT    | `/reviews/:reviewId`     | Update review rating or text (Review Owner, Admin, or SuperAdmin)              |  🔒  |
+| 33  | DELETE | `/reviews/:reviewId`     | Delete a review permanently and recalculate product stats (Owner or Admin)     |  🔒  |
 
 ---
 
@@ -81,6 +85,7 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 - [Cart Management Endpoints](#cart-management-endpoints)
 - [Order & Checkout Endpoints](#order--checkout-endpoints)
 - [Coupon Management Endpoints](#coupon-management-endpoints)
+- [Review & Rating Endpoints](#review--rating-endpoints)
 - [Common HTTP Status Codes](#common-http-status-codes)
 
 ---
@@ -2338,6 +2343,348 @@ Coupon with specified ID does not exist.
 {
   "status": "fail",
   "message": "Coupon not found"
+}
+```
+
+---
+
+## Review & Rating Endpoints
+
+### GET /reviews/:productId
+
+Retrieve all reviews and ratings submitted for a specific product. Populates reviewer profile information (fullName, username, profile picture, email, role). No authentication required.
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description     |
+| :---------- | :----- | :------: | :-------------- |
+| `productId` | string |    ✅    | The product ID. |
+
+#### Responses
+
+##### Response 200
+
+Reviews fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Reviews fetched successfully",
+  "data": [
+    {
+      "_id": "67104b90e1234567890abcd1",
+      "product": "6ac92261707ab25c5d1ed396",
+      "ratings": 5,
+      "reviewText": "Exceptional product quality, exceeded expectations!",
+      "user": {
+        "_id": "664fa1e2b5c7e1234567890a",
+        "fullName": "Ahmed Mohamed",
+        "username": "ahmed_dev",
+        "email": "ahmed@example.com",
+        "role": "User",
+        "profilePicture": {
+          "url": "https://res.cloudinary.com/.../avatar.jpg",
+          "publicId": "Avatars/user123"
+        }
+      },
+      "createdAt": "2026-10-14T18:00:00.000Z",
+      "updatedAt": "2026-10-14T18:00:00.000Z"
+    }
+  ]
+}
+```
+
+##### Response 400
+
+Product ID is missing or invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Product ID is required"
+}
+```
+
+##### Response 404
+
+Product not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Product not found"
+}
+```
+
+---
+
+### POST /reviews/:productId
+
+Submit a new review or update an existing review for a product. Requires authentication. Each user can have one review per product. Submitting updates the product's `ratingAverage` (`ratings`) and `ratingQuantity` statistics automatically.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description     |
+| :---------- | :----- | :------: | :-------------- |
+| `productId` | string |    ✅    | The product ID. |
+
+#### Request Body
+
+| Field        | Type   | Required | Description                                                  |
+| :----------- | :----- | :------: | :----------------------------------------------------------- |
+| `ratings`    | number |    ✅    | Numerical rating from `1` to `5` (inclusive).               |
+| `reviewText` | string |    ✅    | Customer opinion text (Min length: 1, Max length: 500 chars). |
+
+```json
+{
+  "ratings": 5,
+  "reviewText": "Super comfortable fabric and pristine stitch quality!"
+}
+```
+
+#### Responses
+
+##### Response 201
+
+Review created successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Review created successfully",
+  "data": {
+    "review": {
+      "_id": "67104b90e1234567890abcd1",
+      "product": "6ac92261707ab25c5d1ed396",
+      "ratings": 5,
+      "reviewText": "Super comfortable fabric and pristine stitch quality!",
+      "user": {
+        "_id": "664fa1e2b5c7e1234567890a",
+        "fullName": "Ahmed Mohamed",
+        "username": "ahmed_dev"
+      },
+      "createdAt": "2026-10-14T18:00:00.000Z",
+      "updatedAt": "2026-10-14T18:00:00.000Z"
+    },
+    "productRating": 4.8,
+    "productRatingQuantity": 12
+  }
+}
+```
+
+##### Response 200
+
+Existing review updated successfully (when user previously reviewed the product).
+
+```json
+{
+  "status": "success",
+  "message": "Review updated successfully",
+  "data": {
+    "review": {
+      "_id": "67104b90e1234567890abcd1",
+      "ratings": 4,
+      "reviewText": "Updated review feedback"
+    },
+    "productRating": 4.6,
+    "productRatingQuantity": 12
+  }
+}
+```
+
+##### Response 400
+
+Validation error in rating (must be 1-5) or reviewText.
+
+```json
+{
+  "status": "fail",
+  "message": "Rating must be at least 1"
+}
+```
+
+##### Response 401
+
+Missing or invalid bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+Product not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Product not found"
+}
+```
+
+---
+
+### PUT /reviews/:reviewId
+
+Update an existing review by ID. Requires authentication. **Only the review author (`user`), an Admin, or a SuperAdmin can update the review.** Recalculates product rating statistics automatically.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
+
+#### Path Parameters
+
+| Parameter  | Type   | Required | Description    |
+| :--------- | :----- | :------: | :------------- |
+| `reviewId` | string |    ✅    | The review ID. |
+
+#### Request Body
+
+| Field        | Type   | Required | Description                                                  |
+| :----------- | :----- | :------: | :----------------------------------------------------------- |
+| `ratings`    | number |    ❌    | Updated numerical rating from `1` to `5`.                    |
+| `reviewText` | string |    ❌    | Updated customer review text (Min 1, Max 500 characters).    |
+
+```json
+{
+  "ratings": 4,
+  "reviewText": "Adjusted rating after a month of heavy use."
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Review updated successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Review updated successfully",
+  "data": {
+    "review": {
+      "_id": "67104b90e1234567890abcd1",
+      "ratings": 4,
+      "reviewText": "Adjusted rating after a month of heavy use."
+    },
+    "productRating": 4.5,
+    "productRatingQuantity": 12
+  }
+}
+```
+
+##### Response 401
+
+Missing or invalid bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. The requester is neither the review author nor an Admin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not authorized to update this review"
+}
+```
+
+##### Response 404
+
+Review not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Review Not Found"
+}
+```
+
+---
+
+### DELETE /reviews/:reviewId
+
+Permanently delete a review by ID. Requires authentication. **Only the review author (`user`), an Admin, or a SuperAdmin can delete the review.** Recalculates the product's average rating and decrements its review count.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter  | Type   | Required | Description    |
+| :--------- | :----- | :------: | :------------- |
+| `reviewId` | string |    ✅    | The review ID. |
+
+#### Responses
+
+##### Response 200
+
+Review deleted successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Review deleted successfully",
+  "data": {
+    "productRating": 4.5,
+    "productRatingQuantity": 11
+  }
+}
+```
+
+##### Response 401
+
+Missing or invalid bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Requester is not the review author or an Admin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not authorized to delete this review"
+}
+```
+
+##### Response 404
+
+Review not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Review Not Found"
 }
 ```
 

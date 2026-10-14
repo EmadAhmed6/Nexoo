@@ -11,8 +11,9 @@ import {
   updateProduct,
 } from "./product.controller.js";
 import upload from "../../middlewares/multer.js";
+import reviewRoutes from "./Review/review.routes.js";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router
   .route("/")
@@ -24,5 +25,7 @@ router
   .get(getProductById)
   .put(verifyProductOwner, upload.array("productImages", 5), updateProduct)
   .delete(verifyProductOwner, deleteProduct);
+
+router.use("/:productId/reviews", reviewRoutes);
 
 export default router;

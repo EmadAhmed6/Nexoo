@@ -30,6 +30,7 @@ import { useAppStore } from "@/store/use-app-store";
 import { Button, Text } from "@/_components/shared";
 import { EditProductModal } from "@/features/products/components/EditProductModal";
 import { DeleteConfirmModal } from "@/features/products/components/DeleteConfirmModal";
+import { ProductReviewsSection } from "@/features/reviews/components/ProductReviewsSection";
 
 function ProductDetailContent() {
   const params = useParams();
@@ -381,14 +382,22 @@ function ProductDetailContent() {
             </Text>
 
             <div className="flex items-center gap-2 mt-3 text-xs text-textSecondary">
-              <div className="flex items-center gap-1 text-primary">
+              <a
+                href="#reviews"
+                className="flex items-center gap-1 text-primary hover:opacity-80 transition-opacity"
+              >
                 <Star className="w-4 h-4 fill-primary" />
                 <span className="font-bold text-textPrimary text-sm">
-                  {product.ratingAverage || 0}
+                  {product.ratingAverage ?? (product as unknown as { ratings?: number }).ratings ?? 0}
                 </span>
-              </div>
+              </a>
               <span>•</span>
-              <span>{product.ratingQuantity || 0} reviews</span>
+              <a
+                href="#reviews"
+                className="hover:underline hover:text-primary transition-colors cursor-pointer"
+              >
+                {product.ratingQuantity || 0} reviews
+              </a>
               <span>•</span>
               <span
                 className={
@@ -568,6 +577,13 @@ function ProductDetailContent() {
           </div>
         </div>
       </div>
+
+      {/* Product Reviews & Ratings Section */}
+      <ProductReviewsSection
+        productId={productId}
+        ratingAverage={product.ratingAverage ?? (product as unknown as { ratings?: number }).ratings ?? 0}
+        ratingQuantity={product.ratingQuantity ?? 0}
+      />
 
       {/* Edit Product Modal */}
       {isOwner && editModalOpen && (

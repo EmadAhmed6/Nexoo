@@ -52,6 +52,10 @@ const options: Options = {
         name: "Coupons",
         description: "Coupons and discount management APIs",
       },
+      {
+        name: "Reviews",
+        description: "Product reviews and ratings management APIs",
+      },
     ],
     components: {
       securitySchemes: {

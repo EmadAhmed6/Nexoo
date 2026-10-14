@@ -12,6 +12,10 @@ import { Cart } from "../Cart/cart.model.js";
 const getCoupons = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const coupons = await Coupon.find().sort({ createdAt: -1 });
+    if (!coupons) {
+      sendError(res, 404, "No Coupons found");
+      return;
+    }
     successMsg(res, 200, "Coupons fetched successfully", coupons);
   },
 );
@@ -31,20 +35,8 @@ const createCoupon = asyncHandler(
       expireDate,
       usageLimit,
       couponCode,
+      isActive,
     } = req.body;
-
-    if (
-      discountType === "percentage" &&
-      (discountValue < 1 || discountValue > 100)
-    ) {
-      sendError(res, 400, "Percentage discount must be between 1 and 100");
-      return;
-    }
-
-    if (new Date(startDate) > new Date(expireDate)) {
-      sendError(res, 400, "Start date must be before expire date");
-      return;
-    }
 
     const existingCode = await Coupon.findOne({ couponCode });
     if (existingCode) {
@@ -56,7 +48,7 @@ const createCoupon = asyncHandler(
       discountValue,
       couponCode: couponCode.toUpperCase(),
       usageLimit: Number(usageLimit) || 10,
-      isActive: req.body.isActive !== undefined ? req.body.isActive : true,
+      isActive: isActive,
       startDate: new Date(startDate),
       expireDate: new Date(expireDate),
     });
@@ -103,13 +95,13 @@ const updateCoupon = asyncHandler(
       couponId,
       {
         $set: {
-          ...(discountType && { discountType }),
-          ...(discountValue !== undefined && { discountValue }),
-          ...(isActive !== undefined && { isActive }),
-          ...(startDate && { startDate }),
-          ...(expireDate && { expireDate }),
-          ...(couponCode && { couponCode: couponCode.toUpperCase() }),
-          ...(usageLimit !== undefined && { usageLimit }),
+          discountType,
+          discountValue,
+          isActive,
+          startDate,
+          expireDate,
+          couponCode,
+          usageLimit,
         },
       },
       { new: true, runValidators: true },
@@ -131,6 +123,7 @@ const applyCoupon = asyncHandler(
       sendError(res, 404, "Coupon not found");
       return;
     }
+
     if (coupon.isActive === false) {
       sendError(res, 400, "Coupon is not active");
       return;
@@ -185,8 +178,10 @@ const removeCoupon = asyncHandler(
       sendError(res, 404, "Cart is empty or not found");
       return;
     }
+
     cart.totalPriceAfterDiscount = undefined;
     cart.couponApplied = undefined;
+    
     await cart.save();
     successMsg(res, 200, "Coupon removed successfully", null);
   },
@@ -211,4 +206,11 @@ const deleteCoupon = asyncHandler(
   },
 );
 
-export { getCoupons, createCoupon, updateCoupon, deleteCoupon, applyCoupon, removeCoupon };
+export {
+  getCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  applyCoupon,
+  removeCoupon,
+};
