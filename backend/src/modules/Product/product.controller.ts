@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 
 import { sendError, successMsg } from "../../middlewares/errors.js";
 import {
+  IProduct,
   Product,
   validateCreateProduct,
   validateUpdateProduct,
@@ -243,19 +244,48 @@ const deleteProduct = asyncHandler(
   },
 );
 
-// RATE PRODUCT
-
-const rateProduct = asyncHandler(
+const toggleLikeProduct = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const productId = req.params.productId;
-    const product = await Product.findById(productId);
+    const productId = req.params.productId as string;
     const userId = req.user?.id;
+    const product = await Product.findById(productId);
     if (!product) {
       sendError(res, 404, "No Product found with this id");
       return;
     }
-
-    // 
+    const isLiked = (product.likes || []).some(
+      (like) => like?.toString() === userId?.toString(),
+    );
+    let updatedProduct: IProduct | null;
+    if (isLiked) {
+      updatedProduct = await Product.findByIdAndUpdate(
+        productId,
+        {
+          $pull: { likes: userId },
+          $set: { likesCount: Math.max(0, (product.likesCount || 1) - 1) },
+        },
+        { returnDocument: "after", runValidators: true },
+      );
+      if (!updatedProduct) {
+        sendError(res, 500, "Failed to Unlike Product");
+        return;
+      }
+      successMsg(res, 200, "Product unliked successfully", updatedProduct);
+    } else {
+      updatedProduct = await Product.findByIdAndUpdate(
+        productId,
+        {
+          $addToSet: { likes: userId },
+          $set: { likesCount: (product.likesCount || 0) + 1 },
+        },
+        { returnDocument: "after", runValidators: true },
+      );
+      if (!updatedProduct) {
+        sendError(res, 500, "Failed to Like Product");
+        return;
+      }
+      successMsg(res, 200, "Product liked successfully", updatedProduct);
+    }
   },
 );
 
@@ -265,4 +295,5 @@ export {
   getProductById,
   updateProduct,
   deleteProduct,
+  toggleLikeProduct,
 };

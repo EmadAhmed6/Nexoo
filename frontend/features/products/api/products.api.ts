@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete, axiosClient } from "@/lib/axios-client";
+import { apiGet, apiPost, apiPut, apiPatch, apiDelete, axiosClient } from "@/lib/axios-client";
 import { ApiResponse } from "@/types/api.types";
 import {
   Product,
@@ -112,5 +112,13 @@ export const productsApi = {
    */
   deleteProduct: async (productId: string) => {
     return apiDelete<null>(`/products/${productId}`);
+  },
+
+  /**
+   * Toggle like on product
+   * PATCH /products/:productId
+   */
+  toggleLikeProduct: async (productId: string) => {
+    return apiPatch<Product>(`/products/${productId}`);
   },
 };

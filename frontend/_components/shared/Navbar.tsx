@@ -21,9 +21,11 @@ import {
   User as UserIcon,
   Search,
   LayoutDashboard,
+  Bookmark,
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/store/useCartStore";
 import { useCart } from "@/features/cart/hooks/useCart";
+import { useWishlist } from "@/features/wishlist/hooks/useWishlist";
 import { useAppStore } from "@/store/use-app-store";
 import { ThemeToggle } from "@/_components/theme-toggle";
 import { Text } from "@/_components/shared/Text";
@@ -47,6 +49,7 @@ export function Navbar() {
 
   const { openCart } = useCartStore();
   const { data: cart } = useCart();
+  const { data: wishlist } = useWishlist();
   const { user, isAuthenticated, logout } = useAppStore();
 
   const validCartItems = (cart?.cartItems ?? []).filter((item) =>
@@ -56,6 +59,8 @@ export function Navbar() {
     (acc, item) => acc + item.productQuantity,
     0,
   );
+
+  const wishlistCount = (wishlist?.products ?? []).length;
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = React.useRef<HTMLDivElement>(null);
@@ -100,6 +105,12 @@ export function Navbar() {
             href: "/orders",
             icon: Package,
             desc: "Track shipments & order history",
+          },
+          {
+            label: "My Wishlist",
+            href: "/wishlist",
+            icon: Bookmark,
+            desc: "View saved products",
           },
         ]
       : []),
@@ -150,6 +161,23 @@ export function Navbar() {
             <div className="flex items-center gap-2.5 sm:gap-3">
               {/* Theme Toggle */}
               <ThemeToggle />
+
+              {/* Wishlist Button (authenticated users only) */}
+              {isAuthenticated && (
+                <Link
+                  href="/wishlist"
+                  className="relative p-2.5 rounded-xl border border-borderPrimary bg-bgPrimary hover:border-primary/50 text-textPrimary transition-colors flex items-center justify-center"
+                  aria-label="Open wishlist"
+                  title="My Wishlist"
+                >
+                  <Bookmark className="w-5 h-5 text-textPrimary" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-primary text-black text-[11px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-in zoom-in-50">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               {/* Cart Button */}
               <button
@@ -252,6 +280,31 @@ export function Navbar() {
                             >
                               <UserIcon className="w-4 h-4 text-primary" />
                               <span>My Profile</span>
+                            </Link>
+
+                            {/* Orders Link */}
+                            <Link
+                              href="/orders"
+                              onClick={() => setUserMenuOpen(false)}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-textSecondary hover:text-textPrimary hover:bg-bgPrimary transition-colors"
+                            >
+                              <Package className="w-4 h-4 text-primary" />
+                              <span>My Orders</span>
+                            </Link>
+
+                            {/* Wishlist Link */}
+                            <Link
+                              href="/wishlist"
+                              onClick={() => setUserMenuOpen(false)}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-textSecondary hover:text-textPrimary hover:bg-bgPrimary transition-colors"
+                            >
+                              <Bookmark className="w-4 h-4 text-primary" />
+                              <span>My Wishlist</span>
+                              {wishlistCount > 0 && (
+                                <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold">
+                                  {wishlistCount}
+                                </span>
+                              )}
                             </Link>
 
                             {/* Dashboard Link (if Admin or SuperAdmin) */}

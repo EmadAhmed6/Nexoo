@@ -15,6 +15,8 @@ export interface Product {
   ratingAverage?: number;
   ratingQuantity?: number;
   userId?: string;
+  likes?: string[];
+  likesCount?: number;
   createdAt?: string;
   updatedAt?: string;
 }

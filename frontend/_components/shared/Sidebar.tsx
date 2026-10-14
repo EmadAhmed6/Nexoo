@@ -16,8 +16,10 @@ import {
   User,
   Compass,
   Layers,
+  Bookmark,
 } from "lucide-react";
 import { useAppStore } from "@/store/use-app-store";
+import { useWishlist } from "@/features/wishlist/hooks/useWishlist";
 import { CreateProductModal } from "@/features/products/components/CreateProductModal";
 import { Text } from "@/_components/shared/Text";
 import { cn } from "@/lib/utils";
@@ -35,7 +37,9 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAppStore();
+  const { data: wishlist } = useWishlist();
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const wishlistCount = (wishlist?.products ?? []).length;
 
   const navLinks = [
     {
@@ -59,6 +63,12 @@ export function Sidebar({
             href: "/orders",
             icon: Package,
             isActive: pathname.startsWith("/orders"),
+          },
+          {
+            label: "My Wishlist",
+            href: "/wishlist",
+            icon: Bookmark,
+            isActive: pathname.startsWith("/wishlist"),
           },
         ]
       : []),
@@ -102,6 +112,16 @@ export function Sidebar({
                         )}
                       />
                       <span>{link.label}</span>
+                      {link.label === "My Wishlist" && wishlistCount > 0 && (
+                        <span className={cn(
+                          "text-[10px] px-1.5 py-0.5 rounded font-black",
+                          isActive
+                            ? "bg-black/20 text-black"
+                            : "bg-primary/20 text-primary",
+                        )}>
+                          {wishlistCount}
+                        </span>
+                      )}
                     </div>
 
                     <ChevronRight

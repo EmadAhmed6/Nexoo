@@ -9,6 +9,7 @@ import reviews from "./modules/Product/Review/review.routes.js";
 import cart from "./modules/Cart/cart.routes.js";
 import orders from "./modules/Order/order.routes.js";
 import coupons from "./modules/Coupons/coupon.routes.js";
+import wishlist from "./modules/Wishlist/wishlist.routes.js";
 import connectToDB from "./config/config.js";
 import { errorHandler, notFound } from "./middlewares/errors.js";
 import swaggerui from "swagger-ui-express";
@@ -32,6 +33,7 @@ app.use("/users", users);
 app.use("/products", products);
 app.use("/reviews", reviews);
 app.use("/cart", cart);
+app.use("/wishlist", wishlist);
 app.use("/orders", orders);
 app.use("/coupons", coupons);
 

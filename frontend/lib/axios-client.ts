@@ -74,3 +74,9 @@ export async function apiDelete<T>(endpoint: string): Promise<ApiResponse<T>> {
   const response = await axiosClient.delete<ApiResponse<T>>(endpoint);
   return response.data;
 }
+
+export async function apiPatch<T, B = unknown>(endpoint: string, body?: B): Promise<ApiResponse<T>> {
+  const response = await axiosClient.patch<ApiResponse<T>>(endpoint, body);
+  return response.data;
+}
+

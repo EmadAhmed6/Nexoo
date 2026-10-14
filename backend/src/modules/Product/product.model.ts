@@ -1,4 +1,4 @@
-import { Document, model, Schema } from "mongoose";
+import { Document, model, Schema, Types } from "mongoose";
 import {
   createProductSchema,
   ICreateProductSchema,
@@ -18,7 +18,7 @@ type Category =
   | "Eyewear"
   | "Leather Goods";
 
-interface IProduct extends Document {
+export interface IProduct extends Document {
   title: string;
   description: string;
   price: number;
@@ -33,6 +33,8 @@ interface IProduct extends Document {
   ratingAverage: number;
   ratingQuantity: number;
   userId?: Schema.Types.ObjectId | string;
+  likes: Types.ObjectId[];
+  likesCount: number;
 }
 
 const ProductSchema = new Schema<IProduct>({
@@ -109,6 +111,17 @@ const ProductSchema = new Schema<IProduct>({
     type: Number,
     min: 0,
     default: 0,
+  },
+  likes: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  likesCount: {
+    type: Number,
+    default: 0,
+    min: 0,
   },
   userId: {
     type: Schema.Types.ObjectId,

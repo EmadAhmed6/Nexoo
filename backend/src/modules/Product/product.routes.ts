@@ -8,6 +8,7 @@ import {
   deleteProduct,
   getAllProducts,
   getProductById,
+  toggleLikeProduct,
   updateProduct,
 } from "./product.controller.js";
 import upload from "../../middlewares/multer.js";
@@ -24,6 +25,7 @@ router
   .route("/:productId")
   .get(getProductById)
   .put(verifyProductOwner, upload.array("productImages", 5), updateProduct)
+  .patch(verifyToken, toggleLikeProduct)
   .delete(verifyProductOwner, deleteProduct);
 
 router.use("/:productId/reviews", reviewRoutes);

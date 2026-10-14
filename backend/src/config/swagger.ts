@@ -45,6 +45,10 @@ const options: Options = {
         description: "Shopping cart management APIs",
       },
       {
+        name: "Wishlist",
+        description: "Wishlist management APIs",
+      },
+      {
         name: "Orders",
         description: "Order processing and PayPal checkout APIs",
       },

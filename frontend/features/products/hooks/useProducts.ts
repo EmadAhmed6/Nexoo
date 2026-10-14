@@ -96,3 +96,24 @@ export function useDeleteProduct() {
     },
   });
 }
+
+/**
+ * Hook to toggle like on a product
+ */
+export function useToggleLikeProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (productId: string) => {
+      const response = await productsApi.toggleLikeProduct(productId);
+      return response.data;
+    },
+    onSuccess: (_, productId) => {
+      queryClient.invalidateQueries({ queryKey: PRODUCT_QUERY_KEYS.all });
+      queryClient.invalidateQueries({
+        queryKey: PRODUCT_QUERY_KEYS.detail(productId),
+      });
+    },
+  });
+}
+

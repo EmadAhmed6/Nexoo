@@ -51,29 +51,34 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 8   | POST   | `/products`              | Create a new product with multiple image uploads to Cloudinary (up to 5 files) |  🔒  |
 | 9   | GET    | `/products/:productId`   | Retrieve single product details by ID                                          |  ❌  |
 | 10  | PUT    | `/products/:productId`   | Update existing product details and images (Owner or Admin)                    |  🔒  |
-| 11  | DELETE | `/products/:productId`   | Delete a product by ID (Owner or Admin)                                        |  🔒  |
-| 12  | GET    | `/cart`                  | Retrieve authenticated user's cart with populated product info                 |  🔒  |
-| 13  | POST   | `/cart/:productId`       | Add product to user cart with quantity (defaults to 1)                         |  🔒  |
-| 14  | PUT    | `/cart/:productId`       | Update item quantity in user cart                                              |  🔒  |
-| 15  | DELETE | `/cart/:productId`       | Remove product from user cart                                                  |  🔒  |
-| 16  | DELETE | `/cart`                  | Clear entire user shopping cart                                                |  🔒  |
-| 17  | POST   | `/orders`                | Create new order from user's current cart                                      |  🔒  |
-| 18  | GET    | `/orders`                | Retrieve list of all orders belonging to authenticated user                    |  🔒  |
-| 19  | GET    | `/orders/:orderId`       | Retrieve single order details by ID                                            |  🔒  |
-| 20  | POST   | `/orders/paypal/create`  | Create PayPal transaction and obtain approval redirect URL                     |  🔒  |
-| 21  | POST   | `/orders/paypal/capture` | Capture PayPal payment after buyer approval                                    |  🔒  |
-| 22  | PUT    | `/orders/:orderId`       | Update shipping address or payment method of pending order                     |  🔒  |
-| 23  | DELETE | `/orders/:orderId`       | Cancel and delete a pending order                                              |  🔒  |
-| 24  | GET    | `/coupons`               | Retrieve list of all coupons (Admin only)                                      |  🔒  |
-| 25  | POST   | `/coupons`               | Create a new discount coupon (Admin only)                                      |  🔒  |
-| 26  | POST   | `/coupons/apply`         | Apply coupon code to user cart and recalculate prices                          |  🔒  |
-| 27  | DELETE | `/coupons/remove`        | Remove applied coupon from user cart                                           |  🔒  |
-| 28  | PUT    | `/coupons/:couponId`     | Update coupon details, validity dates, or status (Admin only)                  |  🔒  |
-| 29  | DELETE | `/coupons/:couponId`     | Delete unused coupon (Admin only)                                              |  🔒  |
-| 30  | GET    | `/reviews/:productId`    | Retrieve all reviews and ratings for a product with reviewer details           |  ❌  |
-| 31  | POST   | `/reviews/:productId`    | Submit a new review or update existing review (recalculates product ratings)   |  🔒  |
-| 32  | PUT    | `/reviews/:reviewId`     | Update review rating or text (Review Owner, Admin, or SuperAdmin)              |  🔒  |
-| 33  | DELETE | `/reviews/:reviewId`     | Delete a review permanently and recalculate product stats (Owner or Admin)     |  🔒  |
+| 11  | PATCH  | `/products/:productId`   | Toggle like / unlike on a product                                              |  🔒  |
+| 12  | DELETE | `/products/:productId`   | Delete a product by ID (Owner or Admin)                                        |  🔒  |
+| 13  | GET    | `/cart`                  | Retrieve authenticated user's cart with populated product info                 |  🔒  |
+| 14  | POST   | `/cart/:productId`       | Add product to user cart with quantity (defaults to 1)                         |  🔒  |
+| 15  | PUT    | `/cart/:productId`       | Update item quantity in user cart                                              |  🔒  |
+| 16  | DELETE | `/cart/:productId`       | Remove product from user cart                                                  |  🔒  |
+| 17  | DELETE | `/cart`                  | Clear entire user shopping cart                                                |  🔒  |
+| 18  | GET    | `/wishlist`              | Retrieve authenticated user's wishlist with populated products                 |  🔒  |
+| 19  | POST   | `/wishlist/:productId`   | Add product to user's wishlist                                                 |  🔒  |
+| 20  | DELETE | `/wishlist/:productId`   | Remove product from user's wishlist                                            |  🔒  |
+| 21  | DELETE | `/wishlist`              | Clear entire user wishlist                                                     |  🔒  |
+| 22  | POST   | `/orders`                | Create new order from user's current cart                                      |  🔒  |
+| 23  | GET    | `/orders`                | Retrieve list of all orders belonging to authenticated user                    |  🔒  |
+| 24  | GET    | `/orders/:orderId`       | Retrieve single order details by ID                                            |  🔒  |
+| 25  | POST   | `/orders/paypal/create`  | Create PayPal transaction and obtain approval redirect URL                     |  🔒  |
+| 26  | POST   | `/orders/paypal/capture` | Capture PayPal payment after buyer approval                                    |  🔒  |
+| 27  | PUT    | `/orders/:orderId`       | Update shipping address or payment method of pending order                     |  🔒  |
+| 28  | DELETE | `/orders/:orderId`       | Cancel and delete a pending order                                              |  🔒  |
+| 29  | GET    | `/coupons`               | Retrieve list of all coupons (Admin only)                                      |  🔒  |
+| 30  | POST   | `/coupons`               | Create a new discount coupon (Admin only)                                      |  🔒  |
+| 31  | POST   | `/coupons/apply`         | Apply coupon code to user cart and recalculate prices                          |  🔒  |
+| 32  | DELETE | `/coupons/remove`        | Remove applied coupon from user cart                                           |  🔒  |
+| 33  | PUT    | `/coupons/:couponId`     | Update coupon details, validity dates, or status (Admin only)                  |  🔒  |
+| 34  | DELETE | `/coupons/:couponId`     | Delete unused coupon (Admin only)                                              |  🔒  |
+| 35  | GET    | `/reviews/:productId`    | Retrieve all reviews and ratings for a product with reviewer details           |  ❌  |
+| 36  | POST   | `/reviews/:productId`    | Submit a new review or update existing review (recalculates product ratings)   |  🔒  |
+| 37  | PUT    | `/reviews/:reviewId`     | Update review rating or text (Review Owner, Admin, or SuperAdmin)              |  🔒  |
+| 38  | DELETE | `/reviews/:reviewId`     | Delete a review permanently and recalculate product stats (Owner or Admin)     |  🔒  |
 
 ---
 
@@ -83,6 +88,7 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 - [User Management Endpoints](#user-management-endpoints)
 - [Product Management Endpoints](#product-management-endpoints)
 - [Cart Management Endpoints](#cart-management-endpoints)
+- [Wishlist Management Endpoints](#wishlist-management-endpoints)
 - [Order & Checkout Endpoints](#order--checkout-endpoints)
 - [Coupon Management Endpoints](#coupon-management-endpoints)
 - [Review & Rating Endpoints](#review--rating-endpoints)
@@ -877,6 +883,67 @@ Product not found.
 
 ---
 
+### PATCH /products/:productId
+
+Toggle like / unlike status for a product. Requires authentication. If the user previously liked the product, their like is removed and `likesCount` is decremented. If not, the user is added to `likes` and `likesCount` is incremented.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description     |
+| :---------- | :----- | :------: | :-------------- |
+| `productId` | string |    ✅    | The product ID. |
+
+#### Responses
+
+##### Response 200
+
+Product liked or unliked successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Product liked successfully",
+  "data": {
+    "_id": "6ac92261707ab25c5d1ed396",
+    "title": "Casual Cotton Shirt",
+    "likes": [
+      "664fa1e2b5c7e1234567890a"
+    ],
+    "likesCount": 1
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+Product not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No Product found with this id"
+}
+```
+
+---
+
 ## Cart Management Endpoints
 
 ### GET /cart
@@ -1250,6 +1317,263 @@ Cart was not found.
 {
   "status": "fail",
   "message": "Cart is empty"
+}
+```
+
+---
+
+## Wishlist Management Endpoints
+
+### GET /wishlist
+
+Retrieve the authenticated user's wishlist. All products in the wishlist have their details (`title`, `description`, `price`, `priceAfterDiscount`, `productImages`, `category`, `stock`, `ratingAverage`, `ratingQuantity`, `likes`, `likesCount`) populated. If no wishlist exists yet for the user, an empty wishlist is returned.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+Wishlist fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Wishlist fetched successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "products": [
+      {
+        "_id": "6ac92261707ab25c5d1ed396",
+        "title": "Luxury Chronograph Watch",
+        "description": "Premium stainless steel automatic watch with sapphire crystal.",
+        "price": 3500,
+        "priceAfterDiscount": 2800,
+        "category": "Watches",
+        "stock": 12,
+        "productImages": [
+          {
+            "url": "https://res.cloudinary.com/dgypt8dkr/image/upload/.../watch.jpg",
+            "publicId": "Products/watch1"
+          }
+        ],
+        "ratingAverage": 4.8,
+        "ratingQuantity": 15,
+        "likes": [],
+        "likesCount": 4
+      }
+    ]
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### POST /wishlist/:productId
+
+Add a product to the authenticated user's wishlist. Accepts the product ID in the URL path (or in the request body as `productId`). If the product is already in the wishlist, it is not duplicated. Automatically returns the updated populated wishlist.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description                     |
+| :---------- | :----- | :------: | :------------------------------ |
+| `productId` | string |    ✅    | The ID of the product to add.   |
+
+#### Responses
+
+##### Response 200
+
+Added to wishlist successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Added to wishlist successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "products": [
+      {
+        "_id": "6ac92261707ab25c5d1ed396",
+        "title": "Luxury Chronograph Watch",
+        "price": 3500,
+        "priceAfterDiscount": 2800,
+        "category": "Watches",
+        "stock": 12,
+        "productImages": [
+          {
+            "url": "https://res.cloudinary.com/dgypt8dkr/image/upload/.../watch.jpg",
+            "publicId": "Products/watch1"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+##### Response 400
+
+Invalid product ID format.
+
+```json
+{
+  "status": "fail",
+  "message": "Valid Product ID is required"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+Product not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No Product found with this id"
+}
+```
+
+---
+
+### DELETE /wishlist/:productId
+
+Remove a specific product from the authenticated user's wishlist. Returns the updated populated wishlist.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description                       |
+| :---------- | :----- | :------: | :-------------------------------- |
+| `productId` | string |    ✅    | The ID of the product to remove.  |
+
+#### Responses
+
+##### Response 200
+
+Removed from wishlist successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Removed from wishlist successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "products": []
+  }
+}
+```
+
+##### Response 400
+
+Invalid product ID format.
+
+```json
+{
+  "status": "fail",
+  "message": "Valid Product ID is required"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+Wishlist not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No Wishlist found for this user"
+}
+```
+
+---
+
+### DELETE /wishlist
+
+Clear the authenticated user's entire wishlist.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+Wishlist cleared successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Wishlist cleared successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "products": []
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
 }
 ```
 

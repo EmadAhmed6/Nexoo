@@ -18,14 +18,18 @@ import {
   Pencil,
   Trash2,
   Loader2,
+  Heart,
+  Bookmark,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   useProduct,
   useUpdateProduct,
   useDeleteProduct,
+  useToggleLikeProduct,
 } from "@/features/products/hooks/useProducts";
 import { useAddToCart } from "@/features/cart/hooks/useCart";
+import { useToggleWishlist, useIsInWishlist } from "@/features/wishlist/hooks/useWishlist";
 import { useAppStore } from "@/store/use-app-store";
 import { Button, Text } from "@/_components/shared";
 import { EditProductModal } from "@/features/products/components/EditProductModal";
@@ -42,6 +46,9 @@ function ProductDetailContent() {
   const { user } = useAppStore();
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
   const { mutate: updateProduct } = useUpdateProduct(productId);
+  const toggleLike = useToggleLikeProduct();
+  const inWishlist = useIsInWishlist(productId);
+  const { toggleWishlist, isPending: isWishlistPending } = useToggleWishlist();
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -226,6 +233,40 @@ function ProductDetailContent() {
         },
       },
     );
+  };
+
+  const isLiked = Boolean(
+    user?._id &&
+      product?.likes?.some(
+        (id) =>
+          (typeof id === "string" ? id : (id as { _id?: string })._id || id) ===
+          user._id,
+      ),
+  );
+  const likesCount = product?.likesCount ?? product?.likes?.length ?? 0;
+
+  const handleToggleLike = () => {
+    if (!user) {
+      toast.error("Please sign in to like products");
+      router.push("/auth/login");
+      return;
+    }
+    toggleLike.mutate(productId, {
+      onSuccess: () => {
+        if (!isLiked) {
+          toast.success("Added to liked products ❤️");
+        } else {
+          toast.info("Removed from liked products");
+        }
+      },
+      onError: (err) => {
+        toast.error((err as Error)?.message || "Failed to update like");
+      },
+    });
+  };
+
+  const handleToggleWishlist = () => {
+    toggleWishlist(product._id, product.title);
   };
 
   return (
@@ -494,7 +535,7 @@ function ProductDetailContent() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-2">
               <Button
                 variant="primary"
                 size="lg"
@@ -516,6 +557,53 @@ function ProductDetailContent() {
               >
                 {added ? "Added to Cart!" : "Add to Cart"}
               </Button>
+
+              {/* Like Button */}
+              <button
+                type="button"
+                onClick={handleToggleLike}
+                disabled={toggleLike.isPending}
+                className={`p-3.5 rounded-2xl border transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 ${
+                  isLiked
+                    ? "bg-rose-500/15 border-rose-500/40 text-rose-500 hover:bg-rose-500/25"
+                    : "bg-bgSecondary border-borderPrimary text-textSecondary hover:text-rose-500 hover:border-rose-500/40"
+                }`}
+                title={isLiked ? "Unlike product" : "Like product"}
+                aria-label="Like product"
+              >
+                <Heart
+                  className={`w-5 h-5 transition-transform ${
+                    isLiked ? "fill-rose-500 text-rose-500" : ""
+                  }`}
+                />
+                {likesCount > 0 && (
+                  <span className="text-xs font-bold">{likesCount}</span>
+                )}
+              </button>
+
+              {/* Wishlist Button */}
+              <button
+                type="button"
+                onClick={handleToggleWishlist}
+                disabled={isWishlistPending}
+                className={`p-3.5 rounded-2xl border transition-all flex items-center justify-center cursor-pointer shrink-0 ${
+                  inWishlist
+                    ? "bg-primary/15 border-primary text-primary"
+                    : "bg-bgSecondary border-borderPrimary text-textSecondary hover:text-primary hover:border-primary/40"
+                }`}
+                title={inWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+                aria-label={inWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+              >
+                {isWishlistPending ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Bookmark
+                    className={`w-5 h-5 transition-transform ${
+                      inWishlist ? "fill-primary text-primary" : ""
+                    }`}
+                  />
+                )}
+              </button>
             </div>
 
             {/* Owner Actions */}
