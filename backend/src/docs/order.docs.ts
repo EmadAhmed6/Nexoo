@@ -1,8 +1,9 @@
 // POST   /orders
 // GET    /orders
 // GET    /orders/{orderId}
-// POST   /orders/paypal/create
-// POST   /orders/paypal/capture
+// POST   /orders/paymob/create
+// POST   /orders/paymob/verify
+// POST   /orders/paymob/webhook
 // PUT    /orders/{orderId}
 // DELETE /orders/{orderId}
 
@@ -10,7 +11,7 @@
  * @swagger
  * tags:
  *   name: Orders
- *   description: Order processing, management, and PayPal checkout APIs
+ *   description: Order processing, management, and Paymob checkout APIs
  */
 
 // POST /orders
@@ -64,8 +65,8 @@
  *                     example: "01012345678"
  *               paymentMethod:
  *                 type: string
- *                 enum: [Paypal, Stripe, COD]
- *                 example: Paypal
+ *                 enum: [Paymob, Stripe, COD]
+ *                 example: Paymob
  *     responses:
  *       201:
  *         description: Order created successfully
@@ -182,13 +183,13 @@
  *         description: Order was not found
  */
 
-// POST /orders/paypal/create
+// POST /orders/paymob/create
 /**
  * @swagger
- * /orders/paypal/create:
+ * /orders/paymob/create:
  *   post:
- *     summary: Create PayPal order
- *     description: Initiate a PayPal checkout session for an existing unpaid order and obtain the PayPal approval link.
+ *     summary: Create Paymob checkout session
+ *     description: Initiate a Paymob Unified Checkout intention for an existing unpaid order and obtain the checkoutUrl.
  *     tags:
  *       - Orders
  *     security:
@@ -207,7 +208,7 @@
  *                 example: 67092147385a812bf0e54321
  *     responses:
  *       200:
- *         description: PayPal order created successfully
+ *         description: Paymob checkout session created successfully
  *         content:
  *           application/json:
  *             schema:
@@ -218,29 +219,31 @@
  *                   example: success
  *                 message:
  *                   type: string
- *                   example: PayPal order created successfully
+ *                   example: Paymob checkout session created successfully
  *                 data:
  *                   type: object
  *                   properties:
- *                     paypalOrderId:
+ *                     orderId:
  *                       type: string
- *                       example: 5O190127TN364715T
- *                     approvalUrl:
+ *                       example: 67092147385a812bf0e54321
+ *                     checkoutUrl:
  *                       type: string
- *                       example: https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T
+ *                       example: https://accept.paymob.com/unifiedcheckout/?publicKey=...&clientSecret=...
+ *                     clientSecret:
+ *                       type: string
  *       400:
  *         description: This order is already paid
  *       404:
  *         description: Order not found
  */
 
-// POST /orders/paypal/capture
+// POST /orders/paymob/verify
 /**
  * @swagger
- * /orders/paypal/capture:
+ * /orders/paymob/verify:
  *   post:
- *     summary: Capture PayPal payment
- *     description: Capture funds after the buyer approves the payment on PayPal. Updates order payment status to paid.
+ *     summary: Verify Paymob payment
+ *     description: Verify payment status returned from Paymob redirect. Updates order payment status to paid if successful.
  *     tags:
  *       - Orders
  *     security:
@@ -252,18 +255,20 @@
  *           schema:
  *             type: object
  *             required:
- *               - paypalOrderId
  *               - orderId
  *             properties:
- *               paypalOrderId:
- *                 type: string
- *                 example: 5O190127TN364715T
  *               orderId:
  *                 type: string
  *                 example: 67092147385a812bf0e54321
+ *               success:
+ *                 type: string
+ *                 example: "true"
+ *               transactionId:
+ *                 type: string
+ *                 example: "12345678"
  *     responses:
  *       200:
- *         description: Payment captured successfully
+ *         description: Payment verified successfully
  *         content:
  *           application/json:
  *             schema:
@@ -274,11 +279,11 @@
  *                   example: success
  *                 message:
  *                   type: string
- *                   example: Payment captured successfully
+ *                   example: Payment verified successfully
  *                 data:
  *                   type: object
  *       400:
- *         description: Payment failed or not completed
+ *         description: Payment failed or was not successful
  *       404:
  *         description: Order not found
  */
@@ -312,7 +317,7 @@
  *                 type: object
  *               paymentMethod:
  *                 type: string
- *                 enum: [Paypal, Stripe, COD]
+ *                 enum: [Paymob, Stripe, COD]
  *     responses:
  *       200:
  *         description: Order updated successfully

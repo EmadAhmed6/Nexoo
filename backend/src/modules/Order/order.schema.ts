@@ -29,7 +29,7 @@ const CreateOrderSchema = z.object({
         message: "Phone number must start with 01 and be exactly 11 digits",
       }),
   }),
-  paymentMethod: z.enum(["Paypal", "Stripe", "COD"], {
+  paymentMethod: z.enum(["Paymob", "COD", "Stripe"], {
     message: "Payment method is required",
   }),
 });

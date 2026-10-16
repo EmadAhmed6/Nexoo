@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 import {
   CreateCouponSchema,
   ICreateCoupon,
@@ -11,12 +11,18 @@ interface ICoupon {
   discountValue: number;
   couponCode: string;
   usageLimit: number;
+  usageLimitPerUser?: number;
+  usedBy: {
+    user: Types.ObjectId;
+    count: number;
+  }[];
+  minOrderValue: number;
+  applicableCategories?: string[];
+  maxUsersLimit: number | null;
   isActive: boolean;
   startDate: Date;
   usedCount: number;
   expireDate: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 const CouponSchema = new Schema<ICoupon>(
@@ -42,6 +48,38 @@ const CouponSchema = new Schema<ICoupon>(
       required: true,
       default: 10,
     },
+    usageLimitPerUser: {
+      type: Number,
+      required: true,
+      default: 1,
+    },
+    usedBy: {
+      type: [
+        {
+          user: {
+            type: Types.ObjectId,
+            ref: "User",
+          },
+          count: {
+            type: Number,
+            required: true,
+            default: 0,
+          },
+        },
+      ],
+      required: true,
+      default: [],
+    },
+    applicableCategories: {
+      type: [String],
+      default: [],
+    },
+    minOrderValue: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    maxUsersLimit: { type: Number, default: null },
     isActive: {
       type: Boolean,
       required: true,

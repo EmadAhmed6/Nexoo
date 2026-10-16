@@ -39,7 +39,7 @@ interface IPaymentResult {
 }
 
 interface IPayment {
-  paymentMethod: "Paypal" | "Stripe" | "COD";
+  paymentMethod: "Paymob" | "COD" | "Stripe" | "Paypal";
   isPaid: boolean;
   paidAt?: Date;
   paymentResult?: IPaymentResult;
@@ -159,7 +159,7 @@ const OrderSchema = new Schema<IOrder>(
     payment: {
       paymentMethod: {
         type: String,
-        enum: ["Paypal", "Stripe", "COD"],
+        enum: ["Paymob", "COD", "Stripe", "Paypal"],
         required: true,
       },
       isPaid: {

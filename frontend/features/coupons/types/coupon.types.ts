@@ -4,6 +4,11 @@ export interface Coupon {
   discountValue: number;
   couponCode: string;
   usageLimit: number;
+  usageLimitPerUser?: number;
+  minOrderValue?: number;
+  applicableCategories?: string[];
+  maxUsersLimit?: number | null;
+  usedBy?: { user: string; count: number }[];
   usedCount: number;
   isActive: boolean;
   startDate: string;
@@ -17,6 +22,10 @@ export interface CreateCouponPayload {
   discountValue: number;
   couponCode: string;
   usageLimit?: number;
+  usageLimitPerUser?: number;
+  minOrderValue?: number;
+  applicableCategories?: string[];
+  maxUsersLimit?: number | null;
   isActive?: boolean;
   startDate: string;
   expireDate: string;

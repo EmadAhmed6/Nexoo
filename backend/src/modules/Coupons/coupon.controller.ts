@@ -34,6 +34,10 @@ const createCoupon = asyncHandler(
       startDate,
       expireDate,
       usageLimit,
+      usageLimitPerUser,
+      minOrderValue,
+      applicableCategories,
+      maxUsersLimit,
       couponCode,
       isActive,
     } = req.body;
@@ -48,6 +52,12 @@ const createCoupon = asyncHandler(
       discountValue,
       couponCode: couponCode.toUpperCase(),
       usageLimit: Number(usageLimit) || 10,
+      usageLimitPerUser: Number(usageLimitPerUser) || 1,
+      minOrderValue: Number(minOrderValue) || 0,
+      applicableCategories: Array.isArray(applicableCategories)
+        ? applicableCategories
+        : [],
+      maxUsersLimit: maxUsersLimit ? Number(maxUsersLimit) : null,
       isActive: isActive,
       startDate: new Date(startDate),
       expireDate: new Date(expireDate),
@@ -79,6 +89,10 @@ const updateCoupon = asyncHandler(
       expireDate,
       couponCode,
       usageLimit,
+      minOrderValue,
+      usageLimitPerUser,
+      applicableCategories,
+      maxUsersLimit,
     } = req.body;
 
     if (couponCode) {
@@ -100,8 +114,14 @@ const updateCoupon = asyncHandler(
           isActive,
           startDate,
           expireDate,
-          couponCode,
+          couponCode: couponCode ? couponCode.toUpperCase() : coupon.couponCode,
           usageLimit,
+          minOrderValue,
+          usageLimitPerUser,
+          ...(applicableCategories !== undefined && { applicableCategories }),
+          ...(maxUsersLimit !== undefined && {
+            maxUsersLimit: maxUsersLimit ? Number(maxUsersLimit) : null,
+          }),
         },
       },
       { new: true, runValidators: true },
@@ -133,18 +153,68 @@ const applyCoupon = asyncHandler(
       sendError(res, 400, "Coupon has expired");
       return;
     }
+
     if (coupon.usedCount >= coupon.usageLimit) {
       sendError(res, 400, "Coupon usage limit exceeded");
       return;
     }
 
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId }).populate("cartItems.product");
     if (!cart || cart.cartItems.length === 0) {
       sendError(res, 404, "Cart is empty or not found");
       return;
     }
 
     const originalTotal = cart.totalPrice;
+
+    if (coupon.minOrderValue && originalTotal < coupon.minOrderValue) {
+      sendError(
+        res,
+        400,
+        `Minimum order value required is ${coupon.minOrderValue}`,
+      );
+      return;
+    }
+
+    const usersUsedCoupon = coupon.usedBy.find(
+      (item) => item.user.toString() === userId?.toString(),
+    );
+
+    const currentUserUsage = usersUsedCoupon ? usersUsedCoupon.count : 0;
+
+    if (currentUserUsage >= (coupon.usageLimitPerUser || 1)) {
+      sendError(res, 400, "You have already used this coupon");
+      return;
+    }
+
+    if (coupon.maxUsersLimit) {
+      const isUserUsedCoupon = coupon.usedBy.some(
+        (item) => item.user.toString() === userId?.toString(),
+      );
+      if (!isUserUsedCoupon && coupon.usedBy.length >= coupon.maxUsersLimit) {
+        sendError(res, 400, "Coupon has reached its maximum user limit");
+        return;
+      }
+    }
+
+    if (coupon.applicableCategories && coupon.applicableCategories.length > 0) {
+      const isEligible = cart.cartItems.some((item: any) => {
+        const productCategory = item.product?.category?.toString();
+        return (
+          productCategory &&
+          coupon.applicableCategories!.some(
+            (cat: string) =>
+              cat.toLowerCase() === productCategory.toLowerCase(),
+          )
+        );
+      });
+
+      if (!isEligible) {
+        sendError(res, 400, "Coupon not applicable to your cart items");
+        return;
+      }
+    }
+
     let discountAmount = 0;
     if (coupon.discountType === "percentage") {
       discountAmount = (originalTotal * coupon.discountValue) / 100;
@@ -181,7 +251,7 @@ const removeCoupon = asyncHandler(
 
     cart.totalPriceAfterDiscount = undefined;
     cart.couponApplied = undefined;
-    
+
     await cart.save();
     successMsg(res, 200, "Coupon removed successfully", null);
   },

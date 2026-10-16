@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import {
   useOrders,
   useDeleteOrder,
-  useCreatePayPalOrder,
+  useCreatePaymobOrder,
 } from "@/features/orders/hooks/useOrders";
 import { Text } from "@/_components/shared/Text";
 import { Sidebar } from "@/_components/shared";
@@ -65,7 +65,7 @@ const STATUS_CONFIG: Record<
 export default function OrdersPage() {
   const { data: orders, isLoading, refetch } = useOrders();
   const deleteOrderMutation = useDeleteOrder();
-  const createPayPalMutation = useCreatePayPalOrder();
+  const createPaymobMutation = useCreatePaymobOrder();
 
   const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
 
@@ -83,15 +83,15 @@ export default function OrdersPage() {
     setPayingOrderId(orderId);
     try {
       sessionStorage.setItem("current_checkout_order_id", orderId);
-      const res = await createPayPalMutation.mutateAsync(orderId);
-      if (res.data?.approvalUrl) {
-        window.location.href = res.data.approvalUrl;
+      const res = await createPaymobMutation.mutateAsync(orderId);
+      if (res.data?.checkoutUrl) {
+        window.location.href = res.data.checkoutUrl;
       } else {
-        toast.error("Could not obtain PayPal payment link");
+        toast.error("Could not obtain Paymob payment link");
         setPayingOrderId(null);
       }
     } catch (err: any) {
-      toast.error(err?.message || "Failed to initiate PayPal payment");
+      toast.error(err?.message || "Failed to initiate Paymob payment");
       setPayingOrderId(null);
     }
   };
@@ -329,9 +329,10 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
-                  {/* Pay with PayPal CTA if PayPal method and unpaid */}
+                  {/* Pay with Paymob CTA if online method and unpaid */}
                   {!order.payment.isPaid &&
-                    order.payment.paymentMethod === "Paypal" &&
+                    (order.payment.paymentMethod === "Paymob" ||
+                      order.payment.paymentMethod === "Paypal") &&
                     order.orderStatus.status === "Pending" && (
                       <button
                         onClick={() => handlePayNow(order._id)}
@@ -343,7 +344,7 @@ export default function OrdersPage() {
                         ) : (
                           <ExternalLink className="w-3.5 h-3.5" />
                         )}
-                        <span>Complete PayPal Payment</span>
+                        <span>Complete Paymob Payment</span>
                       </button>
                     )}
                 </div>

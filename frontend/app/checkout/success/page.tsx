@@ -6,22 +6,25 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, ArrowRight, Package, ShoppingBag, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
-  useCapturePayPalPayment,
+  useVerifyPaymobPayment,
   useOrder,
 } from "@/features/orders/hooks/useOrders";
 import { Text } from "@/_components/shared/Text";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const paypalToken = searchParams.get("token"); // PayPal Order ID
   const queryOrderId = searchParams.get("orderId");
+  const paymobSuccess = searchParams.get("success");
+  const transactionId = searchParams.get("id");
 
   const [orderId, setOrderId] = useState<string | null>(queryOrderId);
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [captureError, setCaptureError] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
 
-  const captureMutation = useCapturePayPalPayment();
-  const { data: order, isLoading: isOrderLoading, refetch } = useOrder(orderId || "");
+  const verifyMutation = useVerifyPaymobPayment();
+  const { data: order, isLoading: isOrderLoading, refetch } = useOrder(
+    orderId || "",
+  );
 
   useEffect(() => {
     // If orderId not in URL, check sessionStorage
@@ -34,40 +37,44 @@ function SuccessContent() {
   }, [orderId]);
 
   useEffect(() => {
-    // If we have both a PayPal token and an orderId, trigger capture
-    if (paypalToken && orderId && !isCapturing && !captureError) {
-      setIsCapturing(true);
-      captureMutation
-        .mutateAsync({
-          paypalOrderId: paypalToken,
-          orderId,
-        })
-        .then(() => {
-          toast.success("PayPal Payment Completed Successfully!");
-          sessionStorage.removeItem("current_checkout_order_id");
-          refetch();
-        })
-        .catch((err: any) => {
-          // If already captured or error
-          if (!err?.message?.includes("already paid")) {
-            setCaptureError(err?.message || "Failed to capture PayPal payment");
-          }
-        })
-        .finally(() => {
-          setIsCapturing(false);
-        });
+    // If redirected from Paymob with success or transaction id
+    if (orderId && !isVerifying && !verifyError) {
+      if (paymobSuccess === "true" || transactionId) {
+        setIsVerifying(true);
+        verifyMutation
+          .mutateAsync({
+            orderId,
+            success: paymobSuccess === "true" || true,
+            transactionId: transactionId || undefined,
+          })
+          .then(() => {
+            toast.success("Paymob Payment Confirmed Successfully!");
+            sessionStorage.removeItem("current_checkout_order_id");
+            refetch();
+          })
+          .catch((err: any) => {
+            if (!err?.message?.includes("already paid")) {
+              setVerifyError(err?.message || "Payment verification failed");
+            }
+          })
+          .finally(() => {
+            setIsVerifying(false);
+          });
+      } else if (paymobSuccess === "false") {
+        setVerifyError("Payment was declined or cancelled on Paymob.");
+      }
     }
-  }, [paypalToken, orderId]);
+  }, [orderId, paymobSuccess, transactionId]);
 
-  if (isCapturing) {
+  if (isVerifying) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center px-4">
         <Loader2 className="w-12 h-12 animate-spin text-primary" />
         <h2 className="text-xl font-bold text-textPrimary">
-          Finalizing Your PayPal Payment...
+          Confirming Your Paymob Payment...
         </h2>
         <p className="text-xs text-textSecondary max-w-sm">
-          Please wait while we confirm your payment with PayPal and process your order.
+          Please wait while we verify your transaction and finalize your order.
         </p>
       </div>
     );
@@ -120,10 +127,10 @@ function SuccessContent() {
           </div>
         )}
 
-        {captureError && (
+        {verifyError && (
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs flex items-center gap-2 justify-center">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{captureError}</span>
+            <span>{verifyError}</span>
           </div>
         )}
 

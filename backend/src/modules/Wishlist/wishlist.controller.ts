@@ -27,7 +27,7 @@ const getWishlist = asyncHandler(
     } else {
       const validProducts = (wishlist.products || []).filter(Boolean);
       if (validProducts.length !== wishlist.products.length) {
-        wishlist.products = validProducts as any;
+        wishlist.products = validProducts;
         await wishlist.save();
       }
     }

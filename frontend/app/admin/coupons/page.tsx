@@ -17,6 +17,10 @@ import {
   X,
   Power,
   Clock,
+  Sliders,
+  Users,
+  UserCheck,
+  ShoppingBag,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -27,6 +31,7 @@ import {
 } from "@/features/coupons/hooks/useCoupons";
 import { Coupon, CreateCouponPayload } from "@/features/coupons/types/coupon.types";
 import { DeleteConfirmModal } from "@/features/products/components/DeleteConfirmModal";
+import { PRODUCT_CATEGORIES } from "@/features/products/types/categories";
 
 export default function AdminCouponsPage() {
   const [search, setSearch] = useState("");
@@ -225,19 +230,43 @@ export default function AdminCouponsPage() {
 
                       {/* Discount */}
                       <td className="px-4 py-3.5">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bgPrimary border border-borderPrimary text-xs font-bold text-textPrimary">
-                          {coupon.discountType === "percentage" ? (
-                            <>
-                              <Percent className="w-3.5 h-3.5 text-primary" />
-                              <span>{coupon.discountValue}% OFF</span>
-                            </>
-                          ) : (
-                            <>
-                              <Banknote className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>{coupon.discountValue} EGP OFF</span>
-                            </>
+                        <div className="space-y-1">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bgPrimary border border-borderPrimary text-xs font-bold text-textPrimary">
+                            {coupon.discountType === "percentage" ? (
+                              <>
+                                <Percent className="w-3.5 h-3.5 text-primary" />
+                                <span>{coupon.discountValue}% OFF</span>
+                              </>
+                            ) : (
+                              <>
+                                <Banknote className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>{coupon.discountValue} EGP OFF</span>
+                              </>
+                            )}
+                          </span>
+                          {Boolean(coupon.minOrderValue && coupon.minOrderValue > 0) && (
+                            <div className="text-[10.5px] text-textSecondary font-medium flex items-center gap-1">
+                              <span>Min. order:</span>
+                              <span className="text-textPrimary font-semibold">{coupon.minOrderValue} EGP</span>
+                            </div>
                           )}
-                        </span>
+                          {Boolean(
+                            coupon.applicableCategories &&
+                              coupon.applicableCategories.length > 0
+                          ) && (
+                            <div
+                              className="text-[10.5px] text-primary font-medium flex items-center gap-1 truncate max-w-[160px]"
+                              title={coupon.applicableCategories!.join(", ")}
+                            >
+                              <span className="text-textSecondary">Cats:</span>
+                              <span className="truncate">
+                                {coupon.applicableCategories!.length <= 2
+                                  ? coupon.applicableCategories!.join(", ")
+                                  : `${coupon.applicableCategories!.length} categories`}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </td>
 
                       {/* Usage */}
@@ -265,6 +294,20 @@ export default function AdminCouponsPage() {
                               style={{ width: `${usagePercent}%` }}
                             />
                           </div>
+                          <div className="flex items-center justify-between text-[10.5px] text-textSecondary pt-0.5">
+                            <span>Limit / user:</span>
+                            <span className="font-semibold text-textPrimary bg-bgPrimary px-1.5 py-0.5 rounded border border-borderPrimary/50">
+                              {coupon.usageLimitPerUser ?? 1}x
+                            </span>
+                          </div>
+                          {Boolean(coupon.maxUsersLimit && coupon.maxUsersLimit > 0) && (
+                            <div className="flex items-center justify-between text-[10.5px] text-textSecondary">
+                              <span>Max users:</span>
+                              <span className="font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded border border-primary/20">
+                                {coupon.usedBy?.length ?? 0} / {coupon.maxUsersLimit}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </td>
 
@@ -404,6 +447,10 @@ function CreateCouponModal({
     discountType: "percentage" as "percentage" | "fixed",
     discountValue: 10,
     usageLimit: 10,
+    usageLimitPerUser: 1,
+    minOrderValue: 0,
+    applicableCategories: [] as string[],
+    maxUsersLimit: "" as number | string,
     startDate: todayStr,
     expireDate: nextMonthStr,
     isActive: true,
@@ -442,6 +489,10 @@ function CreateCouponModal({
         discountType: formData.discountType,
         discountValue: Number(formData.discountValue),
         usageLimit: Number(formData.usageLimit) || 10,
+        usageLimitPerUser: Number(formData.usageLimitPerUser) || 1,
+        minOrderValue: Number(formData.minOrderValue) || 0,
+        applicableCategories: formData.applicableCategories,
+        maxUsersLimit: formData.maxUsersLimit ? Number(formData.maxUsersLimit) : null,
         startDate: formData.startDate,
         expireDate: formData.expireDate,
         isActive: formData.isActive,
@@ -457,7 +508,7 @@ function CreateCouponModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="w-full max-w-lg rounded-2xl border border-borderPrimary bg-bgSecondary p-6 shadow-2xl space-y-5">
+      <div className="w-full max-w-lg rounded-2xl border border-borderPrimary bg-bgSecondary p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-3 border-b border-borderPrimary">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-primary/10 text-primary">
@@ -590,6 +641,152 @@ function CreateCouponModal({
             </div>
           </div>
 
+          {/* Advanced Rules */}
+          <div className="rounded-xl border border-borderPrimary bg-bgPrimary/60 p-3.5 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-textPrimary">
+              <Sliders className="w-3.5 h-3.5 text-primary" />
+              <span>Advanced Usage Rules</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {/* Usage Limit Per User */}
+              <div>
+                <label className="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1.5">
+                  Per-User Limit
+                </label>
+                <div className="relative">
+                  <Users className="w-3.5 h-3.5 text-textSecondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="number"
+                    min={1}
+                    required
+                    value={formData.usageLimitPerUser}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        usageLimitPerUser: Math.max(1, Number(e.target.value)),
+                      })
+                    }
+                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary text-xs focus:outline-none focus:border-primary transition-colors"
+                    placeholder="1"
+                  />
+                </div>
+                <p className="text-[10px] text-textSecondary mt-1">
+                  Max uses per customer
+                </p>
+              </div>
+
+              {/* Min Order Value */}
+              <div>
+                <label className="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1.5">
+                  Min Order (EGP)
+                </label>
+                <div className="relative">
+                  <ShoppingBag className="w-3.5 h-3.5 text-textSecondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={formData.minOrderValue}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        minOrderValue: Math.max(0, Number(e.target.value)),
+                      })
+                    }
+                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary text-xs focus:outline-none focus:border-primary transition-colors"
+                    placeholder="0"
+                  />
+                </div>
+                <p className="text-[10px] text-textSecondary mt-1">
+                  0 = No minimum required
+                </p>
+              </div>
+
+              {/* Max Customers Limit */}
+              <div className="col-span-2">
+                <label className="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1.5">
+                  Max Unique Customers Limit
+                </label>
+                <div className="relative">
+                  <UserCheck className="w-3.5 h-3.5 text-textSecondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.maxUsersLimit}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        maxUsersLimit:
+                          e.target.value === ""
+                            ? ""
+                            : Math.max(1, Number(e.target.value)),
+                      })
+                    }
+                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary text-xs focus:outline-none focus:border-primary transition-colors"
+                    placeholder="Leave empty for unlimited customers"
+                  />
+                </div>
+                <p className="text-[10px] text-textSecondary mt-1">
+                  Limits how many different customers can ever use this coupon (optional).
+                </p>
+              </div>
+
+              {/* Applicable Categories */}
+              <div className="col-span-2 pt-2 border-t border-borderPrimary/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-textSecondary uppercase tracking-wider">
+                    Applicable Categories
+                  </label>
+                  <span className="text-[10px] text-textSecondary">
+                    {formData.applicableCategories.length === 0
+                      ? "All categories allowed"
+                      : `${formData.applicableCategories.length} selected`}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-1 bg-bgPrimary/40 rounded-xl border border-borderPrimary/40">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, applicableCategories: [] })}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      formData.applicableCategories.length === 0
+                        ? "bg-primary text-black shadow-sm"
+                        : "bg-bgSecondary text-textSecondary hover:text-textPrimary border border-borderPrimary"
+                    }`}
+                  >
+                    All Categories
+                  </button>
+                  {PRODUCT_CATEGORIES.map((cat) => {
+                    const isSelected = formData.applicableCategories.includes(cat);
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          const exists = formData.applicableCategories.includes(cat);
+                          const updated = exists
+                            ? formData.applicableCategories.filter((c) => c !== cat)
+                            : [...formData.applicableCategories, cat];
+                          setFormData({ ...formData, applicableCategories: updated });
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                          isSelected
+                            ? "bg-primary/20 text-primary border border-primary/50 font-bold"
+                            : "bg-bgSecondary text-textSecondary hover:text-textPrimary border border-borderPrimary"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-textSecondary">
+                  Leave on "All Categories" or click specific categories to restrict coupon usage.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Status Checkbox */}
           <label className="flex items-center gap-2.5 cursor-pointer pt-1">
             <input
@@ -650,6 +847,10 @@ function EditCouponModal({
     discountType: coupon.discountType,
     discountValue: coupon.discountValue,
     usageLimit: coupon.usageLimit,
+    usageLimitPerUser: coupon.usageLimitPerUser ?? 1,
+    minOrderValue: coupon.minOrderValue ?? 0,
+    applicableCategories: coupon.applicableCategories ?? ([] as string[]),
+    maxUsersLimit: (coupon.maxUsersLimit ?? "") as number | string,
     startDate: new Date(coupon.startDate).toISOString().split("T")[0],
     expireDate: new Date(coupon.expireDate).toISOString().split("T")[0],
     isActive: coupon.isActive,
@@ -685,6 +886,10 @@ function EditCouponModal({
           discountType: formData.discountType,
           discountValue: Number(formData.discountValue),
           usageLimit: Number(formData.usageLimit),
+          usageLimitPerUser: Number(formData.usageLimitPerUser) || 1,
+          minOrderValue: Number(formData.minOrderValue) || 0,
+          applicableCategories: formData.applicableCategories,
+          maxUsersLimit: formData.maxUsersLimit ? Number(formData.maxUsersLimit) : null,
           startDate: formData.startDate,
           expireDate: formData.expireDate,
           isActive: formData.isActive,
@@ -699,7 +904,7 @@ function EditCouponModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="w-full max-w-lg rounded-2xl border border-borderPrimary bg-bgSecondary p-6 shadow-2xl space-y-5">
+      <div className="w-full max-w-lg rounded-2xl border border-borderPrimary bg-bgSecondary p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-3 border-b border-borderPrimary">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-primary/10 text-primary">
@@ -833,6 +1038,152 @@ function EditCouponModal({
                 onChange={(e) => setFormData({ ...formData, expireDate: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary focus:outline-none focus:border-primary transition-colors"
               />
+            </div>
+          </div>
+
+          {/* Advanced Rules */}
+          <div className="rounded-xl border border-borderPrimary bg-bgPrimary/60 p-3.5 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-textPrimary">
+              <Sliders className="w-3.5 h-3.5 text-primary" />
+              <span>Advanced Usage Rules</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {/* Usage Limit Per User */}
+              <div>
+                <label className="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1.5">
+                  Per-User Limit
+                </label>
+                <div className="relative">
+                  <Users className="w-3.5 h-3.5 text-textSecondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="number"
+                    min={1}
+                    required
+                    value={formData.usageLimitPerUser}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        usageLimitPerUser: Math.max(1, Number(e.target.value)),
+                      })
+                    }
+                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary text-xs focus:outline-none focus:border-primary transition-colors"
+                    placeholder="1"
+                  />
+                </div>
+                <p className="text-[10px] text-textSecondary mt-1">
+                  Max uses per customer
+                </p>
+              </div>
+
+              {/* Min Order Value */}
+              <div>
+                <label className="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1.5">
+                  Min Order (EGP)
+                </label>
+                <div className="relative">
+                  <ShoppingBag className="w-3.5 h-3.5 text-textSecondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={formData.minOrderValue}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        minOrderValue: Math.max(0, Number(e.target.value)),
+                      })
+                    }
+                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary text-xs focus:outline-none focus:border-primary transition-colors"
+                    placeholder="0"
+                  />
+                </div>
+                <p className="text-[10px] text-textSecondary mt-1">
+                  0 = No minimum required
+                </p>
+              </div>
+
+              {/* Max Customers Limit */}
+              <div className="col-span-2">
+                <label className="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1.5">
+                  Max Unique Customers Limit
+                </label>
+                <div className="relative">
+                  <UserCheck className="w-3.5 h-3.5 text-textSecondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.maxUsersLimit}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        maxUsersLimit:
+                          e.target.value === ""
+                            ? ""
+                            : Math.max(1, Number(e.target.value)),
+                      })
+                    }
+                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary text-xs focus:outline-none focus:border-primary transition-colors"
+                    placeholder="Leave empty for unlimited customers"
+                  />
+                </div>
+                <p className="text-[10px] text-textSecondary mt-1">
+                  Limits how many different customers can ever use this coupon (optional).
+                </p>
+              </div>
+
+              {/* Applicable Categories */}
+              <div className="col-span-2 pt-2 border-t border-borderPrimary/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-textSecondary uppercase tracking-wider">
+                    Applicable Categories
+                  </label>
+                  <span className="text-[10px] text-textSecondary">
+                    {formData.applicableCategories.length === 0
+                      ? "All categories allowed"
+                      : `${formData.applicableCategories.length} selected`}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-1 bg-bgPrimary/40 rounded-xl border border-borderPrimary/40">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, applicableCategories: [] })}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      formData.applicableCategories.length === 0
+                        ? "bg-primary text-black shadow-sm"
+                        : "bg-bgSecondary text-textSecondary hover:text-textPrimary border border-borderPrimary"
+                    }`}
+                  >
+                    All Categories
+                  </button>
+                  {PRODUCT_CATEGORIES.map((cat) => {
+                    const isSelected = formData.applicableCategories.includes(cat);
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          const exists = formData.applicableCategories.includes(cat);
+                          const updated = exists
+                            ? formData.applicableCategories.filter((c) => c !== cat)
+                            : [...formData.applicableCategories, cat];
+                          setFormData({ ...formData, applicableCategories: updated });
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                          isSelected
+                            ? "bg-primary/20 text-primary border border-primary/50 font-bold"
+                            : "bg-bgSecondary text-textSecondary hover:text-textPrimary border border-borderPrimary"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-textSecondary">
+                  Leave on "All Categories" or click specific categories to restrict coupon usage.
+                </p>
+              </div>
             </div>
           </div>
 

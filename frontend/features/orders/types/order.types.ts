@@ -35,7 +35,7 @@ export interface IPaymentResult {
 }
 
 export interface IPayment {
-  paymentMethod: "Paypal" | "Stripe" | "COD";
+  paymentMethod: "Paymob" | "COD" | "Stripe" | "Paypal";
   isPaid: boolean;
   paidAt?: string;
   paymentResult?: IPaymentResult;
@@ -68,10 +68,11 @@ export interface CreateOrderPayload {
     postalCode: string;
     phone: string;
   };
-  paymentMethod: "Paypal" | "Stripe" | "COD";
+  paymentMethod: "Paymob" | "COD" | "Stripe" | "Paypal";
 }
 
-export interface CreatePayPalOrderResponse {
-  paypalOrderId: string;
-  approvalUrl?: string;
+export interface CreatePaymobOrderResponse {
+  orderId: string;
+  checkoutUrl: string;
+  clientSecret?: string;
 }

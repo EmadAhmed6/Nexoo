@@ -2,7 +2,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/axios-client";
 import {
   Order,
   CreateOrderPayload,
-  CreatePayPalOrderResponse,
+  CreatePaymobOrderResponse,
 } from "../types/order.types";
 
 export const orderApi = {
@@ -28,26 +28,31 @@ export const orderApi = {
   },
 
   /**
-   * POST /orders/paypal/create — Generate PayPal transaction and approval link
+   * POST /orders/paymob/create — Generate Paymob transaction and checkout link
    */
-  createPayPalOrder: async (orderId: string) => {
-    return apiPost<CreatePayPalOrderResponse, { orderId: string }>(
-      "/orders/paypal/create",
+  createPaymobOrder: async (orderId: string) => {
+    return apiPost<CreatePaymobOrderResponse, { orderId: string }>(
+      "/orders/paymob/create",
       { orderId },
     );
   },
 
   /**
-   * POST /orders/paypal/capture — Capture PayPal funds after buyer approval
+   * POST /orders/paymob/verify — Verify Paymob payment outcome
    */
-  capturePayPalPayment: async (payload: {
-    paypalOrderId: string;
+  verifyPaymobPayment: async (payload: {
     orderId: string;
+    success?: boolean | string;
+    transactionId?: string | number;
   }) => {
-    return apiPost<Order, { paypalOrderId: string; orderId: string }>(
-      "/orders/paypal/capture",
-      payload,
-    );
+    return apiPost<
+      Order,
+      {
+        orderId: string;
+        success?: boolean | string;
+        transactionId?: string | number;
+      }
+    >("/orders/paymob/verify", payload);
   },
 
   /**

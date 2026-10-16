@@ -62,23 +62,24 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 19  | POST   | `/wishlist/:productId`   | Add product to user's wishlist                                                 |  🔒  |
 | 20  | DELETE | `/wishlist/:productId`   | Remove product from user's wishlist                                            |  🔒  |
 | 21  | DELETE | `/wishlist`              | Clear entire user wishlist                                                     |  🔒  |
-| 22  | POST   | `/orders`                | Create new order from user's current cart                                      |  🔒  |
-| 23  | GET    | `/orders`                | Retrieve list of all orders belonging to authenticated user                    |  🔒  |
-| 24  | GET    | `/orders/:orderId`       | Retrieve single order details by ID                                            |  🔒  |
-| 25  | POST   | `/orders/paypal/create`  | Create PayPal transaction and obtain approval redirect URL                     |  🔒  |
-| 26  | POST   | `/orders/paypal/capture` | Capture PayPal payment after buyer approval                                    |  🔒  |
-| 27  | PUT    | `/orders/:orderId`       | Update shipping address or payment method of pending order                     |  🔒  |
-| 28  | DELETE | `/orders/:orderId`       | Cancel and delete a pending order                                              |  🔒  |
-| 29  | GET    | `/coupons`               | Retrieve list of all coupons (Admin only)                                      |  🔒  |
-| 30  | POST   | `/coupons`               | Create a new discount coupon (Admin only)                                      |  🔒  |
-| 31  | POST   | `/coupons/apply`         | Apply coupon code to user cart and recalculate prices                          |  🔒  |
-| 32  | DELETE | `/coupons/remove`        | Remove applied coupon from user cart                                           |  🔒  |
-| 33  | PUT    | `/coupons/:couponId`     | Update coupon details, validity dates, or status (Admin only)                  |  🔒  |
-| 34  | DELETE | `/coupons/:couponId`     | Delete unused coupon (Admin only)                                              |  🔒  |
-| 35  | GET    | `/reviews/:productId`    | Retrieve all reviews and ratings for a product with reviewer details           |  ❌  |
-| 36  | POST   | `/reviews/:productId`    | Submit a new review or update existing review (recalculates product ratings)   |  🔒  |
-| 37  | PUT    | `/reviews/:reviewId`     | Update review rating or text (Review Owner, Admin, or SuperAdmin)              |  🔒  |
-| 38  | DELETE | `/reviews/:reviewId`     | Delete a review permanently and recalculate product stats (Owner or Admin)     |  🔒  |
+| 22  | POST   | `/orders`                   | Create new order from user's current cart                                         |  🔒  |
+| 23  | GET    | `/orders`                   | Retrieve list of all orders belonging to authenticated user                       |  🔒  |
+| 24  | GET    | `/orders/:orderId`          | Retrieve single order details by ID                                               |  🔒  |
+| 25  | POST   | `/orders/paymob/create`     | Initiate Paymob Unified Checkout session and obtain `checkoutUrl`                 |  🔒  |
+| 26  | POST   | `/orders/paymob/verify`     | Verify Paymob payment after customer redirect and mark order as paid              |  🔒  |
+| 27  | POST   | `/orders/paymob/webhook`    | Paymob server-to-server webhook to automatically confirm payment                  |  ❌  |
+| 28  | PUT    | `/orders/:orderId`          | Update shipping address or payment method of pending order                        |  🔒  |
+| 29  | DELETE | `/orders/:orderId`          | Cancel and delete a pending order                                                 |  🔒  |
+| 30  | GET    | `/coupons`                  | Retrieve list of all coupons (Admin only)                                         |  🔒  |
+| 31  | POST   | `/coupons`                  | Create a new discount coupon with advanced limits (Admin only)                    |  🔒  |
+| 32  | POST   | `/coupons/apply`            | Apply coupon code to user cart and recalculate prices                             |  🔒  |
+| 33  | DELETE | `/coupons/remove`           | Remove applied coupon from user cart                                              |  🔒  |
+| 34  | PUT    | `/coupons/:couponId`        | Update coupon details, limits, validity dates, or status (Admin only)             |  🔒  |
+| 35  | DELETE | `/coupons/:couponId`        | Delete unused coupon (Admin only)                                                 |  🔒  |
+| 36  | GET    | `/reviews/:productId`       | Retrieve all reviews and ratings for a product with reviewer details              |  ❌  |
+| 37  | POST   | `/reviews/:productId`       | Submit a new review or update existing review (recalculates product ratings)      |  🔒  |
+| 38  | PUT    | `/reviews/:reviewId`        | Update review rating or text (Review Owner, Admin, or SuperAdmin)                 |  🔒  |
+| 39  | DELETE | `/reviews/:reviewId`        | Delete a review permanently and recalculate product stats (Owner or Admin)        |  🔒  |
 
 ---
 
@@ -1602,7 +1603,7 @@ Create a new order from the items currently in the authenticated user's cart. Up
 | `shippingAddress.country`    | string |    ✅    | Country name (Min 2 chars).                               |
 | `shippingAddress.postalCode` | string |    ✅    | Exactly 5 digits postal code (e.g. `11371`).              |
 | `shippingAddress.phone`      | string |    ✅    | Phone number starting with `01` (11 digits).              |
-| `paymentMethod`              | string |    ✅    | Payment method enum: `"Paypal"`, `"Stripe"`, or `"COD"`. |
+| `paymentMethod`              | string |    ✅    | Payment method enum: `"Paymob"` or `"COD"`. |
 
 ```json
 {
@@ -1614,7 +1615,7 @@ Create a new order from the items currently in the authenticated user's cart. Up
     "postalCode": "11371",
     "phone": "01012345678"
   },
-  "paymentMethod": "Paypal"
+  "paymentMethod": "Paymob"
 }
 ```
 
@@ -1660,7 +1661,7 @@ Order created successfully.
       "totalOrderPrice": 5000
     },
     "payment": {
-      "paymentMethod": "Paypal",
+      "paymentMethod": "Paymob",
       "isPaid": false
     },
     "orderStatus": {
@@ -1752,7 +1753,7 @@ Orders fetched successfully.
         "totalOrderPrice": 5000
       },
       "payment": {
-        "paymentMethod": "Paypal",
+        "paymentMethod": "Paymob",
         "isPaid": true,
         "paidAt": "2026-10-11T14:32:00.000Z"
       },
@@ -1838,7 +1839,7 @@ Order fetched successfully.
       "totalOrderPrice": 5000
     },
     "payment": {
-      "paymentMethod": "Paypal",
+      "paymentMethod": "Paymob",
       "isPaid": true,
       "paidAt": "2026-10-11T14:32:00.000Z"
     },
@@ -1876,9 +1877,11 @@ Order was not found.
 
 ---
 
-### POST /orders/paypal/create
+### POST /orders/paymob/create
 
-Initialize a PayPal checkout session for an unpaid order and retrieve the approval URL for customer redirect.
+Initiate a **Paymob Unified Checkout** session for an existing unpaid order. Returns a `checkoutUrl` to redirect the customer to Paymob's hosted payment page where they can pay by card or mobile wallet.
+
+> **How it works:** Backend calls `POST https://accept.paymob.com/v1/intention/` with the order amount and customer billing data. Paymob responds with a `client_secret` used to build the `checkoutUrl`. After the customer completes payment on Paymob, they are redirected back to `{FRONTEND_URL}/checkout/success?orderId={orderId}&success=true&id={transactionId}`.
 
 #### Request Headers
 
@@ -1903,27 +1906,131 @@ Initialize a PayPal checkout session for an unpaid order and retrieve the approv
 
 ##### Response 200
 
-PayPal order created successfully.
+Paymob checkout session created successfully.
 
 ```json
 {
   "status": "success",
-  "message": "PayPal order created successfully",
+  "message": "Paymob payment session created successfully",
   "data": {
-    "paypalOrderId": "5O190127TN364715T",
-    "approvalUrl": "https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T"
+    "orderId": "67092147385a812bf0e54321",
+    "checkoutUrl": "https://accept.paymob.com/unifiedcheckout/?publicKey=egy_pk_test_...&clientSecret=egy_cs_...",
+    "clientSecret": "egy_cs_test_..."
   }
 }
 ```
 
 ##### Response 400
 
-This order is already paid.
+Order is already paid.
 
 ```json
 {
   "status": "fail",
   "message": "This order is already paid"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+Order not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
+}
+```
+
+##### Response 500
+
+Failed to initialize Paymob session (e.g. invalid credentials or Paymob API error).
+
+```json
+{
+  "status": "fail",
+  "message": "Failed to initialize Paymob payment"
+}
+```
+
+---
+
+### POST /orders/paymob/verify
+
+Verify the outcome of a Paymob payment after the customer is redirected back to the frontend. If `success=true`, the order's `isPaid` is set to `true`, `paidAt` is recorded, and `orderStatus` transitions to `Processing`.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
+
+#### Request Body
+
+| Field           | Type            | Required | Description                                                      |
+| :-------------- | :-------------- | :------: | :--------------------------------------------------------------- |
+| `orderId`       | string          |    ✅    | The Nexoo order ID to verify.                                    |
+| `success`       | boolean\|string |    ❌    | `true` / `"true"` if Paymob reported payment success.           |
+| `transactionId` | string          |    ❌    | The Paymob transaction ID returned in the redirect query string. |
+
+```json
+{
+  "orderId": "67092147385a812bf0e54321",
+  "success": "true",
+  "transactionId": "12345678"
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Payment verified and order marked as paid.
+
+```json
+{
+  "status": "success",
+  "message": "Payment verified successfully",
+  "data": {
+    "_id": "67092147385a812bf0e54321",
+    "payment": {
+      "paymentMethod": "Paymob",
+      "isPaid": true,
+      "paidAt": "2026-10-11T14:32:00.000Z",
+      "paymentResult": {
+        "id": "12345678",
+        "status": "SUCCESS",
+        "update_time": "2026-10-11T14:32:00.000Z"
+      }
+    },
+    "orderStatus": {
+      "status": "Processing",
+      "isDelivered": false
+    }
+  }
+}
+```
+
+##### Response 400
+
+Payment was not successful or verification failed.
+
+```json
+{
+  "status": "fail",
+  "message": "Payment verification failed or payment was not successful"
 }
 ```
 
@@ -1951,90 +2058,37 @@ Order not found.
 
 ---
 
-### POST /orders/paypal/capture
+### POST /orders/paymob/webhook
 
-Capture payment funds after the customer approves the transaction on PayPal. Updates the order payment status to paid and transitions order status to `Processing`.
+Server-to-server webhook endpoint called by Paymob to notify payment status automatically. **Does not require user authentication** — Paymob calls this directly from its servers. Extracts `special_reference` (your order ID) and `success` flag from the payload and marks the order as paid if successful.
+
+> ⚠️ Configure this URL in your Paymob dashboard under **Transaction Processed Callback**: `{YOUR_BACKEND_URL}/orders/paymob/webhook`
 
 #### Request Headers
 
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
-| `Content-Type`  | `application/json`        |
+| Header         | Value              |
+| :------------- | :----------------- |
+| `Content-Type` | `application/json` |
 
-#### Request Body
+#### Request Body (sent by Paymob)
 
-| Field           | Type   | Required | Description                            |
-| :-------------- | :----- | :------: | :------------------------------------- |
-| `paypalOrderId` | string |    ✅    | The PayPal transaction ID to capture.  |
-| `orderId`       | string |    ✅    | The Nexo order ID to mark as paid.     |
+Paymob sends a nested `obj` structure. The key fields read by the handler:
 
-```json
-{
-  "paypalOrderId": "5O190127TN364715T",
-  "orderId": "67092147385a812bf0e54321"
-}
-```
+| Field                         | Description                                           |
+| :---------------------------- | :---------------------------------------------------- |
+| `obj.success`                 | `true` if payment was captured successfully.          |
+| `obj.order.special_reference` | Your internal order ID (set during intention create). |
+| `obj.id`                      | Paymob transaction ID.                                |
 
 #### Responses
 
 ##### Response 200
 
-Payment captured successfully.
+Webhook received (always returned regardless of payment outcome).
 
 ```json
 {
-  "status": "success",
-  "message": "Payment captured successfully",
-  "data": {
-    "_id": "67092147385a812bf0e54321",
-    "payment": {
-      "paymentMethod": "Paypal",
-      "isPaid": true,
-      "paidAt": "2026-10-11T14:32:00.000Z",
-      "paymentResult": {
-        "id": "5O190127TN364715T",
-        "status": "COMPLETED"
-      }
-    },
-    "orderStatus": {
-      "status": "Processing",
-      "isDelivered": false
-    }
-  }
-}
-```
-
-##### Response 400
-
-Payment capture failed or order already paid.
-
-```json
-{
-  "status": "fail",
-  "message": "This order is already paid"
-}
-```
-
-##### Response 401
-
-Unauthorized. Missing or invalid token.
-
-```json
-{
-  "status": "fail",
-  "message": "Unauthorized"
-}
-```
-
-##### Response 404
-
-Order not found.
-
-```json
-{
-  "status": "fail",
-  "message": "Order not found"
+  "status": "received"
 }
 ```
 
@@ -2067,7 +2121,7 @@ Update shipping address or payment method for an order that is still in `Pending
 | `shippingAddress.country`    | string |    ❌    | Updated country name.                                        |
 | `shippingAddress.postalCode` | string |    ❌    | Updated 5-digit postal code.                                 |
 | `shippingAddress.phone`      | string |    ❌    | Updated phone number (11 digits, starts with `01`).          |
-| `paymentMethod`              | string |    ❌    | Updated payment method: `"Paypal"`, `"Stripe"`, or `"COD"`. |
+| `paymentMethod`              | string |    ❌    | Updated payment method: `"Paymob"` or `"COD"`. |
 
 ```json
 {
@@ -2245,7 +2299,14 @@ Coupons fetched successfully.
       "discountType": "percentage",
       "discountValue": 20,
       "usageLimit": 50,
+      "usageLimitPerUser": 1,
+      "minOrderValue": 200,
+      "applicableCategories": ["electronics", "watches"],
+      "maxUsersLimit": 30,
       "usedCount": 4,
+      "usedBy": [
+        { "user": "664fa1e2b5c7e1234567890b", "count": 1 }
+      ],
       "isActive": true,
       "startDate": "2026-06-01T00:00:00.000Z",
       "expireDate": "2026-08-31T23:59:59.000Z",
@@ -2293,22 +2354,30 @@ Create a new discount coupon. **Admin or SuperAdmin only.**
 
 #### Request Body
 
-| Field           | Type    | Required | Description                                                                    |
-| :-------------- | :------ | :------: | :----------------------------------------------------------------------------- |
-| `couponCode`    | string  |    ✅    | Unique coupon identifier code (case-insensitive, auto-uppercased).             |
-| `discountType`  | string  |    ✅    | Either `"percentage"` or `"fixed"`.                                            |
-| `discountValue` | number  |    ✅    | Value of discount (1-100 for percentage, > 0 for fixed amount).                |
-| `usageLimit`    | number  |    ❌    | Maximum number of times the coupon can be redeemed (Default: `10`).            |
-| `startDate`     | string  |    ✅    | ISO date string indicating when coupon validity begins.                        |
-| `expireDate`    | string  |    ✅    | ISO date string indicating when coupon expires (must be after `startDate`).    |
-| `isActive`      | boolean |    ❌    | Whether the coupon is immediately active (Default: `true`).                    |
+| Field                   | Type     | Required | Description                                                                                   |
+| :---------------------- | :------- | :------: | :-------------------------------------------------------------------------------------------- |
+| `couponCode`            | string   |    ✅    | Unique coupon identifier code (case-insensitive, auto-uppercased).                            |
+| `discountType`          | string   |    ✅    | Either `"percentage"` or `"fixed"`.                                                           |
+| `discountValue`         | number   |    ✅    | Value of discount (1–100 for percentage, > 0 for fixed amount in EGP).                       |
+| `usageLimit`            | number   |    ❌    | Maximum total number of times the coupon can be redeemed globally (Default: `10`).            |
+| `usageLimitPerUser`     | number   |    ❌    | Maximum times a **single user** can redeem this coupon (Default: `1`).                        |
+| `minOrderValue`         | number   |    ❌    | Minimum cart total (EGP) required to apply the coupon (Default: `0` = no minimum).            |
+| `applicableCategories`  | string[] |    ❌    | Array of category strings the coupon is restricted to. Empty = applies to all categories.     |
+| `maxUsersLimit`         | number   |    ❌    | Maximum number of **unique users** who can ever use this coupon. `null` = unlimited.          |
+| `startDate`             | string   |    ✅    | ISO date string indicating when coupon validity begins.                                       |
+| `expireDate`            | string   |    ✅    | ISO date string indicating when coupon expires (must be after `startDate`).                   |
+| `isActive`              | boolean  |    ❌    | Whether the coupon is immediately active (Default: `true`).                                   |
 
 ```json
 {
-  "couponCode": "WELCOME10",
+  "couponCode": "WATCH20",
   "discountType": "percentage",
-  "discountValue": 10,
+  "discountValue": 20,
   "usageLimit": 100,
+  "usageLimitPerUser": 1,
+  "minOrderValue": 500,
+  "applicableCategories": ["watches", "accessories"],
+  "maxUsersLimit": 50,
   "startDate": "2026-10-01",
   "expireDate": "2026-12-31",
   "isActive": true
@@ -2327,11 +2396,16 @@ Coupon created successfully.
   "message": "Coupon created successfully",
   "data": {
     "_id": "673f8e4b1a2b3c4d5e6f7a8b",
-    "couponCode": "WELCOME10",
+    "couponCode": "WATCH20",
     "discountType": "percentage",
-    "discountValue": 10,
+    "discountValue": 20,
     "usageLimit": 100,
+    "usageLimitPerUser": 1,
+    "minOrderValue": 500,
+    "applicableCategories": ["watches", "accessories"],
+    "maxUsersLimit": 50,
     "usedCount": 0,
+    "usedBy": [],
     "isActive": true,
     "startDate": "2026-10-01T00:00:00.000Z",
     "expireDate": "2026-12-31T00:00:00.000Z",
@@ -2378,7 +2452,7 @@ Requester does not have Admin or SuperAdmin role.
 
 ### POST /coupons/apply
 
-Apply a discount coupon to the authenticated user's current shopping cart and calculate the new total price.
+Apply a discount coupon to the authenticated user's current shopping cart and calculate the new total price. The controller enforces all constraints: active status, date range, global usage limit, per-user usage limit, minimum order value, max unique users limit, and applicable categories.
 
 #### Request Headers
 
@@ -2395,7 +2469,7 @@ Apply a discount coupon to the authenticated user's current shopping cart and ca
 
 ```json
 {
-  "couponCode": "WELCOME10"
+  "couponCode": "WATCH20"
 }
 ```
 
@@ -2410,22 +2484,32 @@ Coupon applied successfully.
   "status": "success",
   "message": "Coupon applied successfully",
   "data": {
-    "originalTotal": 1250,
-    "discountAmount": 125,
-    "finalPrice": 1125,
-    "couponCode": "WELCOME10"
+    "originalTotal": 1500,
+    "discountAmount": 300,
+    "finalPrice": 1200,
+    "couponCode": "WATCH20"
   }
 }
 ```
 
 ##### Response 400
 
-Coupon is inactive, has expired, or exceeded its usage limit.
+One of the following validation failures:
+
+| Condition | Message |
+| :-------- | :------ |
+| Coupon inactive | `"Coupon is not active"` |
+| Outside validity dates | `"Coupon has expired"` |
+| Global usage limit reached | `"Coupon usage limit exceeded"` |
+| User already used coupon `usageLimitPerUser` times | `"You have already used this coupon"` |
+| Cart total < `minOrderValue` | `"Minimum order value required is {n}"` |
+| Max unique users limit reached | `"Coupon has reached its maximum user limit"` |
+| No cart items match `applicableCategories` | `"Coupon not applicable to your cart items"` |
 
 ```json
 {
   "status": "fail",
-  "message": "Coupon has expired"
+  "message": "Minimum order value required is 500"
 }
 ```
 
@@ -2520,19 +2604,27 @@ Update details, dates, or active status of an existing coupon. **Admin or SuperA
 
 #### Request Body
 
-| Field           | Type    | Required | Description                         |
-| :-------------- | :------ | :------: | :---------------------------------- |
-| `couponCode`    | string  |    ❌    | New unique coupon code.             |
-| `discountType`  | string  |    ❌    | Either `"percentage"` or `"fixed"`. |
-| `discountValue` | number  |    ❌    | New discount numeric value.         |
-| `usageLimit`    | number  |    ❌    | New maximum usage limit.            |
-| `startDate`     | string  |    ❌    | New validity start date (ISO).      |
-| `expireDate`    | string  |    ❌    | New validity expiration date (ISO). |
-| `isActive`      | boolean |    ❌    | Activate or deactivate coupon.      |
+All fields are optional — only send the fields you want to update.
+
+| Field                  | Type     | Required | Description                                                                          |
+| :--------------------- | :------- | :------: | :----------------------------------------------------------------------------------- |
+| `couponCode`           | string   |    ❌    | New unique coupon code (auto-uppercased).                                            |
+| `discountType`         | string   |    ❌    | Either `"percentage"` or `"fixed"`.                                                  |
+| `discountValue`        | number   |    ❌    | New discount numeric value.                                                          |
+| `usageLimit`           | number   |    ❌    | New maximum global usage limit.                                                      |
+| `usageLimitPerUser`    | number   |    ❌    | New per-user usage cap.                                                              |
+| `minOrderValue`        | number   |    ❌    | New minimum cart total required.                                                     |
+| `applicableCategories` | string[] |    ❌    | New category restriction list. Send `[]` to remove restriction.                      |
+| `maxUsersLimit`        | number\|null |    ❌ | New unique user cap. Send `null` to remove limit.                               |
+| `startDate`            | string   |    ❌    | New validity start date (ISO).                                                       |
+| `expireDate`           | string   |    ❌    | New validity expiration date (ISO).                                                  |
+| `isActive`             | boolean  |    ❌    | Activate or deactivate coupon.                                                       |
 
 ```json
 {
-  "isActive": false
+  "isActive": false,
+  "minOrderValue": 1000,
+  "applicableCategories": ["watches"]
 }
 ```
 
@@ -2548,11 +2640,15 @@ Coupon updated successfully.
   "message": "Coupon updated successfully",
   "data": {
     "_id": "673f8e4b1a2b3c4d5e6f7a8b",
-    "couponCode": "WELCOME10",
+    "couponCode": "WATCH20",
     "discountType": "percentage",
-    "discountValue": 10,
+    "discountValue": 20,
     "usageLimit": 100,
-    "usedCount": 0,
+    "usageLimitPerUser": 1,
+    "minOrderValue": 1000,
+    "applicableCategories": ["watches"],
+    "maxUsersLimit": 50,
+    "usedCount": 4,
     "isActive": false,
     "startDate": "2026-10-01T00:00:00.000Z",
     "expireDate": "2026-12-31T00:00:00.000Z",

@@ -17,7 +17,7 @@ export default function CheckoutCancelPage() {
             Payment Cancelled
           </h1>
           <p className="text-xs sm:text-sm text-textSecondary max-w-sm mx-auto">
-            You cancelled the PayPal transaction. No charges were made to your account.
+            You cancelled the payment transaction. No charges were made to your account.
           </p>
         </div>
 

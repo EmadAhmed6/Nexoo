@@ -20,18 +20,19 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useCart } from "@/features/cart/hooks/useCart";
 import {
   useCreateOrder,
-  useCreatePayPalOrder,
+  useCreatePaymobOrder,
 } from "@/features/orders/hooks/useOrders";
+import { useCart } from "@/features/cart/hooks/useCart";
+import { CartItem } from "@/features/cart/types/cart.types";
 import { Text } from "@/_components/shared/Text";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { data: cart, isLoading: isCartLoading } = useCart();
   const createOrderMutation = useCreateOrder();
-  const createPayPalMutation = useCreatePayPalOrder();
+  const createPaymobMutation = useCreatePaymobOrder();
 
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("Cairo");
@@ -39,13 +40,11 @@ export default function CheckoutPage() {
   const [country, setCountry] = useState("Egypt");
   const [postalCode, setPostalCode] = useState("11371");
   const [phone, setPhone] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<
-    "Paypal" | "Stripe" | "COD"
-  >("Paypal");
+  const [paymentMethod, setPaymentMethod] = useState<"Paymob" | "COD">("Paymob");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cartItems = (cart?.cartItems ?? []).filter(
-    (item) => Boolean(item && item.product),
+    (item: CartItem) => Boolean(item && item.product),
   );
   const totalPrice = cart?.totalPrice ?? 0;
 
@@ -100,14 +99,14 @@ export default function CheckoutPage() {
         throw new Error("Failed to create order");
       }
 
-      // If PayPal, initialize transaction and redirect to approval URL
-      if (paymentMethod === "Paypal") {
-        toast.info("Connecting to PayPal...");
+      // If Paymob, initialize transaction and redirect to Paymob checkout URL
+      if (paymentMethod === "Paymob") {
+        toast.info("Connecting to secure Paymob payment gateway...");
         sessionStorage.setItem("current_checkout_order_id", createdOrder._id);
 
-        const paypalRes = await createPayPalMutation.mutateAsync(createdOrder._id);
-        if (paypalRes.data?.approvalUrl) {
-          window.location.href = paypalRes.data.approvalUrl;
+        const paymobRes = await createPaymobMutation.mutateAsync(createdOrder._id);
+        if (paymobRes.data?.checkoutUrl) {
+          window.location.href = paymobRes.data.checkoutUrl;
           return;
         } else {
           toast.success("Order created! Proceeding to order details.");
@@ -305,27 +304,32 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* PayPal option */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Paymob option */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("Paypal")}
-                  className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
-                    paymentMethod === "Paypal"
-                      ? "border-primary bg-primary/10 shadow-sm"
+                  onClick={() => setPaymentMethod("Paymob")}
+                  className={`p-5 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
+                    paymentMethod === "Paymob"
+                      ? "border-primary bg-primary/10 shadow-md ring-1 ring-primary/30"
                       : "border-borderPrimary bg-bgPrimary hover:border-primary/40"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-black text-sm text-[#0079C1] dark:text-[#009cde]">
-                      PayPal
-                    </span>
-                    {paymentMethod === "Paypal" && (
-                      <CheckCircle2 className="w-4 h-4 text-primary" />
+                    <div className="flex items-center gap-2">
+                      <span className="font-black text-sm text-textPrimary tracking-wide">
+                        Card / Wallets (Paymob)
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                        Fast & Secure
+                      </span>
+                    </div>
+                    {paymentMethod === "Paymob" && (
+                      <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
                     )}
                   </div>
-                  <p className="text-[11px] text-textSecondary leading-snug">
-                    Pay securely with PayPal or Credit Card.
+                  <p className="text-xs text-textSecondary leading-relaxed">
+                    Pay securely using Visa, MasterCard, Meeza, or Smart Mobile Wallets.
                   </p>
                 </button>
 
@@ -333,9 +337,9 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod("COD")}
-                  className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                  className={`p-5 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
                     paymentMethod === "COD"
-                      ? "border-primary bg-primary/10 shadow-sm"
+                      ? "border-primary bg-primary/10 shadow-md ring-1 ring-primary/30"
                       : "border-borderPrimary bg-bgPrimary hover:border-primary/40"
                   }`}
                 >
@@ -344,34 +348,11 @@ export default function CheckoutPage() {
                       Cash On Delivery
                     </span>
                     {paymentMethod === "COD" && (
-                      <CheckCircle2 className="w-4 h-4 text-primary" />
+                      <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
                     )}
                   </div>
-                  <p className="text-[11px] text-textSecondary leading-snug">
-                    Pay in cash upon doorstep delivery.
-                  </p>
-                </button>
-
-                {/* Stripe option */}
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("Stripe")}
-                  className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
-                    paymentMethod === "Stripe"
-                      ? "border-primary bg-primary/10 shadow-sm"
-                      : "border-borderPrimary bg-bgPrimary hover:border-primary/40"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-bold text-sm text-textPrimary">
-                      Card (Stripe)
-                    </span>
-                    {paymentMethod === "Stripe" && (
-                      <CheckCircle2 className="w-4 h-4 text-primary" />
-                    )}
-                  </div>
-                  <p className="text-[11px] text-textSecondary leading-snug">
-                    Direct online payment.
+                  <p className="text-xs text-textSecondary leading-relaxed">
+                    Pay in cash upon delivery to your doorstep.
                   </p>
                 </button>
               </div>
@@ -388,10 +369,10 @@ export default function CheckoutPage() {
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span>Processing Order...</span>
                 </>
-              ) : paymentMethod === "Paypal" ? (
+              ) : paymentMethod === "Paymob" ? (
                 <>
                   <Lock className="w-4 h-4" />
-                  <span>Proceed to PayPal Payment ({totalPrice.toFixed(2)} EGP)</span>
+                  <span>Proceed to Paymob Payment ({totalPrice.toFixed(2)} EGP)</span>
                 </>
               ) : (
                 <>
@@ -416,7 +397,7 @@ export default function CheckoutPage() {
 
           {/* Items preview list */}
           <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
-            {cartItems.map((item) => {
+            {cartItems.map((item: CartItem) => {
               const { product, productQuantity, productPrice } = item;
               const imgUrl =
                 product.productImages?.[0]?.url ||

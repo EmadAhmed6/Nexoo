@@ -49,18 +49,21 @@ export function useCreateOrder() {
   });
 }
 
-export function useCreatePayPalOrder() {
+export function useCreatePaymobOrder() {
   return useMutation({
-    mutationFn: (orderId: string) => orderApi.createPayPalOrder(orderId),
+    mutationFn: (orderId: string) => orderApi.createPaymobOrder(orderId),
   });
 }
 
-export function useCapturePayPalPayment() {
+export function useVerifyPaymobPayment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: { paypalOrderId: string; orderId: string }) =>
-      orderApi.capturePayPalPayment(payload),
+    mutationFn: (payload: {
+      orderId: string;
+      success?: boolean | string;
+      transactionId?: string | number;
+    }) => orderApi.verifyPaymobPayment(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
     },

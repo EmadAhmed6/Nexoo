@@ -17,6 +17,18 @@ const CreateCouponSchema = z
       .min(1, "Usage limit must be greater than 0")
       .default(10)
       .optional(),
+    usageLimitPerUser: z
+      .number()
+      .min(1, "Usage limit per user must be at least 1")
+      .default(1)
+      .optional(),
+    minOrderValue: z
+      .number()
+      .min(0, "Minimum order value cannot be negative")
+      .default(0)
+      .optional(),
+    applicableCategories: z.array(z.string()).default([]).optional(),
+    maxUsersLimit: z.number().min(1).nullable().optional(),
     isActive: z.boolean().default(true).optional(),
     startDate: z.coerce.date(),
     expireDate: z.coerce.date(),
@@ -52,6 +64,10 @@ const UpdateCouponSchema = z.object({
     .transform((val) => val.toUpperCase())
     .optional(),
   usageLimit: z.number().min(1).optional(),
+  usageLimitPerUser: z.number().min(1).optional(),
+  minOrderValue: z.number().min(0).optional(),
+  applicableCategories: z.array(z.string()).optional(),
+  maxUsersLimit: z.number().min(1).nullable().optional(),
   isActive: z.boolean().optional(),
   startDate: z.coerce.date().optional(),
   expireDate: z.coerce.date().optional(),

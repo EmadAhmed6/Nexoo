@@ -50,7 +50,7 @@ const options: Options = {
       },
       {
         name: "Orders",
-        description: "Order processing and PayPal checkout APIs",
+        description: "Order processing and Paymob checkout APIs",
       },
       {
         name: "Coupons",
