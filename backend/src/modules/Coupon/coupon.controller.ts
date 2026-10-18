@@ -1,12 +1,13 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import { sendError, successMsg } from "../../middlewares/errors.js";
+
+import { Cart } from "../Cart/cart.model.js";
 import {
   Coupon,
   validateCreateCoupon,
   validateUpdateCoupon,
 } from "./coupon.model.js";
-import { Cart } from "../Cart/cart.model.js";
 
 // GET ALL COUPONS (Admin)
 const getCoupons = asyncHandler(
