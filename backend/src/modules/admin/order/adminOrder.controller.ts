@@ -35,9 +35,8 @@ const getOrders = asyncHandler(
     } = req.query as any;
     const query: any = {};
 
-    const targetStatus = orderStatus;
-    if (targetStatus && targetStatus !== "all") {
-      query["orderStatus.status"] = targetStatus;
+    if (orderStatus && orderStatus !== "all") {
+      query["orderStatus.status"] = orderStatus;
     }
 
     if (orderId) {
@@ -73,6 +72,7 @@ const getOrders = asyncHandler(
     if (isPaid !== undefined && isPaid !== "") {
       query["payment.isPaid"] = isPaid === "true" ? true : false;
     }
+
     const pageNum = Number(page) || 1;
     const limitNum = Number(limit) || 10;
     const orders = await Order.find(query)
@@ -165,7 +165,7 @@ const getOrderOverview = asyncHandler(async (req: Request, res: Response) => {
   const pendingOrders = await Order.countDocuments({
     "orderStatus.status": "Pending",
   });
-  const DeliveredOrders = await Order.countDocuments({
+  const deliveredOrders = await Order.countDocuments({
     "orderStatus.status": "Delivered",
   });
   const processingOrders = await Order.countDocuments({
@@ -184,8 +184,7 @@ const getOrderOverview = asyncHandler(async (req: Request, res: Response) => {
   successMsg(res, 200, "Stats fetched Succeed", {
     totalOrders,
     pendingOrders,
-    DeliveredOrders,
-    deliveredOrders: DeliveredOrders,
+    deliveredOrders,
     processingOrders,
     cancelledOrders,
     totalPaidAmount,
