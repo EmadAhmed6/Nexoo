@@ -2,9 +2,14 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { orderApi } from "../api/order.api";
-import { CreateOrderPayload } from "../types/order.types";
+import {
+  CreateOrderPayload,
+  AdminOrderFilterParams,
+  AdminOrderOverview,
+} from "../types/order.types";
 import { useAppStore } from "@/store/use-app-store";
 import { CART_QUERY_KEY } from "@/features/cart/hooks/useCart";
+import { PRODUCT_QUERY_KEYS } from "@/features/products/hooks/useProducts";
 
 export const ORDERS_QUERY_KEY = ["orders"] as const;
 
@@ -45,6 +50,7 @@ export function useCreateOrder() {
       queryClient.setQueryData(CART_QUERY_KEY, null);
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: PRODUCT_QUERY_KEYS.all });
     },
   });
 }
@@ -66,6 +72,7 @@ export function useVerifyPaymobPayment() {
     }) => orderApi.verifyPaymobPayment(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: PRODUCT_QUERY_KEYS.all });
     },
   });
 }
@@ -82,16 +89,32 @@ export function useDeleteOrder() {
 }
 
 export const ADMIN_ORDERS_QUERY_KEY = ["admin", "orders"] as const;
+export const ADMIN_ORDER_OVERVIEW_QUERY_KEY = ["admin", "orders", "overview"] as const;
 
-export function useAdminOrders() {
+export function useAdminOrders(params?: AdminOrderFilterParams) {
   const user = useAppStore((s) => s.user);
   const isAdmin = user?.role === "Admin" || user?.role === "SuperAdmin";
 
   return useQuery({
-    queryKey: ADMIN_ORDERS_QUERY_KEY,
+    queryKey: [...ADMIN_ORDERS_QUERY_KEY, params],
     queryFn: async () => {
-      const res = await orderApi.getAdminOrders();
+      const res = await orderApi.getAdminOrders(params);
       return res.data ?? [];
+    },
+    enabled: isAdmin,
+    staleTime: 1000 * 30, // 30 seconds
+  });
+}
+
+export function useAdminOrderOverview() {
+  const user = useAppStore((s) => s.user);
+  const isAdmin = user?.role === "Admin" || user?.role === "SuperAdmin";
+
+  return useQuery({
+    queryKey: ADMIN_ORDER_OVERVIEW_QUERY_KEY,
+    queryFn: async () => {
+      const res = await orderApi.getAdminOrderOverview();
+      return res.data ?? null;
     },
     enabled: isAdmin,
     staleTime: 1000 * 30, // 30 seconds
@@ -128,6 +151,7 @@ export function useUpdateAdminOrderStatus() {
     }) => orderApi.updateAdminOrderStatus(orderId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_ORDERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ADMIN_ORDER_OVERVIEW_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
     },
   });

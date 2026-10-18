@@ -213,7 +213,14 @@ function ProductDetailContent() {
         )
       : 0;
 
+  const isOutOfStock = product.stock <= 0 || Boolean(product.isOutOfStock);
+
   const handleAddToCart = () => {
+    if (isOutOfStock) {
+      toast.error("This product is currently out of stock");
+      return;
+    }
+
     if (!user) {
       toast.error("Please sign in first");
       router.push("/auth/login");
@@ -396,11 +403,15 @@ function ProductDetailContent() {
                   {discountPercentage}% OFF
                 </span>
               )}
-              {product.stock <= 5 && product.stock > 0 && (
-                <span className="w-fit inline-flex items-center justify-center px-3 py-1 rounded-full bg-textError/90 text-white font-medium text-xs shadow-sm">
+              {isOutOfStock ? (
+                <span className="w-fit inline-flex items-center justify-center px-3 py-1 rounded-full bg-textError text-white font-bold text-xs shadow-sm">
+                  Out of Stock
+                </span>
+              ) : product.stock <= 5 && product.stock > 0 ? (
+                <span className="w-fit inline-flex items-center justify-center px-3 py-1 rounded-full bg-amber-500/90 text-white font-medium text-xs shadow-sm">
                   Only {product.stock} left in stock
                 </span>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -442,12 +453,12 @@ function ProductDetailContent() {
               <span>•</span>
               <span
                 className={
-                  product.stock > 0
+                  !isOutOfStock
                     ? "text-emerald-500 font-semibold"
                     : "text-textError font-semibold"
                 }
               >
-                {product.stock > 0
+                {!isOutOfStock
                   ? `In Stock (${product.stock} units)`
                   : "Out of Stock"}
               </span>
@@ -512,22 +523,22 @@ function ProductDetailContent() {
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="p-2.5 text-textSecondary hover:text-textPrimary transition-colors"
-                  disabled={quantity <= 1}
+                  className="p-2.5 text-textSecondary hover:text-textPrimary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={quantity <= 1 || isOutOfStock}
                   aria-label="Decrease quantity"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
                 <span className="px-4 text-sm font-bold text-textPrimary">
-                  {quantity}
+                  {isOutOfStock ? 0 : quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() =>
                     setQuantity((q) => Math.min(product.stock, q + 1))
                   }
-                  className="p-2.5 text-textSecondary hover:text-textPrimary transition-colors"
-                  disabled={quantity >= product.stock}
+                  className="p-2.5 text-textSecondary hover:text-textPrimary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={quantity >= product.stock || isOutOfStock}
                   aria-label="Increase quantity"
                 >
                   <Plus className="w-4 h-4" />
@@ -541,7 +552,7 @@ function ProductDetailContent() {
                 size="lg"
                 fullWidth
                 onClick={handleAddToCart}
-                disabled={product.stock <= 0}
+                disabled={isOutOfStock || addToCart.isPending}
                 leftIcon={
                   added ? (
                     <Check className="w-5 h-5" />
@@ -550,12 +561,14 @@ function ProductDetailContent() {
                   )
                 }
                 className={
-                  added
+                  isOutOfStock
+                    ? "bg-bgPrimary/60 border-borderPrimary text-textSecondary/40 cursor-not-allowed opacity-60 hover:bg-bgPrimary/60"
+                    : added
                     ? "bg-emerald-600 hover:bg-emerald-600 text-white border-emerald-600"
                     : ""
                 }
               >
-                {added ? "Added to Cart!" : "Add to Cart"}
+                {isOutOfStock ? "Out of Stock" : added ? "Added to Cart!" : "Add to Cart"}
               </Button>
 
               {/* Like Button */}

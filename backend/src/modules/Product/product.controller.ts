@@ -243,7 +243,7 @@ const deleteProduct = asyncHandler(
     successMsg(res, 200, "Product deleted successfully", null);
   },
 );
-
+//
 const toggleLikeProduct = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const productId = req.params.productId as string;
@@ -289,6 +289,19 @@ const toggleLikeProduct = asyncHandler(
   },
 );
 
+// UPDATE PRODUCT STOCK
+const updateStockAfterPayment = async (orderItems: any[]) => {
+  for (const item of orderItems) {
+    const product = await Product.findById(item.product);
+    if (!product) continue;
+    product.stock = Math.max(0, product.stock - item.quantity);
+    if (product.stock === 0) {
+      product.isOutOfStock = true;
+    }
+    await product.save();
+  }
+};
+
 export {
   createProduct,
   getAllProducts,
@@ -296,4 +309,5 @@ export {
   updateProduct,
   deleteProduct,
   toggleLikeProduct,
+  updateStockAfterPayment,
 };

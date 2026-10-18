@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Users, Package, Tag, TrendingUp, ArrowRight, ShoppingCart } from "lucide-react";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useCoupons } from "@/features/coupons/hooks/useCoupons";
-import { useAdminOrders } from "@/features/orders/hooks/useOrders";
+import { useAdminOrderOverview } from "@/features/orders/hooks/useOrders";
 
 interface StatCardProps {
   label: string;
@@ -37,10 +37,10 @@ function StatCard({ label, value, icon: Icon, href, color, bg }: StatCardProps) 
 export default function AdminPage() {
   const { data: productsData } = useProducts({ limit: 1 });
   const { data: coupons } = useCoupons();
-  const { data: orders } = useAdminOrders();
+  const { data: orderOverview } = useAdminOrderOverview();
 
   const activeCoupons = coupons?.filter((c) => c.isActive).length ?? 0;
-  const pendingOrders = orders?.filter((o) => o.orderStatus.status === "Pending").length ?? 0;
+  const pendingOrders = orderOverview?.pendingOrders ?? 0;
 
   return (
     <div className="space-y-8 max-w-5xl">
@@ -56,7 +56,7 @@ export default function AdminPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Orders"
-          value={orders?.length ?? "—"}
+          value={orderOverview?.totalOrders ?? "—"}
           icon={ShoppingCart}
           href="/admin/orders"
           color="text-amber-400"

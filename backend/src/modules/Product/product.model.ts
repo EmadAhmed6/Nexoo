@@ -35,6 +35,7 @@ export interface IProduct extends Document {
   userId?: Schema.Types.ObjectId | string;
   likes: Types.ObjectId[];
   likesCount: number;
+  isOutOfStock: boolean;
 }
 
 const ProductSchema = new Schema<IProduct>({
@@ -126,6 +127,10 @@ const ProductSchema = new Schema<IProduct>({
   userId: {
     type: Schema.Types.ObjectId,
     ref: "User",
+  },
+  isOutOfStock: {
+    type: Boolean,
+    default: false,
   },
 });
 

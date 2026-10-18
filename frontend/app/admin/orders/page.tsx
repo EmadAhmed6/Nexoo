@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,16 +19,26 @@ import {
   X,
   User as UserIcon,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ExternalLink,
   DollarSign,
   TrendingUp,
+  Filter,
+  RotateCcw,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   useAdminOrders,
+  useAdminOrderOverview,
   useUpdateAdminOrderStatus,
 } from "@/features/orders/hooks/useOrders";
-import { Order, IOrderUser } from "@/features/orders/types/order.types";
+import {
+  Order,
+  IOrderUser,
+  AdminOrderFilterParams,
+} from "@/features/orders/types/order.types";
 
 const STATUS_CONFIG: Record<
   string,
@@ -76,53 +86,193 @@ const ORDER_STATUS_OPTIONS = [
 
 export default function AdminOrdersPage() {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searchField, setSearchField] = useState<
+    "all" | "customerName" | "orderId" | "email" | "phone"
+  >("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterPayment, setFilterPayment] = useState<string>("all");
+  const [minPrice, setMinPrice] = useState("");
+  const [debouncedMinPrice, setDebouncedMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [debouncedMaxPrice, setDebouncedMaxPrice] = useState("");
+  const [showPriceFilter, setShowPriceFilter] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const { data: orders, isLoading } = useAdminOrders();
+  // Debounce search and price inputs
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedMinPrice(minPrice);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [minPrice]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedMaxPrice(maxPrice);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [maxPrice]);
+
+  // Reset page to 1 whenever any filter or search changes
+  useEffect(() => {
+    setPage(1);
+  }, [
+    debouncedSearch,
+    searchField,
+    filterStatus,
+    filterPayment,
+    debouncedMinPrice,
+    debouncedMaxPrice,
+    limit,
+  ]);
+
+  // Construct query parameters for server-side filtering & pagination
+  const queryParams: AdminOrderFilterParams = useMemo(() => {
+    const params: AdminOrderFilterParams = {
+      page,
+      limit,
+    };
+
+    if (filterStatus && filterStatus !== "all") {
+      params.orderStatus = filterStatus;
+    }
+
+    if (filterPayment === "paid") {
+      params.isPaid = true;
+    } else if (filterPayment === "unpaid") {
+      params.isPaid = false;
+    }
+
+    const trimmed = debouncedSearch.trim();
+    if (trimmed) {
+      if (searchField === "orderId") {
+        params.orderId = trimmed;
+      } else if (searchField === "customerName") {
+        params.customerName = trimmed;
+      } else if (searchField === "email") {
+        params.email = trimmed;
+      } else if (searchField === "phone") {
+        params.phone = trimmed;
+      } else {
+        // Smart automatic field matching
+        if (trimmed.includes("@")) {
+          params.email = trimmed;
+        } else if (/^[0-9a-fA-F]{24}$/.test(trimmed)) {
+          params.orderId = trimmed;
+        } else if (/^\+?[0-9]{8,15}$/.test(trimmed)) {
+          params.phone = trimmed;
+        } else {
+          params.customerName = trimmed;
+        }
+      }
+    }
+
+    if (debouncedMinPrice && !isNaN(Number(debouncedMinPrice))) {
+      params.minPrice = Number(debouncedMinPrice);
+    }
+    if (debouncedMaxPrice && !isNaN(Number(debouncedMaxPrice))) {
+      params.maxPrice = Number(debouncedMaxPrice);
+    }
+
+    return params;
+  }, [
+    page,
+    limit,
+    filterStatus,
+    filterPayment,
+    debouncedSearch,
+    searchField,
+    debouncedMinPrice,
+    debouncedMaxPrice,
+  ]);
+
+  const {
+    data: orders,
+    isLoading,
+    isFetching,
+  } = useAdminOrders(queryParams);
+  const { data: overview } = useAdminOrderOverview();
   const updateStatusMutation = useUpdateAdminOrderStatus();
 
-  // Metrics
-  const metrics = useMemo(() => {
-    if (!orders) return { total: 0, pending: 0, delivered: 0, totalRevenue: 0 };
-    const total = orders.length;
-    const pending = orders.filter((o) => o.orderStatus.status === "Pending").length;
-    const delivered = orders.filter((o) => o.orderStatus.status === "Delivered").length;
-    const totalRevenue = orders
-      .filter((o) => o.orderStatus.status !== "Cancelled" && o.payment.isPaid)
-      .reduce((acc, o) => acc + (o.pricing?.totalOrderPrice || 0), 0);
-    return { total, pending, delivered, totalRevenue };
-  }, [orders]);
+  // Server-side filtered orders
+  const displayedOrders = useMemo(() => orders || [], [orders]);
 
-  // Filtered orders
-  const filteredOrders = useMemo(() => {
-    if (!orders) return [];
-    return orders.filter((order) => {
-      // Search
-      const searchLower = search.toLowerCase();
-      const orderIdMatch = order._id.toLowerCase().includes(searchLower);
-      const user = typeof order.user === "object" ? (order.user as IOrderUser) : null;
-      const userNameMatch = user?.fullName?.toLowerCase().includes(searchLower);
-      const userEmailMatch = user?.email?.toLowerCase().includes(searchLower);
-      const phoneMatch = order.shippingAddress?.phone?.includes(searchLower);
+  const hasActiveFilters = Boolean(
+    search ||
+      filterStatus !== "all" ||
+      filterPayment !== "all" ||
+      minPrice ||
+      maxPrice ||
+      searchField !== "all" ||
+      page > 1,
+  );
 
-      const matchesSearch =
-        !search || orderIdMatch || userNameMatch || userEmailMatch || phoneMatch;
+  const handleResetFilters = () => {
+    setSearch("");
+    setDebouncedSearch("");
+    setSearchField("all");
+    setFilterStatus("all");
+    setFilterPayment("all");
+    setMinPrice("");
+    setDebouncedMinPrice("");
+    setMaxPrice("");
+    setDebouncedMaxPrice("");
+    setShowPriceFilter(false);
+    setPage(1);
+  };
 
-      // Status Filter
-      const matchesStatus =
-        filterStatus === "all" || order.orderStatus?.status === filterStatus;
+  const getStatusCount = (st: string) => {
+    if (!overview) return undefined;
+    switch (st) {
+      case "Pending":
+        return overview.pendingOrders;
+      case "Processing":
+        return overview.processingOrders;
+      case "Delivered":
+        return overview.deliveredOrders ?? overview.DeliveredOrders;
+      case "Cancelled":
+        return overview.cancelledOrders;
+      default:
+        return undefined;
+    }
+  };
 
-      // Payment Filter
-      const matchesPayment =
-        filterPayment === "all" ||
-        (filterPayment === "paid" && order.payment.isPaid) ||
-        (filterPayment === "unpaid" && !order.payment.isPaid);
+  // Known total count from overview when no free-form text or price filters are active
+  const totalCount = useMemo(() => {
+    if (!overview) return undefined;
+    if (debouncedSearch.trim() || debouncedMinPrice || debouncedMaxPrice) {
+      return undefined;
+    }
+    if (filterStatus === "all" && filterPayment === "all") {
+      return overview.totalOrders;
+    }
+    if (filterStatus !== "all" && filterPayment === "all") {
+      return getStatusCount(filterStatus);
+    }
+    return undefined;
+  }, [
+    overview,
+    debouncedSearch,
+    debouncedMinPrice,
+    debouncedMaxPrice,
+    filterStatus,
+    filterPayment,
+  ]);
 
-      return matchesSearch && matchesStatus && matchesPayment;
-    });
-  }, [orders, search, filterStatus, filterPayment]);
+  const totalPages =
+    totalCount !== undefined
+      ? Math.max(1, Math.ceil(totalCount / limit))
+      : undefined;
 
   const handleQuickStatusChange = async (
     orderId: string,
@@ -165,9 +315,15 @@ export default function AdminOrdersPage() {
             Monitor, fulfill and update customer orders across the platform
           </p>
         </div>
+        {isFetching && !isLoading && (
+          <div className="flex items-center gap-2 text-xs text-primary font-medium">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <span>Updating results...</span>
+          </div>
+        )}
       </div>
 
-      {/* Metrics Row */}
+      {/* Metrics Row (Powered by getOrderOverview) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 rounded-2xl border border-borderPrimary bg-bgSecondary">
           <div className="flex items-center gap-3">
@@ -176,7 +332,9 @@ export default function AdminOrdersPage() {
             </div>
             <div>
               <p className="text-xs text-textSecondary font-medium">Total Orders</p>
-              <p className="text-xl font-black text-textPrimary">{metrics.total}</p>
+              <p className="text-xl font-black text-textPrimary">
+                {overview?.totalOrders ?? (orders ? orders.length : "—")}
+              </p>
             </div>
           </div>
         </div>
@@ -188,7 +346,9 @@ export default function AdminOrdersPage() {
             </div>
             <div>
               <p className="text-xs text-textSecondary font-medium">Pending Orders</p>
-              <p className="text-xl font-black text-amber-400">{metrics.pending}</p>
+              <p className="text-xl font-black text-amber-400">
+                {overview?.pendingOrders ?? "—"}
+              </p>
             </div>
           </div>
         </div>
@@ -200,7 +360,9 @@ export default function AdminOrdersPage() {
             </div>
             <div>
               <p className="text-xs text-textSecondary font-medium">Delivered</p>
-              <p className="text-xl font-black text-emerald-400">{metrics.delivered}</p>
+              <p className="text-xl font-black text-emerald-400">
+                {overview?.deliveredOrders ?? overview?.DeliveredOrders ?? "—"}
+              </p>
             </div>
           </div>
         </div>
@@ -213,63 +375,167 @@ export default function AdminOrdersPage() {
             <div>
               <p className="text-xs text-textSecondary font-medium">Paid Volume</p>
               <p className="text-xl font-black text-textPrimary">
-                {metrics.totalRevenue.toLocaleString()} EGP
+                {overview?.totalPaidAmount !== undefined
+                  ? `${overview.totalPaidAmount.toLocaleString()} EGP`
+                  : "—"}
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Search and Filters */}
+      {/* Search and Server Filters */}
       <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2.5">
+          {/* Target field selector */}
+          <div className="flex items-center">
+            <select
+              value={searchField}
+              onChange={(e) => setSearchField(e.target.value as any)}
+              className="px-3 py-2.5 rounded-xl border border-borderPrimary bg-bgSecondary text-xs font-semibold text-textPrimary focus:outline-none focus:border-primary transition-colors cursor-pointer"
+            >
+              <option value="all">Auto-detect Field</option>
+              <option value="customerName">Customer Name</option>
+              <option value="orderId">Order ID</option>
+              <option value="email">Email</option>
+              <option value="phone">Phone</option>
+            </select>
+          </div>
+
+          {/* Search text input */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textSecondary pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by order ID, customer name, email, or phone..."
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-borderPrimary bg-bgSecondary text-sm text-textPrimary placeholder:text-textSecondary focus:outline-none focus:border-primary transition-colors"
+              placeholder={
+                searchField === "orderId"
+                  ? "Search by Order ID (24-character ID)..."
+                  : searchField === "customerName"
+                    ? "Search by Customer Name / Username..."
+                    : searchField === "email"
+                      ? "Search by Customer Email..."
+                      : searchField === "phone"
+                        ? "Search by Phone number..."
+                        : "Search by customer name, order ID, email, or phone..."
+              }
+              className="w-full pl-9 pr-8 py-2.5 rounded-xl border border-borderPrimary bg-bgSecondary text-sm text-textPrimary placeholder:text-textSecondary focus:outline-none focus:border-primary transition-colors"
             />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-textSecondary hover:text-textPrimary p-0.5"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Payment filter */}
-            <select
-              value={filterPayment}
-              onChange={(e) => setFilterPayment(e.target.value)}
-              className="px-3 py-2.5 rounded-xl border border-borderPrimary bg-bgSecondary text-xs font-semibold text-textPrimary focus:outline-none focus:border-primary transition-colors"
+          {/* Price Filter Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setShowPriceFilter((prev) => !prev)}
+            className={`px-3 py-2.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap ${
+              showPriceFilter || minPrice || maxPrice
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textPrimary"
+            }`}
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Price Range</span>
+            {(minPrice || maxPrice) && (
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+            )}
+          </button>
+
+          {/* Payment filter */}
+          <select
+            value={filterPayment}
+            onChange={(e) => setFilterPayment(e.target.value)}
+            className="px-3 py-2.5 rounded-xl border border-borderPrimary bg-bgSecondary text-xs font-semibold text-textPrimary focus:outline-none focus:border-primary transition-colors cursor-pointer"
+          >
+            <option value="all">All Payments</option>
+            <option value="paid">Paid Only</option>
+            <option value="unpaid">Unpaid Only</option>
+          </select>
+
+          {/* Reset Filters button */}
+          {hasActiveFilters && (
+            <button
+              onClick={handleResetFilters}
+              title="Reset all filters"
+              className="p-2.5 rounded-xl border border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textError hover:border-textError/40 transition-colors flex items-center justify-center flex-shrink-0"
             >
-              <option value="all">All Payments</option>
-              <option value="paid">Paid Only</option>
-              <option value="unpaid">Unpaid Only</option>
-            </select>
-          </div>
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
-        {/* Status Filter Chips */}
+        {/* Collapsible Price Range inputs */}
+        {showPriceFilter && (
+          <div className="p-3 rounded-xl border border-borderPrimary bg-bgPrimary/60 flex flex-wrap items-center gap-3 text-xs animate-in fade-in duration-150">
+            <span className="font-semibold text-textSecondary flex items-center gap-1">
+              <DollarSign className="w-3.5 h-3.5 text-primary" /> Price Bounds (EGP):
+            </span>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                placeholder="Min Price"
+                className="w-28 px-2.5 py-1.5 rounded-lg border border-borderPrimary bg-bgSecondary text-textPrimary text-xs focus:outline-none focus:border-primary"
+              />
+              <span className="text-textSecondary">—</span>
+              <input
+                type="number"
+                min="0"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                placeholder="Max Price"
+                className="w-28 px-2.5 py-1.5 rounded-lg border border-borderPrimary bg-bgSecondary text-textPrimary text-xs focus:outline-none focus:border-primary"
+              />
+            </div>
+            {(minPrice || maxPrice) && (
+              <button
+                onClick={() => {
+                  setMinPrice("");
+                  setMaxPrice("");
+                }}
+                className="text-[11px] text-textSecondary hover:text-textError underline"
+              >
+                Clear price
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Status Filter Chips with Overview Counts */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
           <button
             onClick={() => setFilterStatus("all")}
             className={`px-3 py-1.5 rounded-xl font-semibold transition-all whitespace-nowrap ${
               filterStatus === "all"
-                ? "bg-primary text-black"
+                ? "bg-primary text-black shadow-sm"
                 : "border border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textPrimary"
             }`}
           >
-            All ({orders?.length ?? 0})
+            All ({overview?.totalOrders ?? orders?.length ?? 0})
           </button>
           {ORDER_STATUS_OPTIONS.map((st) => {
-            const count =
+            const overviewCount = getStatusCount(st);
+            const fallbackCount =
               orders?.filter((o) => o.orderStatus?.status === st).length ?? 0;
+            const count = overviewCount !== undefined ? overviewCount : fallbackCount;
+
             return (
               <button
                 key={st}
                 onClick={() => setFilterStatus(st)}
                 className={`px-3 py-1.5 rounded-xl font-semibold transition-all whitespace-nowrap ${
                   filterStatus === st
-                    ? "bg-primary text-black"
+                    ? "bg-primary text-black shadow-sm"
                     : "border border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textPrimary"
                 }`}
               >
@@ -287,10 +553,18 @@ export default function AdminOrdersPage() {
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
             <span className="text-sm text-textSecondary">Loading orders...</span>
           </div>
-        ) : !filteredOrders.length ? (
+        ) : !displayedOrders.length ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <ShoppingCart className="w-10 h-10 text-textSecondary" strokeWidth={1.5} />
-            <p className="text-sm text-textSecondary">No orders found</p>
+            <p className="text-sm text-textSecondary font-medium">No orders found</p>
+            {hasActiveFilters && (
+              <button
+                onClick={handleResetFilters}
+                className="text-xs text-primary hover:underline font-semibold"
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -321,7 +595,7 @@ export default function AdminOrdersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-borderPrimary">
-                {filteredOrders.map((order) => {
+                {displayedOrders.map((order) => {
                   const status =
                     STATUS_CONFIG[order.orderStatus?.status] || STATUS_CONFIG.Pending;
                   const StatusIcon = status.icon;
@@ -478,6 +752,67 @@ export default function AdminOrdersPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {displayedOrders.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+          <div className="flex items-center gap-2 text-xs text-textSecondary">
+            <span>Rows per page:</span>
+            <select
+              value={limit}
+              onChange={(e) => {
+                setLimit(Number(e.target.value));
+                setPage(1);
+              }}
+              className="px-2.5 py-1 rounded-lg border border-borderPrimary bg-bgSecondary text-xs text-textPrimary font-semibold focus:outline-none focus:border-primary transition-colors cursor-pointer"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+            {totalCount !== undefined ? (
+              <span className="ml-2 font-medium">
+                Showing {(page - 1) * limit + 1} -{" "}
+                {Math.min(page * limit, totalCount)} of {totalCount} orders
+              </span>
+            ) : (
+              <span className="ml-2 font-medium">
+                Page {page} ({displayedOrders.length} orders on this page)
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1 || isLoading || isFetching}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-borderPrimary bg-bgSecondary text-xs font-semibold text-textSecondary hover:text-primary hover:border-primary/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
+
+            <span className="px-3 py-1 rounded-lg bg-bgSecondary border border-borderPrimary text-xs font-bold text-textPrimary min-w-[32px] text-center shadow-sm">
+              {totalPages !== undefined ? `${page} / ${totalPages}` : page}
+            </span>
+
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={
+                isLoading ||
+                isFetching ||
+                (totalPages !== undefined
+                  ? page >= totalPages
+                  : displayedOrders.length < limit)
+              }
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-borderPrimary bg-bgSecondary text-xs font-semibold text-textSecondary hover:text-primary hover:border-primary/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Order Details Modal */}
       {selectedOrder && (

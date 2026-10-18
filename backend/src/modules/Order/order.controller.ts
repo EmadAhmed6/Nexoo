@@ -10,6 +10,7 @@ import {
   validateUpdateOrder,
 } from "./order.model.js";
 import { Coupon } from "../Coupon/coupon.model.js";
+import { updateStockAfterPayment } from "../Product/product.controller.js";
 
 // GET USER ORDERS
 const getOrders = asyncHandler(
@@ -222,6 +223,7 @@ const verifyPaymobPayment = asyncHandler(
       };
       order.orderStatus.status = "Processing";
       await order.save();
+      await updateStockAfterPayment(order.orderItems);
 
       successMsg(res, 200, "Payment verified successfully", order);
       return;
@@ -257,6 +259,7 @@ const paymobWebhook = asyncHandler(
         };
         order.orderStatus.status = "Processing";
         await order.save();
+        await updateStockAfterPayment(order.orderItems);
       }
     }
 

@@ -60,6 +60,10 @@ export default function WishlistPage() {
   };
 
   const handleAddToCart = (product: Product) => {
+    if (product.stock <= 0 || product.isOutOfStock) {
+      toast.error("This product is currently out of stock");
+      return;
+    }
     addToCart.mutate(
       { productId: product._id, productQuantity: 1 },
       {
@@ -232,12 +236,12 @@ export default function WishlistPage() {
                             {discountPct}% OFF
                           </span>
                         )}
-                        {product.stock <= 5 && product.stock > 0 && (
-                          <span className="px-2.5 py-1 rounded-full bg-textError/90 text-white font-bold text-[11px] shadow-sm">
+                        {product.stock <= 5 && product.stock > 0 && !product.isOutOfStock && (
+                          <span className="px-2.5 py-1 rounded-full bg-amber-500/90 text-white font-bold text-[11px] shadow-sm">
                             Only {product.stock} left
                           </span>
                         )}
-                        {product.stock === 0 && (
+                        {(product.stock === 0 || product.isOutOfStock) && (
                           <span className="px-2.5 py-1 rounded-full bg-textError/90 text-white font-bold text-[11px] shadow-sm">
                             Out of Stock
                           </span>
@@ -320,15 +324,17 @@ export default function WishlistPage() {
                             type="button"
                             onClick={() => handleAddToCart(product)}
                             disabled={
-                              product.stock === 0 || addToCart.isPending
+                              product.stock === 0 ||
+                              Boolean(product.isOutOfStock) ||
+                              addToCart.isPending
                             }
-                            className={`p-2 rounded-xl border transition-all cursor-pointer disabled:opacity-50 ${
+                            className={`p-2 rounded-xl border transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                               isAdded
                                 ? "bg-emerald-500 text-white border-emerald-500"
                                 : "bg-bgPrimary border-borderPrimary hover:border-primary text-textPrimary hover:text-primary hover:bg-primary/10"
                             }`}
                             title={
-                              product.stock === 0
+                              product.stock === 0 || product.isOutOfStock
                                 ? "Out of Stock"
                                 : "Add to cart"
                             }

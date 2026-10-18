@@ -4,6 +4,8 @@ import {
   CreateOrderPayload,
   CreatePaymobOrderResponse,
   UpdateAdminOrderStatusPayload,
+  AdminOrderFilterParams,
+  AdminOrderOverview,
 } from "../types/order.types";
 
 export const orderApi = {
@@ -77,10 +79,17 @@ export const orderApi = {
   },
 
   /**
-   * Admin: GET /admin/orders — Fetch all system orders
+   * Admin: GET /admin/orders — Fetch all system orders with optional filtering
    */
-  getAdminOrders: async () => {
-    return apiGet<Order[]>("/admin/orders");
+  getAdminOrders: async (params?: AdminOrderFilterParams) => {
+    return apiGet<Order[]>("/admin/orders", params as Record<string, unknown>);
+  },
+
+  /**
+   * Admin: GET /admin/orders/overview — Fetch orders statistics
+   */
+  getAdminOrderOverview: async () => {
+    return apiGet<AdminOrderOverview>("/admin/orders/overview");
   },
 
   /**

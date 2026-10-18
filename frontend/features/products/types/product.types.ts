@@ -10,6 +10,7 @@ export interface Product {
   price: number;
   priceAfterDiscount?: number;
   stock: number;
+  isOutOfStock?: boolean;
   category: string;
   productImages: ProductImage[];
   ratingAverage?: number;

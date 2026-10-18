@@ -85,9 +85,16 @@ export function ProductCard({ product }: ProductCardProps) {
     toggleWishlist(product._id, product.title);
   };
 
+  const isOutOfStock = product.stock <= 0 || Boolean(product.isOutOfStock);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isOutOfStock) {
+      toast.error("This product is currently out of stock");
+      return;
+    }
 
     if (!isAuthenticated) {
       toast.error("Please sign in first");
@@ -124,7 +131,9 @@ export function ProductCard({ product }: ProductCardProps) {
             alt={product.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-            className="object-cover group-hover:scale-108 transition-transform duration-500"
+            className={`object-cover group-hover:scale-108 transition-transform duration-500 ${
+              isOutOfStock ? "grayscale-[40%] opacity-80" : ""
+            }`}
           />
 
           {/* Badges */}
@@ -134,11 +143,15 @@ export function ProductCard({ product }: ProductCardProps) {
                 {discountPercentage}% OFF
               </span>
             )}
-            {product.stock <= 5 && product.stock > 0 && (
+            {isOutOfStock ? (
               <span className="px-2.5 py-1 rounded-full bg-textError/95 text-white font-bold text-[11px] text-center shadow-sm">
+                Out of Stock
+              </span>
+            ) : product.stock <= 5 && product.stock > 0 ? (
+              <span className="px-2.5 py-1 rounded-full bg-amber-500/95 text-white font-bold text-[11px] text-center shadow-sm">
                 Only {product.stock} left
               </span>
-            )}
+            ) : null}
           </div>
 
           <span className="absolute bottom-3.5 left-3.5 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-black/70 text-white backdrop-blur-md z-10 pointer-events-none">
@@ -253,14 +266,17 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
 
             <motion.button
-              whileTap={{ scale: 0.92 }}
+              whileTap={isOutOfStock ? undefined : { scale: 0.92 }}
               onClick={handleAddToCart}
+              disabled={isOutOfStock || addToCart.isPending}
               className={`p-3 rounded-2xl border transition-all z-10 shadow-sm ${
-                added
+                isOutOfStock
+                  ? "bg-bgPrimary/60 border-borderPrimary text-textSecondary/40 cursor-not-allowed opacity-60"
+                  : added
                   ? "bg-emerald-500 text-white border-emerald-500"
-                  : "bg-bgPrimary border-borderPrimary hover:border-primary text-textPrimary hover:text-primary hover:bg-primary/10"
+                  : "bg-bgPrimary border-borderPrimary hover:border-primary text-textPrimary hover:text-primary hover:bg-primary/10 cursor-pointer"
               }`}
-              title="Add to cart"
+              title={isOutOfStock ? "Out of Stock" : "Add to cart"}
             >
               {added ? (
                 <Check className="w-4.5 h-4.5 text-white" />

@@ -93,3 +93,27 @@ export interface CreatePaymobOrderResponse {
   checkoutUrl: string;
   clientSecret?: string;
 }
+
+export interface AdminOrderFilterParams {
+  orderStatus?: string;
+  orderId?: string;
+  customerName?: string;
+  email?: string;
+  phone?: string;
+  status?: string;
+  minPrice?: number | string;
+  maxPrice?: number | string;
+  page?: number;
+  limit?: number;
+  isPaid?: boolean | string;
+}
+
+export interface AdminOrderOverview {
+  totalOrders: number;
+  pendingOrders: number;
+  DeliveredOrders?: number;
+  deliveredOrders?: number;
+  processingOrders: number;
+  cancelledOrders: number;
+  totalPaidAmount: number;
+}

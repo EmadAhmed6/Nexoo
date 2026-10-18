@@ -62,27 +62,27 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 19  | POST   | `/wishlist/:productId`   | Add product to user's wishlist                                                 |  🔒  |
 | 20  | DELETE | `/wishlist/:productId`   | Remove product from user's wishlist                                            |  🔒  |
 | 21  | DELETE | `/wishlist`              | Clear entire user wishlist                                                     |  🔒  |
-| 22  | POST   | `/orders`                   | Create new order from user's current cart                                         |  🔒  |
-| 23  | GET    | `/orders`                   | Retrieve list of all orders belonging to authenticated user                       |  🔒  |
-| 24  | GET    | `/orders/:orderId`          | Retrieve single order details by ID                                               |  🔒  |
-| 25  | POST   | `/orders/paymob/create`     | Initiate Paymob Unified Checkout session and obtain `checkoutUrl`                 |  🔒  |
-| 26  | POST   | `/orders/paymob/verify`     | Verify Paymob payment after customer redirect and mark order as paid              |  🔒  |
-| 27  | POST   | `/orders/paymob/webhook`    | Paymob server-to-server webhook to automatically confirm payment                  |  ❌  |
-| 28  | PUT    | `/orders/:orderId`          | Update shipping address or payment method of pending order                        |  🔒  |
-| 29  | DELETE | `/orders/:orderId`          | Cancel and delete a pending order                                                 |  🔒  |
-| 30  | GET    | `/admin/orders`             | Retrieve all platform orders with populated customer info (Admin only)            |  🔒  |
-| 31  | GET    | `/admin/orders/:orderId`    | Retrieve complete details of any order by ID (Admin only)                         |  🔒  |
-| 32  | PATCH  | `/admin/orders/:orderId`    | Update order delivery and fulfillment status (Admin only)                         |  🔒  |
-| 33  | GET    | `/coupons`                  | Retrieve list of all coupons (Admin only)                                         |  🔒  |
-| 34  | POST   | `/coupons`                  | Create a new discount coupon with advanced limits (Admin only)                    |  🔒  |
-| 35  | POST   | `/coupons/apply`            | Apply coupon code to user cart and recalculate prices                             |  🔒  |
-| 36  | DELETE | `/coupons/remove`           | Remove applied coupon from user cart                                              |  🔒  |
-| 37  | PUT    | `/coupons/:couponId`        | Update coupon details, limits, validity dates, or status (Admin only)             |  🔒  |
-| 38  | DELETE | `/coupons/:couponId`        | Delete unused coupon (Admin only)                                                 |  🔒  |
-| 39  | GET    | `/reviews/:productId`       | Retrieve all reviews and ratings for a product with reviewer details              |  ❌  |
-| 40  | POST   | `/reviews/:productId`       | Submit a new review or update existing review (recalculates product ratings)      |  🔒  |
-| 41  | PUT    | `/reviews/:reviewId`        | Update review rating or text (Review Owner, Admin, or SuperAdmin)                 |  🔒  |
-| 42  | DELETE | `/reviews/:reviewId`        | Delete a review permanently and recalculate product stats (Owner or Admin)        |  🔒  |
+| 22  | POST   | `/orders`                | Create new order from user's current cart                                      |  🔒  |
+| 23  | GET    | `/orders`                | Retrieve list of all orders belonging to authenticated user                    |  🔒  |
+| 24  | GET    | `/orders/:orderId`       | Retrieve single order details by ID                                            |  🔒  |
+| 25  | POST   | `/orders/paymob/create`  | Initiate Paymob Unified Checkout session and obtain `checkoutUrl`              |  🔒  |
+| 26  | POST   | `/orders/paymob/verify`  | Verify Paymob payment after customer redirect and mark order as paid           |  🔒  |
+| 27  | POST   | `/orders/paymob/webhook` | Paymob server-to-server webhook to automatically confirm payment               |  ❌  |
+| 28  | PUT    | `/orders/:orderId`       | Update shipping address or payment method of pending order                     |  🔒  |
+| 29  | DELETE | `/orders/:orderId`       | Cancel and delete a pending order                                              |  🔒  |
+| 30  | GET    | `/coupons`               | Retrieve list of all coupons (Admin only)                                      |  🔒  |
+| 31  | POST   | `/coupons`               | Create a new discount coupon with advanced limits (Admin only)                 |  🔒  |
+| 32  | POST   | `/coupons/apply`         | Apply coupon code to user cart and recalculate prices                          |  🔒  |
+| 33  | DELETE | `/coupons/remove`        | Remove applied coupon from user cart                                           |  🔒  |
+| 34  | PUT    | `/coupons/:couponId`     | Update coupon details, limits, validity dates, or status (Admin only)          |  🔒  |
+| 35  | DELETE | `/coupons/:couponId`     | Delete unused coupon (Admin only)                                              |  🔒  |
+| 36  | GET    | `/reviews/:productId`    | Retrieve all reviews and ratings for a product with reviewer details           |  ❌  |
+| 37  | POST   | `/reviews/:productId`    | Submit a new review or update existing review (recalculates product ratings)   |  🔒  |
+| 38  | PUT    | `/reviews/:reviewId`     | Update review rating or text (Review Owner, Admin, or SuperAdmin)              |  🔒  |
+| 39  | DELETE | `/reviews/:reviewId`     | Delete a review permanently and recalculate product stats (Owner or Admin)     |  🔒  |
+| 40  | GET    | `/admin/orders`          | Retrieve all platform orders with populated customer info (Admin only)         |  🔒  |
+| 41  | GET    | `/admin/orders/:orderId` | Retrieve complete details of any order by ID (Admin only)                      |  🔒  |
+| 42  | PATCH  | `/admin/orders/:orderId` | Update order delivery and fulfillment status (Admin only)                      |  🔒  |
 
 ---
 
@@ -378,11 +378,11 @@ Update user details. Restricted to the account owner, an Admin, or a SuperAdmin.
 
 #### Request Body
 
-| Field      | Type   | Required | Description                                                                  |
-| :--------- | :----- | :------: | :--------------------------------------------------------------------------- |
-| `fullName` | string |    ❌    | Updated full name.                                                           |
-| `phone`    | string |    ❌    | Updated phone number.                                                        |
-| `role`     | string |    ❌    | Updated role (`"User"`, `"Admin"`, or `"SuperAdmin"`). SuperAdmin only.      |
+| Field      | Type   | Required | Description                                                             |
+| :--------- | :----- | :------: | :---------------------------------------------------------------------- |
+| `fullName` | string |    ❌    | Updated full name.                                                      |
+| `phone`    | string |    ❌    | Updated phone number.                                                   |
+| `role`     | string |    ❌    | Updated role (`"User"`, `"Admin"`, or `"SuperAdmin"`). SuperAdmin only. |
 
 ```json
 {
@@ -521,18 +521,18 @@ Retrieve the products catalog with full support for pagination, search, price fi
 
 #### Query Parameters
 
-| Parameter     | Type    | Required | Description                                                                                           |
-| :------------ | :------ | :------: | :---------------------------------------------------------------------------------------------------- |
-| `page`        | integer |    ❌    | Page number (Default: `1`).                                                                           |
-| `limit`       | integer |    ❌    | Number of items per page (Default: `10`).                                                             |
-| `search`      | string  |    ❌    | Search keyword matching title, description, category, price, or stock.                               |
-| `category`    | string  |    ❌    | Filter by product category.                                                                           |
-| `minPrice`    | number  |    ❌    | Minimum product price (`price >= minPrice`).                                                          |
-| `maxPrice`    | number  |    ❌    | Maximum product price (`price <= maxPrice`).                                                          |
-| `inStock`     | string  |    ❌    | Filter by availability: `"true"` for in stock (`> 0`), `"false"` for out of stock (`<= 0`).          |
-| `minRating`   | number  |    ❌    | Minimum average rating (`ratingAverage >= minRating`).                                                |
-| `maxRating`   | number  |    ❌    | Maximum average rating (`ratingAverage <= maxRating`).                                                |
-| `hasDiscount` | string  |    ❌    | Filter by discount: `"true"` (has active discount), `"false"` (no discount).                         |
+| Parameter     | Type    | Required | Description                                                                                 |
+| :------------ | :------ | :------: | :------------------------------------------------------------------------------------------ |
+| `page`        | integer |    ❌    | Page number (Default: `1`).                                                                 |
+| `limit`       | integer |    ❌    | Number of items per page (Default: `10`).                                                   |
+| `search`      | string  |    ❌    | Search keyword matching title, description, category, price, or stock.                      |
+| `category`    | string  |    ❌    | Filter by product category.                                                                 |
+| `minPrice`    | number  |    ❌    | Minimum product price (`price >= minPrice`).                                                |
+| `maxPrice`    | number  |    ❌    | Maximum product price (`price <= maxPrice`).                                                |
+| `inStock`     | string  |    ❌    | Filter by availability: `"true"` for in stock (`> 0`), `"false"` for out of stock (`<= 0`). |
+| `minRating`   | number  |    ❌    | Minimum average rating (`ratingAverage >= minRating`).                                      |
+| `maxRating`   | number  |    ❌    | Maximum average rating (`ratingAverage <= maxRating`).                                      |
+| `hasDiscount` | string  |    ❌    | Filter by discount: `"true"` (has active discount), `"false"` (no discount).                |
 
 #### Responses
 
@@ -734,16 +734,16 @@ Update existing product details and images. Requires authentication. **Only the 
 
 #### Form Data Fields
 
-| Field                | Type    | Required | Description                                                                                |
-| :------------------- | :------ | :------: | :----------------------------------------------------------------------------------------- |
-| `title`              | string  |    ❌    | Updated title (Min 4, Max 100).                                                            |
-| `description`        | string  |    ❌    | Updated description (Min 10, Max 1000).                                                    |
-| `price`              | number  |    ❌    | Updated original price.                                                                    |
-| `priceAfterDiscount` | number  |    ❌    | Updated discounted price.                                                                  |
-| `stock`              | number  |    ❌    | Updated stock count.                                                                       |
-| `category`           | string  |    ❌    | Updated category.                                                                          |
+| Field                | Type    | Required | Description                                                                               |
+| :------------------- | :------ | :------: | :---------------------------------------------------------------------------------------- |
+| `title`              | string  |    ❌    | Updated title (Min 4, Max 100).                                                           |
+| `description`        | string  |    ❌    | Updated description (Min 10, Max 1000).                                                   |
+| `price`              | number  |    ❌    | Updated original price.                                                                   |
+| `priceAfterDiscount` | number  |    ❌    | Updated discounted price.                                                                 |
+| `stock`              | number  |    ❌    | Updated stock count.                                                                      |
+| `category`           | string  |    ❌    | Updated category.                                                                         |
 | `existingImages`     | string  |    ❌    | JSON string of images to retain: `[{"url":"...","publicId":"..."}]`. Defaults to current. |
-| `productImages`      | files[] |    ❌    | Optional new/replacement files to upload (up to 5 total images).                           |
+| `productImages`      | files[] |    ❌    | Optional new/replacement files to upload (up to 5 total images).                          |
 
 #### Responses
 
@@ -917,9 +917,7 @@ Product liked or unliked successfully.
   "data": {
     "_id": "6ac92261707ab25c5d1ed396",
     "title": "Casual Cotton Shirt",
-    "likes": [
-      "664fa1e2b5c7e1234567890a"
-    ],
+    "likes": ["664fa1e2b5c7e1234567890a"],
     "likesCount": 1
   }
 }
@@ -1402,9 +1400,9 @@ Add a product to the authenticated user's wishlist. Accepts the product ID in th
 
 #### Path Parameters
 
-| Parameter   | Type   | Required | Description                     |
-| :---------- | :----- | :------: | :------------------------------ |
-| `productId` | string |    ✅    | The ID of the product to add.   |
+| Parameter   | Type   | Required | Description                   |
+| :---------- | :----- | :------: | :---------------------------- |
+| `productId` | string |    ✅    | The ID of the product to add. |
 
 #### Responses
 
@@ -1486,9 +1484,9 @@ Remove a specific product from the authenticated user's wishlist. Returns the up
 
 #### Path Parameters
 
-| Parameter   | Type   | Required | Description                       |
-| :---------- | :----- | :------: | :-------------------------------- |
-| `productId` | string |    ✅    | The ID of the product to remove.  |
+| Parameter   | Type   | Required | Description                      |
+| :---------- | :----- | :------: | :------------------------------- |
+| `productId` | string |    ✅    | The ID of the product to remove. |
 
 #### Responses
 
@@ -1599,15 +1597,15 @@ Create a new order from the items currently in the authenticated user's cart. Up
 
 #### Request Body
 
-| Field                        | Type   | Required | Description                                               |
-| :--------------------------- | :----- | :------: | :-------------------------------------------------------- |
-| `shippingAddress.address`    | string |    ✅    | Street address (Min 5 chars).                             |
-| `shippingAddress.city`       | string |    ✅    | City name (Min 2 chars).                                  |
-| `shippingAddress.state`      | string |    ✅    | State or governorate (Min 2 chars).                       |
-| `shippingAddress.country`    | string |    ✅    | Country name (Min 2 chars).                               |
-| `shippingAddress.postalCode` | string |    ✅    | Exactly 5 digits postal code (e.g. `11371`).              |
-| `shippingAddress.phone`      | string |    ✅    | Phone number starting with `01` (11 digits).              |
-| `paymentMethod`              | string |    ✅    | Payment method enum: `"Paymob"` or `"COD"`. |
+| Field                        | Type   | Required | Description                                  |
+| :--------------------------- | :----- | :------: | :------------------------------------------- |
+| `shippingAddress.address`    | string |    ✅    | Street address (Min 5 chars).                |
+| `shippingAddress.city`       | string |    ✅    | City name (Min 2 chars).                     |
+| `shippingAddress.state`      | string |    ✅    | State or governorate (Min 2 chars).          |
+| `shippingAddress.country`    | string |    ✅    | Country name (Min 2 chars).                  |
+| `shippingAddress.postalCode` | string |    ✅    | Exactly 5 digits postal code (e.g. `11371`). |
+| `shippingAddress.phone`      | string |    ✅    | Phone number starting with `01` (11 digits). |
+| `paymentMethod`              | string |    ✅    | Payment method enum: `"Paymob"` or `"COD"`.  |
 
 ```json
 {
@@ -1986,7 +1984,7 @@ Verify the outcome of a Paymob payment after the customer is redirected back to 
 | Field           | Type            | Required | Description                                                      |
 | :-------------- | :-------------- | :------: | :--------------------------------------------------------------- |
 | `orderId`       | string          |    ✅    | The Nexoo order ID to verify.                                    |
-| `success`       | boolean\|string |    ❌    | `true` / `"true"` if Paymob reported payment success.           |
+| `success`       | boolean\|string |    ❌    | `true` / `"true"` if Paymob reported payment success.            |
 | `transactionId` | string          |    ❌    | The Paymob transaction ID returned in the redirect query string. |
 
 ```json
@@ -2117,15 +2115,15 @@ Update shipping address or payment method for an order that is still in `Pending
 
 #### Request Body
 
-| Field                        | Type   | Required | Description                                                  |
-| :--------------------------- | :----- | :------: | :----------------------------------------------------------- |
-| `shippingAddress.address`    | string |    ❌    | Updated street address.                                      |
-| `shippingAddress.city`       | string |    ❌    | Updated city name.                                           |
-| `shippingAddress.state`      | string |    ❌    | Updated state or governorate.                                |
-| `shippingAddress.country`    | string |    ❌    | Updated country name.                                        |
-| `shippingAddress.postalCode` | string |    ❌    | Updated 5-digit postal code.                                 |
-| `shippingAddress.phone`      | string |    ❌    | Updated phone number (11 digits, starts with `01`).          |
-| `paymentMethod`              | string |    ❌    | Updated payment method: `"Paymob"` or `"COD"`. |
+| Field                        | Type   | Required | Description                                         |
+| :--------------------------- | :----- | :------: | :-------------------------------------------------- |
+| `shippingAddress.address`    | string |    ❌    | Updated street address.                             |
+| `shippingAddress.city`       | string |    ❌    | Updated city name.                                  |
+| `shippingAddress.state`      | string |    ❌    | Updated state or governorate.                       |
+| `shippingAddress.country`    | string |    ❌    | Updated country name.                               |
+| `shippingAddress.postalCode` | string |    ❌    | Updated 5-digit postal code.                        |
+| `shippingAddress.phone`      | string |    ❌    | Updated phone number (11 digits, starts with `01`). |
+| `paymentMethod`              | string |    ❌    | Updated payment method: `"Paymob"` or `"COD"`.      |
 
 ```json
 {
@@ -2274,337 +2272,6 @@ Order not found.
 
 ---
 
-## Admin Order Management Endpoints
-
-### GET /admin/orders
-
-Retrieve all customer orders placed across the store. **Admin or SuperAdmin only.** Orders are sorted by creation date descending and customer (`user`) details are populated.
-
-#### Request Headers
-
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
-
-#### Responses
-
-##### Response 200
-
-Orders fetched successfully.
-
-```json
-{
-  "status": "success",
-  "message": "Orders fetched successfully",
-  "data": [
-    {
-      "_id": "67092147385a812bf0e54321",
-      "user": {
-        "_id": "664fa1e2b5c7e1234567890b",
-        "fullName": "Ahmed Mohamed",
-        "email": "ahmed@example.com",
-        "username": "ahmed_m",
-        "phone": "01012345678",
-        "role": "User"
-      },
-      "orderItems": [
-        {
-          "product": "6ac92261707ab25c5d1ed396",
-          "productQuantity": 2,
-          "productPrice": 2500,
-          "productTitle": "Luxury Chronograph Watch",
-          "productImage": [
-            {
-              "url": "https://res.cloudinary.com/...",
-              "publicId": "watches/watch1"
-            }
-          ]
-        }
-      ],
-      "shippingAddress": {
-        "address": "15 El-Tahrir Street, Apt 4B",
-        "city": "Cairo",
-        "state": "Cairo",
-        "country": "Egypt",
-        "postalCode": "11371",
-        "phone": "01012345678"
-      },
-      "pricing": {
-        "itemsPrice": 5000,
-        "shippingPrice": 50,
-        "taxPrice": 0,
-        "couponCode": null,
-        "discountPrice": 0,
-        "totalOrderPrice": 5050
-      },
-      "payment": {
-        "paymentMethod": "Paymob",
-        "isPaid": true,
-        "paidAt": "2026-10-11T14:32:00.000Z"
-      },
-      "orderStatus": {
-        "status": "Processing",
-        "isDelivered": false
-      },
-      "createdAt": "2026-10-11T14:30:00.000Z",
-      "updatedAt": "2026-10-11T14:32:00.000Z"
-    }
-  ]
-}
-```
-
-##### Response 401
-
-Unauthorized. Missing or invalid token.
-
-```json
-{
-  "status": "fail",
-  "message": "Unauthorized"
-}
-```
-
-##### Response 403
-
-Forbidden. Caller is not an Admin or SuperAdmin.
-
-```json
-{
-  "status": "fail",
-  "message": "Not Authorized"
-}
-```
-
----
-
-### GET /admin/orders/:orderId
-
-Retrieve complete details of a single order by ID. **Admin or SuperAdmin only.** Populates both customer (`user`) and product (`orderItems.product`) information.
-
-#### Request Headers
-
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
-
-#### Path Parameters
-
-| Parameter | Type   | Required | Description                     |
-| :-------- | :----- | :------: | :------------------------------ |
-| `orderId` | string |    ✅    | The unique order ID to retrieve. |
-
-#### Responses
-
-##### Response 200
-
-Order fetched successfully.
-
-```json
-{
-  "status": "success",
-  "message": "Order fetched successfully",
-  "data": {
-    "_id": "67092147385a812bf0e54321",
-    "user": {
-      "_id": "664fa1e2b5c7e1234567890b",
-      "fullName": "Ahmed Mohamed",
-      "email": "ahmed@example.com",
-      "phone": "01012345678"
-    },
-    "orderItems": [
-      {
-        "product": {
-          "_id": "6ac92261707ab25c5d1ed396",
-          "title": "Luxury Chronograph Watch",
-          "price": 2500,
-          "productImages": [
-            {
-              "url": "https://res.cloudinary.com/...",
-              "publicId": "watches/watch1"
-            }
-          ]
-        },
-        "productQuantity": 2,
-        "productPrice": 2500,
-        "productTitle": "Luxury Chronograph Watch",
-        "productImage": [
-          {
-            "url": "https://res.cloudinary.com/...",
-            "publicId": "watches/watch1"
-          }
-        ]
-      }
-    ],
-    "shippingAddress": {
-      "address": "15 El-Tahrir Street, Apt 4B",
-      "city": "Cairo",
-      "state": "Cairo",
-      "country": "Egypt",
-      "postalCode": "11371",
-      "phone": "01012345678"
-    },
-    "pricing": {
-      "itemsPrice": 5000,
-      "shippingPrice": 50,
-      "taxPrice": 0,
-      "couponCode": null,
-      "discountPrice": 0,
-      "totalOrderPrice": 5050
-    },
-    "payment": {
-      "paymentMethod": "Paymob",
-      "isPaid": true,
-      "paidAt": "2026-10-11T14:32:00.000Z"
-    },
-    "orderStatus": {
-      "status": "Processing",
-      "isDelivered": false
-    },
-    "createdAt": "2026-10-11T14:30:00.000Z",
-    "updatedAt": "2026-10-11T14:32:00.000Z"
-  }
-}
-```
-
-##### Response 401
-
-Unauthorized. Missing or invalid token.
-
-```json
-{
-  "status": "fail",
-  "message": "Unauthorized"
-}
-```
-
-##### Response 403
-
-Forbidden. Caller is not an Admin or SuperAdmin.
-
-```json
-{
-  "status": "fail",
-  "message": "Not Authorized"
-}
-```
-
-##### Response 404
-
-Order not found.
-
-```json
-{
-  "status": "fail",
-  "message": "Order not found"
-}
-```
-
----
-
-### PATCH /admin/orders/:orderId
-
-Update the fulfillment and delivery status of an order. **Admin or SuperAdmin only.** Setting status to `"Delivered"` automatically sets `isDelivered = true` and records the current timestamp in `deliveredAt`.
-
-#### Request Headers
-
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
-| `Content-Type`  | `application/json`        |
-
-#### Path Parameters
-
-| Parameter | Type   | Required | Description                   |
-| :-------- | :----- | :------: | :---------------------------- |
-| `orderId` | string |    ✅    | The unique order ID to update. |
-
-#### Request Body
-
-| Field         | Type    | Required | Description                                                                        |
-| :------------ | :------ | :------: | :--------------------------------------------------------------------------------- |
-| `orderStatus` | string  |    ✅    | Target status enum: `"Pending"`, `"Processing"`, `"Shipped"`, `"Delivered"`, `"Cancelled"`. |
-| `isPaid`      | boolean |    ❌    | Optional manual payment confirmation flag.                                          |
-
-```json
-{
-  "orderStatus": "Delivered",
-  "isPaid": true
-}
-```
-
-#### Responses
-
-##### Response 200
-
-Order status updated successfully.
-
-```json
-{
-  "status": "success",
-  "message": "Order status updated successfully",
-  "data": {
-    "_id": "67092147385a812bf0e54321",
-    "payment": {
-      "paymentMethod": "COD",
-      "isPaid": true,
-      "paidAt": "2026-10-12T16:00:00.000Z"
-    },
-    "orderStatus": {
-      "status": "Delivered",
-      "isDelivered": true,
-      "deliveredAt": "2026-10-12T16:00:00.000Z"
-    },
-    "updatedAt": "2026-10-12T16:00:00.000Z"
-  }
-}
-```
-
-##### Response 400
-
-Validation error (invalid status string or missing orderStatus).
-
-```json
-{
-  "status": "fail",
-  "message": "Invalid order status. Allowed values: Pending, Processing, Shipped, Delivered, Cancelled"
-}
-```
-
-##### Response 401
-
-Unauthorized. Missing or invalid token.
-
-```json
-{
-  "status": "fail",
-  "message": "Unauthorized"
-}
-```
-
-##### Response 403
-
-Forbidden. Caller is not an Admin or SuperAdmin.
-
-```json
-{
-  "status": "fail",
-  "message": "Not Authorized"
-}
-```
-
-##### Response 404
-
-Order not found.
-
-```json
-{
-  "status": "fail",
-  "message": "Order not found"
-}
-```
-
----
-
 ## Coupon Management Endpoints
 
 ### GET /coupons
@@ -2639,9 +2306,7 @@ Coupons fetched successfully.
       "applicableCategories": ["electronics", "watches"],
       "maxUsersLimit": 30,
       "usedCount": 4,
-      "usedBy": [
-        { "user": "664fa1e2b5c7e1234567890b", "count": 1 }
-      ],
+      "usedBy": [{ "user": "664fa1e2b5c7e1234567890b", "count": 1 }],
       "isActive": true,
       "startDate": "2026-06-01T00:00:00.000Z",
       "expireDate": "2026-08-31T23:59:59.000Z",
@@ -2689,19 +2354,19 @@ Create a new discount coupon. **Admin or SuperAdmin only.**
 
 #### Request Body
 
-| Field                   | Type     | Required | Description                                                                                   |
-| :---------------------- | :------- | :------: | :-------------------------------------------------------------------------------------------- |
-| `couponCode`            | string   |    ✅    | Unique coupon identifier code (case-insensitive, auto-uppercased).                            |
-| `discountType`          | string   |    ✅    | Either `"percentage"` or `"fixed"`.                                                           |
-| `discountValue`         | number   |    ✅    | Value of discount (1–100 for percentage, > 0 for fixed amount in EGP).                       |
-| `usageLimit`            | number   |    ❌    | Maximum total number of times the coupon can be redeemed globally (Default: `10`).            |
-| `usageLimitPerUser`     | number   |    ❌    | Maximum times a **single user** can redeem this coupon (Default: `1`).                        |
-| `minOrderValue`         | number   |    ❌    | Minimum cart total (EGP) required to apply the coupon (Default: `0` = no minimum).            |
-| `applicableCategories`  | string[] |    ❌    | Array of category strings the coupon is restricted to. Empty = applies to all categories.     |
-| `maxUsersLimit`         | number   |    ❌    | Maximum number of **unique users** who can ever use this coupon. `null` = unlimited.          |
-| `startDate`             | string   |    ✅    | ISO date string indicating when coupon validity begins.                                       |
-| `expireDate`            | string   |    ✅    | ISO date string indicating when coupon expires (must be after `startDate`).                   |
-| `isActive`              | boolean  |    ❌    | Whether the coupon is immediately active (Default: `true`).                                   |
+| Field                  | Type     | Required | Description                                                                               |
+| :--------------------- | :------- | :------: | :---------------------------------------------------------------------------------------- |
+| `couponCode`           | string   |    ✅    | Unique coupon identifier code (case-insensitive, auto-uppercased).                        |
+| `discountType`         | string   |    ✅    | Either `"percentage"` or `"fixed"`.                                                       |
+| `discountValue`        | number   |    ✅    | Value of discount (1–100 for percentage, > 0 for fixed amount in EGP).                    |
+| `usageLimit`           | number   |    ❌    | Maximum total number of times the coupon can be redeemed globally (Default: `10`).        |
+| `usageLimitPerUser`    | number   |    ❌    | Maximum times a **single user** can redeem this coupon (Default: `1`).                    |
+| `minOrderValue`        | number   |    ❌    | Minimum cart total (EGP) required to apply the coupon (Default: `0` = no minimum).        |
+| `applicableCategories` | string[] |    ❌    | Array of category strings the coupon is restricted to. Empty = applies to all categories. |
+| `maxUsersLimit`        | number   |    ❌    | Maximum number of **unique users** who can ever use this coupon. `null` = unlimited.      |
+| `startDate`            | string   |    ✅    | ISO date string indicating when coupon validity begins.                                   |
+| `expireDate`           | string   |    ✅    | ISO date string indicating when coupon expires (must be after `startDate`).               |
+| `isActive`             | boolean  |    ❌    | Whether the coupon is immediately active (Default: `true`).                               |
 
 ```json
 {
@@ -2831,15 +2496,15 @@ Coupon applied successfully.
 
 One of the following validation failures:
 
-| Condition | Message |
-| :-------- | :------ |
-| Coupon inactive | `"Coupon is not active"` |
-| Outside validity dates | `"Coupon has expired"` |
-| Global usage limit reached | `"Coupon usage limit exceeded"` |
-| User already used coupon `usageLimitPerUser` times | `"You have already used this coupon"` |
-| Cart total < `minOrderValue` | `"Minimum order value required is {n}"` |
-| Max unique users limit reached | `"Coupon has reached its maximum user limit"` |
-| No cart items match `applicableCategories` | `"Coupon not applicable to your cart items"` |
+| Condition                                          | Message                                       |
+| :------------------------------------------------- | :-------------------------------------------- |
+| Coupon inactive                                    | `"Coupon is not active"`                      |
+| Outside validity dates                             | `"Coupon has expired"`                        |
+| Global usage limit reached                         | `"Coupon usage limit exceeded"`               |
+| User already used coupon `usageLimitPerUser` times | `"You have already used this coupon"`         |
+| Cart total < `minOrderValue`                       | `"Minimum order value required is {n}"`       |
+| Max unique users limit reached                     | `"Coupon has reached its maximum user limit"` |
+| No cart items match `applicableCategories`         | `"Coupon not applicable to your cart items"`  |
 
 ```json
 {
@@ -2941,19 +2606,19 @@ Update details, dates, or active status of an existing coupon. **Admin or SuperA
 
 All fields are optional — only send the fields you want to update.
 
-| Field                  | Type     | Required | Description                                                                          |
-| :--------------------- | :------- | :------: | :----------------------------------------------------------------------------------- |
-| `couponCode`           | string   |    ❌    | New unique coupon code (auto-uppercased).                                            |
-| `discountType`         | string   |    ❌    | Either `"percentage"` or `"fixed"`.                                                  |
-| `discountValue`        | number   |    ❌    | New discount numeric value.                                                          |
-| `usageLimit`           | number   |    ❌    | New maximum global usage limit.                                                      |
-| `usageLimitPerUser`    | number   |    ❌    | New per-user usage cap.                                                              |
-| `minOrderValue`        | number   |    ❌    | New minimum cart total required.                                                     |
-| `applicableCategories` | string[] |    ❌    | New category restriction list. Send `[]` to remove restriction.                      |
-| `maxUsersLimit`        | number\|null |    ❌ | New unique user cap. Send `null` to remove limit.                               |
-| `startDate`            | string   |    ❌    | New validity start date (ISO).                                                       |
-| `expireDate`           | string   |    ❌    | New validity expiration date (ISO).                                                  |
-| `isActive`             | boolean  |    ❌    | Activate or deactivate coupon.                                                       |
+| Field                  | Type         | Required | Description                                                     |
+| :--------------------- | :----------- | :------: | :-------------------------------------------------------------- |
+| `couponCode`           | string       |    ❌    | New unique coupon code (auto-uppercased).                       |
+| `discountType`         | string       |    ❌    | Either `"percentage"` or `"fixed"`.                             |
+| `discountValue`        | number       |    ❌    | New discount numeric value.                                     |
+| `usageLimit`           | number       |    ❌    | New maximum global usage limit.                                 |
+| `usageLimitPerUser`    | number       |    ❌    | New per-user usage cap.                                         |
+| `minOrderValue`        | number       |    ❌    | New minimum cart total required.                                |
+| `applicableCategories` | string[]     |    ❌    | New category restriction list. Send `[]` to remove restriction. |
+| `maxUsersLimit`        | number\|null |    ❌    | New unique user cap. Send `null` to remove limit.               |
+| `startDate`            | string       |    ❌    | New validity start date (ISO).                                  |
+| `expireDate`           | string       |    ❌    | New validity expiration date (ISO).                             |
+| `isActive`             | boolean      |    ❌    | Activate or deactivate coupon.                                  |
 
 ```json
 {
@@ -3192,9 +2857,9 @@ Submit a new review or update an existing review for a product. Requires authent
 
 #### Request Body
 
-| Field        | Type   | Required | Description                                                  |
-| :----------- | :----- | :------: | :----------------------------------------------------------- |
-| `ratings`    | number |    ✅    | Numerical rating from `1` to `5` (inclusive).               |
+| Field        | Type   | Required | Description                                                   |
+| :----------- | :----- | :------: | :------------------------------------------------------------ |
+| `ratings`    | number |    ✅    | Numerical rating from `1` to `5` (inclusive).                 |
 | `reviewText` | string |    ✅    | Customer opinion text (Min length: 1, Max length: 500 chars). |
 
 ```json
@@ -3308,10 +2973,10 @@ Update an existing review by ID. Requires authentication. **Only the review auth
 
 #### Request Body
 
-| Field        | Type   | Required | Description                                                  |
-| :----------- | :----- | :------: | :----------------------------------------------------------- |
-| `ratings`    | number |    ❌    | Updated numerical rating from `1` to `5`.                    |
-| `reviewText` | string |    ❌    | Updated customer review text (Min 1, Max 500 characters).    |
+| Field        | Type   | Required | Description                                               |
+| :----------- | :----- | :------: | :-------------------------------------------------------- |
+| `ratings`    | number |    ❌    | Updated numerical rating from `1` to `5`.                 |
+| `reviewText` | string |    ❌    | Updated customer review text (Min 1, Max 500 characters). |
 
 ```json
 {
@@ -3440,6 +3105,408 @@ Review not found.
 {
   "status": "fail",
   "message": "Review Not Found"
+}
+```
+
+---
+
+## Admin Order Management Endpoints
+
+### GET /admin/orders
+
+Retrieve all customer orders placed across the store. **Admin or SuperAdmin only.** Orders are sorted by creation date descending and customer (`user`) details are populated.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Query Parameters
+
+| Parameter      | Type    | Required | Description                                                                                                   |
+| :------------- | :------ | :------: | :------------------------------------------------------------------------------------------------------------ |
+| `orderStatus`  | string  |    ❌    | Filter by order status (`Pending`, `Processing`, `Shipped`, `Delivered`, `Cancelled`). Use `all` for all.    |
+| `orderId`      | string  |    ❌    | Filter by exact order ID (`_id`).                                                                             |
+| `customerName` | string  |    ❌    | Case-insensitive regex search matching customer's `fullName` or `username`.                                   |
+| `email`        | string  |    ❌    | Case-insensitive regex search matching customer's `email`.                                                    |
+| `phone`        | string  |    ❌    | Case-insensitive regex search matching shipping phone number (`shippingAddress.phone`).                       |
+| `minPrice`     | number  |    ❌    | Filter orders where `pricing.totalOrderPrice` is greater than or equal to this value.                         |
+| `maxPrice`     | number  |    ❌    | Filter orders where `pricing.totalOrderPrice` is less than or equal to this value.                            |
+| `isPaid`       | boolean |    ❌    | Filter orders by payment status (`true` for paid, `false` for unpaid).                                       |
+| `page`         | number  |    ❌    | Page number for pagination (defaults to `1`).                                                                 |
+| `limit`        | number  |    ❌    | Number of orders per page (defaults to `10`).                                                                 |
+
+#### Responses
+
+##### Response 200
+
+Orders fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Orders fetched successfully",
+  "data": [
+    {
+      "_id": "67092147385a812bf0e54321",
+      "user": {
+        "_id": "664fa1e2b5c7e1234567890b",
+        "fullName": "Ahmed Mohamed",
+        "email": "ahmed@example.com",
+        "username": "ahmed_m",
+        "phone": "01012345678",
+        "role": "User"
+      },
+      "orderItems": [
+        {
+          "product": "6ac92261707ab25c5d1ed396",
+          "productQuantity": 2,
+          "productPrice": 2500,
+          "productTitle": "Luxury Chronograph Watch",
+          "productImage": [
+            {
+              "url": "https://res.cloudinary.com/...",
+              "publicId": "watches/watch1"
+            }
+          ]
+        }
+      ],
+      "shippingAddress": {
+        "address": "15 El-Tahrir Street, Apt 4B",
+        "city": "Cairo",
+        "state": "Cairo",
+        "country": "Egypt",
+        "postalCode": "11371",
+        "phone": "01012345678"
+      },
+      "pricing": {
+        "itemsPrice": 5000,
+        "shippingPrice": 50,
+        "taxPrice": 0,
+        "couponCode": null,
+        "discountPrice": 0,
+        "totalOrderPrice": 5050
+      },
+      "payment": {
+        "paymentMethod": "Paymob",
+        "isPaid": true,
+        "paidAt": "2026-10-11T14:32:00.000Z"
+      },
+      "orderStatus": {
+        "status": "Processing",
+        "isDelivered": false
+      },
+      "createdAt": "2026-10-11T14:30:00.000Z",
+      "updatedAt": "2026-10-11T14:32:00.000Z"
+    }
+  ]
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Caller is not an Admin or SuperAdmin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+---
+
+### GET /admin/orders/:orderId
+
+Retrieve complete details of a single order by ID. **Admin or SuperAdmin only.** Populates both customer (`user`) and product (`orderItems.product`) information.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter | Type   | Required | Description                      |
+| :-------- | :----- | :------: | :------------------------------- |
+| `orderId` | string |    ✅    | The unique order ID to retrieve. |
+
+#### Responses
+
+##### Response 200
+
+Order fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Order fetched successfully",
+  "data": {
+    "_id": "67092147385a812bf0e54321",
+    "user": {
+      "_id": "664fa1e2b5c7e1234567890b",
+      "fullName": "Ahmed Mohamed",
+      "email": "ahmed@example.com",
+      "phone": "01012345678"
+    },
+    "orderItems": [
+      {
+        "product": {
+          "_id": "6ac92261707ab25c5d1ed396",
+          "title": "Luxury Chronograph Watch",
+          "price": 2500,
+          "productImages": [
+            {
+              "url": "https://res.cloudinary.com/...",
+              "publicId": "watches/watch1"
+            }
+          ]
+        },
+        "productQuantity": 2,
+        "productPrice": 2500,
+        "productTitle": "Luxury Chronograph Watch",
+        "productImage": [
+          {
+            "url": "https://res.cloudinary.com/...",
+            "publicId": "watches/watch1"
+          }
+        ]
+      }
+    ],
+    "shippingAddress": {
+      "address": "15 El-Tahrir Street, Apt 4B",
+      "city": "Cairo",
+      "state": "Cairo",
+      "country": "Egypt",
+      "postalCode": "11371",
+      "phone": "01012345678"
+    },
+    "pricing": {
+      "itemsPrice": 5000,
+      "shippingPrice": 50,
+      "taxPrice": 0,
+      "couponCode": null,
+      "discountPrice": 0,
+      "totalOrderPrice": 5050
+    },
+    "payment": {
+      "paymentMethod": "Paymob",
+      "isPaid": true,
+      "paidAt": "2026-10-11T14:32:00.000Z"
+    },
+    "orderStatus": {
+      "status": "Processing",
+      "isDelivered": false
+    },
+    "createdAt": "2026-10-11T14:30:00.000Z",
+    "updatedAt": "2026-10-11T14:32:00.000Z"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Caller is not an Admin or SuperAdmin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+##### Response 404
+
+Order not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
+}
+```
+
+---
+
+### PATCH /admin/orders/:orderId
+
+Update the fulfillment and delivery status of an order. **Admin or SuperAdmin only.** Setting status to `"Delivered"` automatically sets `isDelivered = true` and records the current timestamp in `deliveredAt`.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
+
+#### Path Parameters
+
+| Parameter | Type   | Required | Description                    |
+| :-------- | :----- | :------: | :----------------------------- |
+| `orderId` | string |    ✅    | The unique order ID to update. |
+
+#### Request Body
+
+| Field         | Type    | Required | Description                                                                                 |
+| :------------ | :------ | :------: | :------------------------------------------------------------------------------------------ |
+| `orderStatus` | string  |    ✅    | Target status enum: `"Pending"`, `"Processing"`, `"Shipped"`, `"Delivered"`, `"Cancelled"`. |
+| `isPaid`      | boolean |    ❌    | Optional manual payment confirmation flag.                                                  |
+
+```json
+{
+  "orderStatus": "Delivered",
+  "isPaid": true
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Order status updated successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Order status updated successfully",
+  "data": {
+    "_id": "67092147385a812bf0e54321",
+    "payment": {
+      "paymentMethod": "COD",
+      "isPaid": true,
+      "paidAt": "2026-10-12T16:00:00.000Z"
+    },
+    "orderStatus": {
+      "status": "Delivered",
+      "isDelivered": true,
+      "deliveredAt": "2026-10-12T16:00:00.000Z"
+    },
+    "updatedAt": "2026-10-12T16:00:00.000Z"
+  }
+}
+```
+
+##### Response 400
+
+Validation error (invalid status string or missing orderStatus).
+
+```json
+{
+  "status": "fail",
+  "message": "Invalid order status. Allowed values: Pending, Processing, Shipped, Delivered, Cancelled"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Caller is not an Admin or SuperAdmin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+##### Response 404
+
+Order not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
+}
+```
+
+---
+
+### GET /admin/orders/overview
+
+Retrieve aggregated store-wide order statistics and metrics, including total counts, counts broken down by status, and total revenue accumulated from all paid orders. **Admin or SuperAdmin only.**
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+Stats fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Stats fetched Succeed",
+  "data": {
+    "totalOrders": 128,
+    "pendingOrders": 14,
+    "DeliveredOrders": 82,
+    "deliveredOrders": 82,
+    "processingOrders": 24,
+    "cancelledOrders": 8,
+    "totalPaidAmount": 425300
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Caller is not an Admin or SuperAdmin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
 }
 ```
 
