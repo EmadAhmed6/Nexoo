@@ -80,6 +80,14 @@ const OrderSchema = new Schema({
             type: Number,
             required: true,
         },
+        couponCode: {
+            type: String,
+            default: null,
+        },
+        discountPrice: {
+            type: Number,
+            default: 0,
+        },
         totalOrderPrice: {
             type: Number,
             required: true,
@@ -88,7 +96,7 @@ const OrderSchema = new Schema({
     payment: {
         paymentMethod: {
             type: String,
-            enum: ["Paypal", "Stripe", "COD"],
+            enum: ["Paymob", "COD", "Stripe", "Paypal"],
             required: true,
         },
         isPaid: {

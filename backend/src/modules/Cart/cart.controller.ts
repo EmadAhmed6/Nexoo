@@ -5,7 +5,7 @@ import { sendError, successMsg } from "../../middlewares/errors.js";
 import { Cart, validateCreateCart, validateUpdateCart } from "./cart.model.js";
 import { Types } from "mongoose";
 import { Product } from "../Product/product.model.js";
-import { Coupon } from "../Coupons/coupon.model.js";
+import { Coupon } from "../Coupon/coupon.model.js";
 
 // GET CART
 const getCart = asyncHandler(

@@ -2,9 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { Users, Package, Tag, TrendingUp, ArrowRight } from "lucide-react";
+import { Users, Package, Tag, TrendingUp, ArrowRight, ShoppingCart } from "lucide-react";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useCoupons } from "@/features/coupons/hooks/useCoupons";
+import { useAdminOrders } from "@/features/orders/hooks/useOrders";
 
 interface StatCardProps {
   label: string;
@@ -36,8 +37,10 @@ function StatCard({ label, value, icon: Icon, href, color, bg }: StatCardProps) 
 export default function AdminPage() {
   const { data: productsData } = useProducts({ limit: 1 });
   const { data: coupons } = useCoupons();
+  const { data: orders } = useAdminOrders();
 
   const activeCoupons = coupons?.filter((c) => c.isActive).length ?? 0;
+  const pendingOrders = orders?.filter((o) => o.orderStatus.status === "Pending").length ?? 0;
 
   return (
     <div className="space-y-8 max-w-5xl">
@@ -46,11 +49,19 @@ export default function AdminPage() {
           Admin Overview
         </h1>
         <p className="text-sm text-textSecondary mt-1">
-          Manage your store — users, products, and coupons from one place.
+          Manage your store — orders, users, products, and coupons from one place.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label="Total Orders"
+          value={orders?.length ?? "—"}
+          icon={ShoppingCart}
+          href="/admin/orders"
+          color="text-amber-400"
+          bg="bg-amber-400/10 border border-amber-400/20"
+        />
         <StatCard
           label="Total Products"
           value={productsData?.totalProducts ?? "—"}
@@ -82,27 +93,39 @@ export default function AdminPage() {
         <h2 className="text-sm font-bold text-textSecondary uppercase tracking-wider mb-3">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Link
+            href="/admin/orders"
+            className="flex items-center gap-3 p-4 rounded-xl border border-borderPrimary bg-bgSecondary hover:border-primary/40 transition-all text-sm font-semibold text-textPrimary hover:text-primary"
+          >
+            <ShoppingCart className="w-4 h-4 text-amber-400" />
+            <span>Manage Orders</span>
+            {pendingOrders > 0 && (
+              <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/10 text-amber-400 border border-amber-400/20">
+                {pendingOrders} new
+              </span>
+            )}
+          </Link>
           <Link
             href="/admin/products"
             className="flex items-center gap-3 p-4 rounded-xl border border-borderPrimary bg-bgSecondary hover:border-primary/40 transition-all text-sm font-semibold text-textPrimary hover:text-primary"
           >
-            <Package className="w-4 h-4" />
-            Manage Products
+            <Package className="w-4 h-4 text-blue-400" />
+            <span>Manage Products</span>
           </Link>
           <Link
             href="/admin/users"
             className="flex items-center gap-3 p-4 rounded-xl border border-borderPrimary bg-bgSecondary hover:border-primary/40 transition-all text-sm font-semibold text-textPrimary hover:text-primary"
           >
-            <Users className="w-4 h-4" />
-            Manage Users
+            <Users className="w-4 h-4 text-purple-400" />
+            <span>Manage Users</span>
           </Link>
           <Link
             href="/admin/coupons"
             className="flex items-center gap-3 p-4 rounded-xl border border-borderPrimary bg-bgSecondary hover:border-primary/40 transition-all text-sm font-semibold text-textPrimary hover:text-primary"
           >
-            <Tag className="w-4 h-4" />
-            Manage Coupons
+            <Tag className="w-4 h-4 text-emerald-400" />
+            <span>Manage Coupons</span>
           </Link>
         </div>
       </div>

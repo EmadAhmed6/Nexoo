@@ -1,8 +1,9 @@
-import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/axios-client";
+import { apiGet, apiPost, apiPut, apiDelete, apiPatch } from "@/lib/axios-client";
 import {
   Order,
   CreateOrderPayload,
   CreatePaymobOrderResponse,
+  UpdateAdminOrderStatusPayload,
 } from "../types/order.types";
 
 export const orderApi = {
@@ -74,4 +75,32 @@ export const orderApi = {
   deleteOrder: async (orderId: string) => {
     return apiDelete<Order>(`/orders/${orderId}`);
   },
+
+  /**
+   * Admin: GET /admin/orders — Fetch all system orders
+   */
+  getAdminOrders: async () => {
+    return apiGet<Order[]>("/admin/orders");
+  },
+
+  /**
+   * Admin: GET /admin/orders/:orderId — Fetch single order details
+   */
+  getAdminOrderById: async (orderId: string) => {
+    return apiGet<Order>(`/admin/orders/${orderId}`);
+  },
+
+  /**
+   * Admin: PATCH /admin/orders/:orderId — Update order status (or payment)
+   */
+  updateAdminOrderStatus: async (
+    orderId: string,
+    payload: UpdateAdminOrderStatusPayload,
+  ) => {
+    return apiPatch<Order, UpdateAdminOrderStatusPayload>(
+      `/admin/orders/${orderId}`,
+      payload,
+    );
+  },
 };
+

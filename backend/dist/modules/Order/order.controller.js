@@ -1,9 +1,10 @@
 import asyncHandler from "express-async-handler";
-import checkoutNodeJssdk from "@paypal/checkout-server-sdk";
-import paypalClient from "../../config/paypal.js";
 import { sendError, successMsg } from "../../middlewares/errors.js";
+import { createPaymobIntention } from "../../config/paymob.js";
+import { User } from "../Users/user.model.js";
 import { Cart } from "../Cart/cart.model.js";
 import { Order, validateCreateOrder, validateUpdateOrder, } from "./order.model.js";
+import { Coupon } from "../Coupon/coupon.model.js";
 // GET USER ORDERS
 const getOrders = asyncHandler(async (req, res) => {
     const userId = req.user?.id;
@@ -58,10 +59,14 @@ const createOrder = asyncHandler(async (req, res) => {
     const itemsPrice = cart.totalPrice;
     const taxPrice = 0;
     const shippingPrice = 0;
-    const totalOrderPrice = itemsPrice + shippingPrice + taxPrice;
-    // For PayPal or COD, payment is not completed at creation
-    const isPaid = paymentMethod === "Stripe";
-    const paidAt = isPaid ? new Date() : undefined;
+    const discountPrice = cart.totalPriceAfterDiscount
+        ? cart.totalPrice - cart.totalPriceAfterDiscount
+        : 0;
+    const totalOrderPrice = (cart.totalPriceAfterDiscount ?? cart.totalPrice) +
+        shippingPrice +
+        taxPrice;
+    const isPaid = false;
+    const paidAt = undefined;
     const order = await Order.create({
         user: userId,
         orderItems,
@@ -70,6 +75,8 @@ const createOrder = asyncHandler(async (req, res) => {
             itemsPrice,
             shippingPrice,
             taxPrice,
+            couponCode: cart.couponApplied || null,
+            discountPrice,
             totalOrderPrice,
         },
         payment: {
@@ -82,11 +89,25 @@ const createOrder = asyncHandler(async (req, res) => {
             isDelivered: false,
         },
     });
+    if (cart.couponApplied) {
+        const coupon = await Coupon.findOne({ couponCode: cart.couponApplied });
+        if (coupon) {
+            coupon.usedCount += 1;
+            const userIndex = coupon.usedBy.findIndex((item) => item.user.toString() === userId.toString());
+            if (userIndex > -1) {
+                coupon.usedBy[userIndex].count += 1;
+            }
+            else {
+                coupon.usedBy.push({ user: userId, count: 1 });
+            }
+            await coupon.save();
+        }
+    }
     await Cart.findByIdAndDelete(cart._id);
     successMsg(res, 201, "Order created successfully", order);
 });
-// PAYAPAL ORDER
-const createPayPalOrder = asyncHandler(async (req, res) => {
+// PAYMOB ORDER
+const createPaymobOrder = asyncHandler(async (req, res) => {
     const { orderId } = req.body;
     const userId = req.user?.id;
     const order = await Order.findOne({ _id: orderId, user: userId });
@@ -98,59 +119,91 @@ const createPayPalOrder = asyncHandler(async (req, res) => {
         sendError(res, 400, "This order is already paid");
         return;
     }
-    const request = new checkoutNodeJssdk.orders.OrdersCreateRequest();
-    request.prefer("return=representation");
-    request.requestBody({
-        intent: "CAPTURE",
-        purchase_units: [
-            {
-                reference_id: order._id.toString(),
-                amount: {
-                    currency_code: "USD",
-                    value: order.pricing.totalOrderPrice.toFixed(2),
-                },
+    const user = await User.findById(userId);
+    const nameParts = (user?.fullName || user?.username || "Customer").split(" ");
+    const firstName = nameParts[0] || "Customer";
+    const lastName = nameParts.slice(1).join(" ") || firstName;
+    try {
+        const intention = await createPaymobIntention({
+            amount: order.pricing.totalOrderPrice,
+            orderId: order._id.toString(),
+            items: order.orderItems.map((item) => ({
+                name: item.productTitle,
+                amount: item.productPrice,
+                quantity: item.productQuantity,
+            })),
+            billingData: {
+                firstName,
+                lastName,
+                phone: order.shippingAddress.phone || user?.phone || "01000000000",
+                email: user?.email || "customer@example.com",
+                address: order.shippingAddress.address,
+                city: order.shippingAddress.city,
+                state: order.shippingAddress.state,
+                country: order.shippingAddress.country,
+                postalCode: order.shippingAddress.postalCode,
             },
-        ],
-        application_context: {
-            return_url: "http://localhost:3000/checkout/success",
-            cancel_url: "http://localhost:3000/checkout/cancel",
-        },
-    });
-    const client = paypalClient();
-    const paypalOrder = await client.execute(request);
-    const approvalUrl = paypalOrder.result.links.find((link) => link.rel === "approve")?.href;
-    successMsg(res, 200, "PayPal order created successfully", {
-        paypalOrderId: paypalOrder.result.id,
-        approvalUrl,
-    });
+        });
+        successMsg(res, 200, "Paymob payment session created successfully", {
+            orderId: order._id,
+            checkoutUrl: intention.checkoutUrl,
+            clientSecret: intention.clientSecret,
+        });
+    }
+    catch (err) {
+        sendError(res, 500, err?.message || "Failed to initialize Paymob payment");
+    }
 });
-const capturePayPalPayment = asyncHandler(async (req, res) => {
-    const { paypalOrderId, orderId } = req.body;
-    const request = new checkoutNodeJssdk.orders.OrdersCaptureRequest(paypalOrderId);
-    request.requestBody({});
-    const client = paypalClient();
-    const captureResponse = await client.execute(request);
-    if (captureResponse.result.status === "COMPLETED") {
-        const order = await Order.findById(orderId);
-        if (!order) {
-            sendError(res, 404, "Order not found");
-            return;
-        }
+// VERIFY PAYMOB PAYMENT
+const verifyPaymobPayment = asyncHandler(async (req, res) => {
+    const { orderId, success, transactionId } = req.body;
+    const userId = req.user?.id;
+    const order = await Order.findOne({ _id: orderId, user: userId });
+    if (!order) {
+        sendError(res, 404, "Order not found");
+        return;
+    }
+    if (order.payment.isPaid) {
+        successMsg(res, 200, "Order is already paid", order);
+        return;
+    }
+    if (success === true || success === "true") {
         order.payment.isPaid = true;
         order.payment.paidAt = new Date();
         order.payment.paymentResult = {
-            id: captureResponse.result.id,
-            status: captureResponse.result.status,
-            update_time: captureResponse.result.update_time,
-            email_address: captureResponse.result.payer?.email_address,
+            id: transactionId ? String(transactionId) : undefined,
+            status: "SUCCESS",
+            update_time: new Date().toISOString(),
         };
         order.orderStatus.status = "Processing";
         await order.save();
-        successMsg(res, 200, "Payment captured successfully", order);
+        successMsg(res, 200, "Payment verified successfully", order);
+        return;
     }
-    else {
-        sendError(res, 400, "Payment failed or not completed");
+    sendError(res, 400, "Payment verification failed or payment was not successful");
+});
+// PAYMOB WEBHOOK
+const paymobWebhook = asyncHandler(async (req, res) => {
+    const obj = req.body?.obj || req.body;
+    const isSuccess = obj?.success === true || obj?.success === "true";
+    const orderId = obj?.order?.special_reference ||
+        obj?.special_reference ||
+        obj?.extras?.order_id;
+    if (isSuccess && orderId) {
+        const order = await Order.findById(orderId);
+        if (order && !order.payment.isPaid) {
+            order.payment.isPaid = true;
+            order.payment.paidAt = new Date();
+            order.payment.paymentResult = {
+                id: String(obj?.id || ""),
+                status: "SUCCESS",
+                update_time: new Date().toISOString(),
+            };
+            order.orderStatus.status = "Processing";
+            await order.save();
+        }
     }
+    res.status(200).json({ status: "received" });
 });
 // UPDATE ORDER
 const updateOrder = asyncHandler(async (req, res) => {
@@ -188,5 +241,5 @@ const deleteOrder = asyncHandler(async (req, res) => {
     await order.deleteOne();
     successMsg(res, 200, "Order deleted successfully", order);
 });
-export { getOrders, getOrderById, createOrder, createPayPalOrder, capturePayPalPayment, updateOrder, deleteOrder, };
+export { getOrders, getOrderById, createOrder, createPaymobOrder, verifyPaymobPayment, paymobWebhook, updateOrder, deleteOrder, };
 //# sourceMappingURL=order.controller.js.map

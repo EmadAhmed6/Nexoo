@@ -53,6 +53,10 @@ const options: Options = {
         description: "Order processing and Paymob checkout APIs",
       },
       {
+        name: "Admin Orders",
+        description: "Admin order management and fulfillment APIs",
+      },
+      {
         name: "Coupons",
         description: "Coupons and discount management APIs",
       },

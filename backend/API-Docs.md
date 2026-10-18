@@ -70,16 +70,19 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 27  | POST   | `/orders/paymob/webhook`    | Paymob server-to-server webhook to automatically confirm payment                  |  ❌  |
 | 28  | PUT    | `/orders/:orderId`          | Update shipping address or payment method of pending order                        |  🔒  |
 | 29  | DELETE | `/orders/:orderId`          | Cancel and delete a pending order                                                 |  🔒  |
-| 30  | GET    | `/coupons`                  | Retrieve list of all coupons (Admin only)                                         |  🔒  |
-| 31  | POST   | `/coupons`                  | Create a new discount coupon with advanced limits (Admin only)                    |  🔒  |
-| 32  | POST   | `/coupons/apply`            | Apply coupon code to user cart and recalculate prices                             |  🔒  |
-| 33  | DELETE | `/coupons/remove`           | Remove applied coupon from user cart                                              |  🔒  |
-| 34  | PUT    | `/coupons/:couponId`        | Update coupon details, limits, validity dates, or status (Admin only)             |  🔒  |
-| 35  | DELETE | `/coupons/:couponId`        | Delete unused coupon (Admin only)                                                 |  🔒  |
-| 36  | GET    | `/reviews/:productId`       | Retrieve all reviews and ratings for a product with reviewer details              |  ❌  |
-| 37  | POST   | `/reviews/:productId`       | Submit a new review or update existing review (recalculates product ratings)      |  🔒  |
-| 38  | PUT    | `/reviews/:reviewId`        | Update review rating or text (Review Owner, Admin, or SuperAdmin)                 |  🔒  |
-| 39  | DELETE | `/reviews/:reviewId`        | Delete a review permanently and recalculate product stats (Owner or Admin)        |  🔒  |
+| 30  | GET    | `/admin/orders`             | Retrieve all platform orders with populated customer info (Admin only)            |  🔒  |
+| 31  | GET    | `/admin/orders/:orderId`    | Retrieve complete details of any order by ID (Admin only)                         |  🔒  |
+| 32  | PATCH  | `/admin/orders/:orderId`    | Update order delivery and fulfillment status (Admin only)                         |  🔒  |
+| 33  | GET    | `/coupons`                  | Retrieve list of all coupons (Admin only)                                         |  🔒  |
+| 34  | POST   | `/coupons`                  | Create a new discount coupon with advanced limits (Admin only)                    |  🔒  |
+| 35  | POST   | `/coupons/apply`            | Apply coupon code to user cart and recalculate prices                             |  🔒  |
+| 36  | DELETE | `/coupons/remove`           | Remove applied coupon from user cart                                              |  🔒  |
+| 37  | PUT    | `/coupons/:couponId`        | Update coupon details, limits, validity dates, or status (Admin only)             |  🔒  |
+| 38  | DELETE | `/coupons/:couponId`        | Delete unused coupon (Admin only)                                                 |  🔒  |
+| 39  | GET    | `/reviews/:productId`       | Retrieve all reviews and ratings for a product with reviewer details              |  ❌  |
+| 40  | POST   | `/reviews/:productId`       | Submit a new review or update existing review (recalculates product ratings)      |  🔒  |
+| 41  | PUT    | `/reviews/:reviewId`        | Update review rating or text (Review Owner, Admin, or SuperAdmin)                 |  🔒  |
+| 42  | DELETE | `/reviews/:reviewId`        | Delete a review permanently and recalculate product stats (Owner or Admin)        |  🔒  |
 
 ---
 
@@ -91,6 +94,7 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 - [Cart Management Endpoints](#cart-management-endpoints)
 - [Wishlist Management Endpoints](#wishlist-management-endpoints)
 - [Order & Checkout Endpoints](#order--checkout-endpoints)
+- [Admin Order Management Endpoints](#admin-order-management-endpoints)
 - [Coupon Management Endpoints](#coupon-management-endpoints)
 - [Review & Rating Endpoints](#review--rating-endpoints)
 - [Common HTTP Status Codes](#common-http-status-codes)
@@ -2254,6 +2258,337 @@ Unauthorized. Missing or invalid token.
 {
   "status": "fail",
   "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+Order not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
+}
+```
+
+---
+
+## Admin Order Management Endpoints
+
+### GET /admin/orders
+
+Retrieve all customer orders placed across the store. **Admin or SuperAdmin only.** Orders are sorted by creation date descending and customer (`user`) details are populated.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+Orders fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Orders fetched successfully",
+  "data": [
+    {
+      "_id": "67092147385a812bf0e54321",
+      "user": {
+        "_id": "664fa1e2b5c7e1234567890b",
+        "fullName": "Ahmed Mohamed",
+        "email": "ahmed@example.com",
+        "username": "ahmed_m",
+        "phone": "01012345678",
+        "role": "User"
+      },
+      "orderItems": [
+        {
+          "product": "6ac92261707ab25c5d1ed396",
+          "productQuantity": 2,
+          "productPrice": 2500,
+          "productTitle": "Luxury Chronograph Watch",
+          "productImage": [
+            {
+              "url": "https://res.cloudinary.com/...",
+              "publicId": "watches/watch1"
+            }
+          ]
+        }
+      ],
+      "shippingAddress": {
+        "address": "15 El-Tahrir Street, Apt 4B",
+        "city": "Cairo",
+        "state": "Cairo",
+        "country": "Egypt",
+        "postalCode": "11371",
+        "phone": "01012345678"
+      },
+      "pricing": {
+        "itemsPrice": 5000,
+        "shippingPrice": 50,
+        "taxPrice": 0,
+        "couponCode": null,
+        "discountPrice": 0,
+        "totalOrderPrice": 5050
+      },
+      "payment": {
+        "paymentMethod": "Paymob",
+        "isPaid": true,
+        "paidAt": "2026-10-11T14:32:00.000Z"
+      },
+      "orderStatus": {
+        "status": "Processing",
+        "isDelivered": false
+      },
+      "createdAt": "2026-10-11T14:30:00.000Z",
+      "updatedAt": "2026-10-11T14:32:00.000Z"
+    }
+  ]
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Caller is not an Admin or SuperAdmin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+---
+
+### GET /admin/orders/:orderId
+
+Retrieve complete details of a single order by ID. **Admin or SuperAdmin only.** Populates both customer (`user`) and product (`orderItems.product`) information.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter | Type   | Required | Description                     |
+| :-------- | :----- | :------: | :------------------------------ |
+| `orderId` | string |    ✅    | The unique order ID to retrieve. |
+
+#### Responses
+
+##### Response 200
+
+Order fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Order fetched successfully",
+  "data": {
+    "_id": "67092147385a812bf0e54321",
+    "user": {
+      "_id": "664fa1e2b5c7e1234567890b",
+      "fullName": "Ahmed Mohamed",
+      "email": "ahmed@example.com",
+      "phone": "01012345678"
+    },
+    "orderItems": [
+      {
+        "product": {
+          "_id": "6ac92261707ab25c5d1ed396",
+          "title": "Luxury Chronograph Watch",
+          "price": 2500,
+          "productImages": [
+            {
+              "url": "https://res.cloudinary.com/...",
+              "publicId": "watches/watch1"
+            }
+          ]
+        },
+        "productQuantity": 2,
+        "productPrice": 2500,
+        "productTitle": "Luxury Chronograph Watch",
+        "productImage": [
+          {
+            "url": "https://res.cloudinary.com/...",
+            "publicId": "watches/watch1"
+          }
+        ]
+      }
+    ],
+    "shippingAddress": {
+      "address": "15 El-Tahrir Street, Apt 4B",
+      "city": "Cairo",
+      "state": "Cairo",
+      "country": "Egypt",
+      "postalCode": "11371",
+      "phone": "01012345678"
+    },
+    "pricing": {
+      "itemsPrice": 5000,
+      "shippingPrice": 50,
+      "taxPrice": 0,
+      "couponCode": null,
+      "discountPrice": 0,
+      "totalOrderPrice": 5050
+    },
+    "payment": {
+      "paymentMethod": "Paymob",
+      "isPaid": true,
+      "paidAt": "2026-10-11T14:32:00.000Z"
+    },
+    "orderStatus": {
+      "status": "Processing",
+      "isDelivered": false
+    },
+    "createdAt": "2026-10-11T14:30:00.000Z",
+    "updatedAt": "2026-10-11T14:32:00.000Z"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Caller is not an Admin or SuperAdmin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+##### Response 404
+
+Order not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Order not found"
+}
+```
+
+---
+
+### PATCH /admin/orders/:orderId
+
+Update the fulfillment and delivery status of an order. **Admin or SuperAdmin only.** Setting status to `"Delivered"` automatically sets `isDelivered = true` and records the current timestamp in `deliveredAt`.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
+
+#### Path Parameters
+
+| Parameter | Type   | Required | Description                   |
+| :-------- | :----- | :------: | :---------------------------- |
+| `orderId` | string |    ✅    | The unique order ID to update. |
+
+#### Request Body
+
+| Field         | Type    | Required | Description                                                                        |
+| :------------ | :------ | :------: | :--------------------------------------------------------------------------------- |
+| `orderStatus` | string  |    ✅    | Target status enum: `"Pending"`, `"Processing"`, `"Shipped"`, `"Delivered"`, `"Cancelled"`. |
+| `isPaid`      | boolean |    ❌    | Optional manual payment confirmation flag.                                          |
+
+```json
+{
+  "orderStatus": "Delivered",
+  "isPaid": true
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Order status updated successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Order status updated successfully",
+  "data": {
+    "_id": "67092147385a812bf0e54321",
+    "payment": {
+      "paymentMethod": "COD",
+      "isPaid": true,
+      "paidAt": "2026-10-12T16:00:00.000Z"
+    },
+    "orderStatus": {
+      "status": "Delivered",
+      "isDelivered": true,
+      "deliveredAt": "2026-10-12T16:00:00.000Z"
+    },
+    "updatedAt": "2026-10-12T16:00:00.000Z"
+  }
+}
+```
+
+##### Response 400
+
+Validation error (invalid status string or missing orderStatus).
+
+```json
+{
+  "status": "fail",
+  "message": "Invalid order status. Allowed values: Pending, Processing, Shipped, Delivered, Cancelled"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Caller is not an Admin or SuperAdmin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
 }
 ```
 

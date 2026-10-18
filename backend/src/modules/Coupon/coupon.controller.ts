@@ -7,7 +7,7 @@ import {
   Coupon,
   validateCreateCoupon,
   validateUpdateCoupon,
-} from "./coupon.model.js";
+} from "../Coupon/coupon.model.js";
 
 // GET ALL COUPONS (Admin)
 const getCoupons = asyncHandler(

@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import bcrypt from "bcrypt";
 import { User } from "./user.model.js";
 import { sendError, successMsg } from "../../middlewares/errors.js";
 // GET ALL USERS
@@ -28,7 +29,20 @@ const updateUser = asyncHandler(async (req, res) => {
         sendError(res, 404, "User not found");
         return;
     }
-    successMsg(res, 200, "User updated successfully", user);
+    const updateData = { ...req.body };
+    if (updateData.password && updateData.password.trim().length > 0) {
+        const genSalt = await bcrypt.genSalt(10);
+        updateData.password = await bcrypt.hash(updateData.password, genSalt);
+    }
+    else {
+        delete updateData.password;
+    }
+    // Prevent non-admin users from escalating their role
+    if (req.user?.role !== "SuperAdmin" && req.user?.role !== "Admin") {
+        delete updateData.role;
+    }
+    const updatedUser = await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true, runValidators: true }).select("-password");
+    successMsg(res, 200, "User updated successfully", updatedUser);
 });
 // DELETE USER
 const deleteUser = asyncHandler(async (req, res) => {

@@ -5,7 +5,7 @@ import {
   LoginSchema,
   passwordSchema,
   RegisterSchema,
-} from "../auth/auth.schema.js";
+} from "../Auth/auth.schema.js";
 
 const UserSchema = z.object({
   username: z

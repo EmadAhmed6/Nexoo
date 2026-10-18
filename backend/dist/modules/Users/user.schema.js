@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { passwordSchema, } from "../auth/auth.schema.js";
+import { passwordSchema, } from "../Auth/auth.schema.js";
 const UserSchema = z.object({
     username: z
         .string()

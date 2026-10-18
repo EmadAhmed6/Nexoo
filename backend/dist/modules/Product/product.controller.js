@@ -171,6 +171,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
     successMsg(res, 200, "Product updated successfully", updatedProduct);
 });
+// DELETE PRODUCT
 const deleteProduct = asyncHandler(async (req, res) => {
     const productId = req.params.productId;
     const product = await Product.findById(productId);
@@ -181,5 +182,38 @@ const deleteProduct = asyncHandler(async (req, res) => {
     await Product.findByIdAndDelete(productId);
     successMsg(res, 200, "Product deleted successfully", null);
 });
-export { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, };
+const toggleLikeProduct = asyncHandler(async (req, res) => {
+    const productId = req.params.productId;
+    const userId = req.user?.id;
+    const product = await Product.findById(productId);
+    if (!product) {
+        sendError(res, 404, "No Product found with this id");
+        return;
+    }
+    const isLiked = (product.likes || []).some((like) => like?.toString() === userId?.toString());
+    let updatedProduct;
+    if (isLiked) {
+        updatedProduct = await Product.findByIdAndUpdate(productId, {
+            $pull: { likes: userId },
+            $set: { likesCount: Math.max(0, (product.likesCount || 1) - 1) },
+        }, { returnDocument: "after", runValidators: true });
+        if (!updatedProduct) {
+            sendError(res, 500, "Failed to Unlike Product");
+            return;
+        }
+        successMsg(res, 200, "Product unliked successfully", updatedProduct);
+    }
+    else {
+        updatedProduct = await Product.findByIdAndUpdate(productId, {
+            $addToSet: { likes: userId },
+            $set: { likesCount: (product.likesCount || 0) + 1 },
+        }, { returnDocument: "after", runValidators: true });
+        if (!updatedProduct) {
+            sendError(res, 500, "Failed to Like Product");
+            return;
+        }
+        successMsg(res, 200, "Product liked successfully", updatedProduct);
+    }
+});
+export { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, toggleLikeProduct, };
 //# sourceMappingURL=product.controller.js.map

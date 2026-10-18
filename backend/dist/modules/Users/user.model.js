@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import jwt from "jsonwebtoken";
-import { LoginSchema, RegisterSchema, } from "../auth/auth.schema.js";
+import { LoginSchema, RegisterSchema, } from "../Auth/auth.schema.js";
 const UserSchema = new Schema({
     username: {
         type: String,

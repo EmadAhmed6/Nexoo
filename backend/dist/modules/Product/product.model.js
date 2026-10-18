@@ -58,6 +58,12 @@ const ProductSchema = new Schema({
             },
         },
     ],
+    ratings: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5,
+    },
     ratingAverage: {
         type: Number,
         default: 0,
@@ -68,6 +74,17 @@ const ProductSchema = new Schema({
         type: Number,
         min: 0,
         default: 0,
+    },
+    likes: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+        },
+    ],
+    likesCount: {
+        type: Number,
+        default: 0,
+        min: 0,
     },
     userId: {
         type: Schema.Types.ObjectId,

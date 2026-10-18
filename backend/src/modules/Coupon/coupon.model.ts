@@ -4,7 +4,7 @@ import {
   ICreateCoupon,
   IUpdateCoupon,
   UpdateCouponSchema,
-} from "./coupon.schema.js";
+} from "../Coupon/coupon.schema.js";
 
 interface ICoupon {
   discountType: "percentage" | "fixed";

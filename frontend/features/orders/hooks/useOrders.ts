@@ -80,3 +80,56 @@ export function useDeleteOrder() {
     },
   });
 }
+
+export const ADMIN_ORDERS_QUERY_KEY = ["admin", "orders"] as const;
+
+export function useAdminOrders() {
+  const user = useAppStore((s) => s.user);
+  const isAdmin = user?.role === "Admin" || user?.role === "SuperAdmin";
+
+  return useQuery({
+    queryKey: ADMIN_ORDERS_QUERY_KEY,
+    queryFn: async () => {
+      const res = await orderApi.getAdminOrders();
+      return res.data ?? [];
+    },
+    enabled: isAdmin,
+    staleTime: 1000 * 30, // 30 seconds
+  });
+}
+
+export function useAdminOrder(orderId: string) {
+  const user = useAppStore((s) => s.user);
+  const isAdmin = user?.role === "Admin" || user?.role === "SuperAdmin";
+
+  return useQuery({
+    queryKey: [...ADMIN_ORDERS_QUERY_KEY, orderId],
+    queryFn: async () => {
+      const res = await orderApi.getAdminOrderById(orderId);
+      return res.data ?? null;
+    },
+    enabled: isAdmin && Boolean(orderId),
+  });
+}
+
+export function useUpdateAdminOrderStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      payload,
+    }: {
+      orderId: string;
+      payload: {
+        orderStatus: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+        isPaid?: boolean;
+      };
+    }) => orderApi.updateAdminOrderStatus(orderId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_ORDERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
+    },
+  });
+}
+

@@ -40,8 +40,24 @@ const options = {
                 description: "Shopping cart management APIs",
             },
             {
+                name: "Wishlist",
+                description: "Wishlist management APIs",
+            },
+            {
                 name: "Orders",
-                description: "Order processing and PayPal checkout APIs",
+                description: "Order processing and Paymob checkout APIs",
+            },
+            {
+                name: "Admin Orders",
+                description: "Admin order management and fulfillment APIs",
+            },
+            {
+                name: "Coupons",
+                description: "Coupons and discount management APIs",
+            },
+            {
+                name: "Reviews",
+                description: "Product reviews and ratings management APIs",
             },
         ],
         components: {

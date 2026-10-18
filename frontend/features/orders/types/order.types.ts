@@ -24,6 +24,8 @@ export interface IPricing {
   itemsPrice: number;
   shippingPrice: number;
   taxPrice: number;
+  couponCode?: string | null;
+  discountPrice?: number;
   totalOrderPrice: number;
 }
 
@@ -47,9 +49,19 @@ export interface IOrderStatus {
   deliveredAt?: string;
 }
 
+export interface IOrderUser {
+  _id: string;
+  fullName: string;
+  email: string;
+  username?: string;
+  phone?: string;
+  profilePic?: { url: string; publicId?: string };
+  role?: string;
+}
+
 export interface Order {
   _id: string;
-  user: string;
+  user: IOrderUser | string;
   orderItems: IOrderItem[];
   shippingAddress: IShippingAddress;
   pricing: IPricing;
@@ -57,6 +69,11 @@ export interface Order {
   orderStatus: IOrderStatus;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UpdateAdminOrderStatusPayload {
+  orderStatus: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  isPaid?: boolean;
 }
 
 export interface CreateOrderPayload {

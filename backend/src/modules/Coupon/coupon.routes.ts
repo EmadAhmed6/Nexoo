@@ -6,7 +6,7 @@ import {
   updateCoupon,
   applyCoupon,
   removeCoupon,
-} from "./coupon.controller.js";
+} from "../Coupon/coupon.controller.js";
 import { verifyAdminToken, verifyToken } from "../../middlewares/verifyToken.js";
 
 const router = express.Router();

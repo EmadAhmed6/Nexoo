@@ -7,7 +7,7 @@ import {
   IRegisterSchema,
   LoginSchema,
   RegisterSchema,
-} from "../auth/auth.schema.js";
+} from "../Auth/auth.schema.js";
 
 interface IAddress extends Document {
   street: string;

@@ -9,7 +9,7 @@ import {
   validateCreateOrder,
   validateUpdateOrder,
 } from "./order.model.js";
-import { Coupon } from "../Coupons/coupon.model.js";
+import { Coupon } from "../Coupon/coupon.model.js";
 
 // GET USER ORDERS
 const getOrders = asyncHandler(
@@ -186,7 +186,11 @@ const createPaymobOrder = asyncHandler(
         clientSecret: intention.clientSecret,
       });
     } catch (err: any) {
-      sendError(res, 500, err?.message || "Failed to initialize Paymob payment");
+      sendError(
+        res,
+        500,
+        err?.message || "Failed to initialize Paymob payment",
+      );
     }
   },
 );

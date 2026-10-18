@@ -31,6 +31,11 @@ const CartSchema = new Schema({
         type: Number,
         required: false,
     },
+    couponApplied: {
+        type: String,
+        required: false,
+        default: null,
+    },
 }, { timestamps: true });
 const Cart = model("Cart", CartSchema);
 const validateCreateCart = (cart) => {

@@ -323,4 +323,54 @@ export {};
  *       404:
  *         description: No Product found with this id
  */
+// PATCH /products/{productId}
+/**
+ * @swagger
+ * /products/{productId}:
+ *   patch:
+ *     summary: Toggle like product
+ *     description: Like or unlike a product by ID for the authenticated user. Increments/decrements likesCount accordingly.
+ *     tags:
+ *       - Products
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: productId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 6ac92261707ab25c5d1ed396
+ *     responses:
+ *       200:
+ *         description: Product liked/unliked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Product liked successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 6ac92261707ab25c5d1ed396
+ *                     likes:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     likesCount:
+ *                       type: integer
+ *                       example: 5
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: No Product found with this id
+ */
 //# sourceMappingURL=product.docs.js.map
