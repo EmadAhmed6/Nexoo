@@ -1,9 +1,51 @@
 import asyncHandler from "express-async-handler";
 import { sendError, successMsg } from "../../../middlewares/errors.js";
 import { Order } from "../../Order/order.model.js";
+import { User } from "../../Users/user.model.js";
 // GET ALL USER ORDERS
 const getOrders = asyncHandler(async (req, res) => {
-    const orders = await Order.find().populate("user").sort({ createdAt: -1 });
+    const { orderStatus, orderId, customerName, email, phone, minPrice, maxPrice, page, limit, isPaid, } = req.query;
+    const query = {};
+    if (orderStatus && orderStatus !== "all") {
+        query["orderStatus.status"] = orderStatus;
+    }
+    if (orderId) {
+        query._id = orderId;
+    }
+    if (customerName || email) {
+        const userFilters = [];
+        if (customerName) {
+            userFilters.push({ fullName: { $regex: customerName, $options: "i" } });
+            userFilters.push({ username: { $regex: customerName, $options: "i" } });
+        }
+        if (email) {
+            userFilters.push({ email: { $regex: email, $options: "i" } });
+        }
+        const matchedUsers = await User.find({ $or: userFilters }).select("_id");
+        query.user = { $in: matchedUsers.map((u) => u._id) };
+    }
+    if (phone) {
+        query["shippingAddress.phone"] = { $regex: phone, $options: "i" };
+    }
+    if (minPrice || maxPrice) {
+        query["pricing.totalOrderPrice"] = {};
+        if (minPrice !== undefined && minPrice !== "") {
+            query["pricing.totalOrderPrice"].$gte = Number(minPrice);
+        }
+        if (maxPrice !== undefined && maxPrice !== "") {
+            query["pricing.totalOrderPrice"].$lte = Number(maxPrice);
+        }
+    }
+    if (isPaid !== undefined && isPaid !== "") {
+        query["payment.isPaid"] = isPaid === "true" ? true : false;
+    }
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+    const orders = await Order.find(query)
+        .populate("user")
+        .sort({ createdAt: -1 })
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum);
     if (!orders) {
         sendError(res, 404, "Orders not found");
         return;
@@ -25,7 +67,7 @@ const getOrderById = asyncHandler(async (req, res) => {
 // UPDATE ORDER STATUS
 const updateOrderStatus = asyncHandler(async (req, res) => {
     const orderId = req.params.orderId;
-    const orderStatus = req.body.orderStatus || req.body.status;
+    const orderStatus = req.body.orderStatus;
     if (!orderStatus) {
         sendError(res, 400, "Order status is required");
         return;
@@ -63,5 +105,34 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     await order.save();
     successMsg(res, 200, "Order status updated successfully", order);
 });
-export { getOrders, getOrderById, updateOrderStatus };
+// GET ORDER STATS
+const getOrderOverview = asyncHandler(async (req, res) => {
+    const totalOrders = await Order.countDocuments();
+    const pendingOrders = await Order.countDocuments({
+        "orderStatus.status": "Pending",
+    });
+    const deliveredOrders = await Order.countDocuments({
+        "orderStatus.status": "Delivered",
+    });
+    const processingOrders = await Order.countDocuments({
+        "orderStatus.status": "Processing",
+    });
+    const cancelledOrders = await Order.countDocuments({
+        "orderStatus.status": "Cancelled",
+    });
+    const paidOrders = await Order.aggregate([
+        { $match: { "payment.isPaid": true } },
+        { $group: { _id: null, total: { $sum: "$pricing.totalOrderPrice" } } },
+    ]);
+    const totalPaidAmount = paidOrders[0]?.total || 0;
+    successMsg(res, 200, "Stats fetched Succeed", {
+        totalOrders,
+        pendingOrders,
+        deliveredOrders,
+        processingOrders,
+        cancelledOrders,
+        totalPaidAmount,
+    });
+});
+export { getOrders, getOrderById, updateOrderStatus, getOrderOverview };
 //# sourceMappingURL=adminOrder.controller.js.map

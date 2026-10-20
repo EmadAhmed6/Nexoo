@@ -5,6 +5,7 @@ import { User } from "../Users/user.model.js";
 import { Cart } from "../Cart/cart.model.js";
 import { Order, validateCreateOrder, validateUpdateOrder, } from "./order.model.js";
 import { Coupon } from "../Coupon/coupon.model.js";
+import { updateStockAfterPayment } from "../Product/product.controller.js";
 // GET USER ORDERS
 const getOrders = asyncHandler(async (req, res) => {
     const userId = req.user?.id;
@@ -177,6 +178,7 @@ const verifyPaymobPayment = asyncHandler(async (req, res) => {
         };
         order.orderStatus.status = "Processing";
         await order.save();
+        await updateStockAfterPayment(order.orderItems);
         successMsg(res, 200, "Payment verified successfully", order);
         return;
     }
@@ -201,6 +203,7 @@ const paymobWebhook = asyncHandler(async (req, res) => {
             };
             order.orderStatus.status = "Processing";
             await order.save();
+            await updateStockAfterPayment(order.orderItems);
         }
     }
     res.status(200).json({ status: "received" });

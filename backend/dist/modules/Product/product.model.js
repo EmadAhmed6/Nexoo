@@ -90,6 +90,10 @@ const ProductSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "User",
     },
+    isOutOfStock: {
+        type: Boolean,
+        default: false,
+    },
 });
 const Product = model("Product", ProductSchema);
 const validateCreateProduct = (product) => {

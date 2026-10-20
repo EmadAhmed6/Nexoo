@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyProductOwner, verifyToken, } from "../../middlewares/verifyToken.js";
-import { createProduct, deleteProduct, getAllProducts, getProductById, toggleLikeProduct, updateProduct, } from "./product.controller.js";
+import { createProduct, deleteProduct, getAllProducts, getProductById, getProductSuggestions, toggleLikeProduct, updateProduct, } from "./product.controller.js";
 import upload from "../../middlewares/multer.js";
 import reviewRoutes from "./Review/review.routes.js";
 const router = express.Router({ mergeParams: true });
@@ -8,6 +8,7 @@ router
     .route("/")
     .get(getAllProducts)
     .post(verifyToken, upload.array("productImages", 5), createProduct);
+router.get("/suggestions", getProductSuggestions);
 router
     .route("/:productId")
     .get(getProductById)

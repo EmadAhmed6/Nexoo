@@ -182,6 +182,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
     await Product.findByIdAndDelete(productId);
     successMsg(res, 200, "Product deleted successfully", null);
 });
+//
 const toggleLikeProduct = asyncHandler(async (req, res) => {
     const productId = req.params.productId;
     const userId = req.user?.id;
@@ -215,5 +216,58 @@ const toggleLikeProduct = asyncHandler(async (req, res) => {
         successMsg(res, 200, "Product liked successfully", updatedProduct);
     }
 });
-export { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, toggleLikeProduct, };
+// UPDATE PRODUCT STOCK
+const updateStockAfterPayment = async (orderItems) => {
+    for (const item of orderItems) {
+        const product = await Product.findById(item.product);
+        if (!product)
+            continue;
+        product.stock = Math.max(0, product.stock - item.quantity);
+        if (product.stock === 0) {
+            product.isOutOfStock = true;
+        }
+        await product.save();
+    }
+};
+// GET PRODUCT AUTOCOMPLETE SUGGESTIONS
+const getProductSuggestions = asyncHandler(async (req, res) => {
+    const q = (req.query.q || req.query.search || "").trim();
+    if (!q) {
+        successMsg(res, 200, "Suggestions fetched successfully", {
+            products: [],
+            categories: [],
+        });
+        return;
+    }
+    const safeRegex = q.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    const regex = new RegExp(safeRegex, "i");
+    const categoriesList = [
+        "Electronics",
+        "Clothes",
+        "Shoes",
+        "Furniture",
+        "Bags",
+        "Books",
+        "Accessories",
+        "Watches & Accessories",
+        "Luxury Fragrances",
+        "Eyewear",
+        "Leather Goods",
+    ];
+    const matchingCategories = categoriesList.filter((cat) => regex.test(cat));
+    const products = await Product.find({
+        $or: [
+            { title: { $regex: safeRegex, $options: "i" } },
+            { description: { $regex: safeRegex, $options: "i" } },
+            { category: { $regex: safeRegex, $options: "i" } },
+        ],
+    })
+        .select("title description category price priceAfterDiscount productImages stock")
+        .limit(6);
+    successMsg(res, 200, "Suggestions fetched successfully", {
+        products,
+        categories: matchingCategories,
+    });
+});
+export { createProduct, getAllProducts, getProductById, getProductSuggestions, updateProduct, deleteProduct, toggleLikeProduct, updateStockAfterPayment, };
 //# sourceMappingURL=product.controller.js.map

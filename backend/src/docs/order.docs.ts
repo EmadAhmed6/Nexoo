@@ -42,7 +42,6 @@
  *                   - city
  *                   - state
  *                   - country
- *                   - postalCode
  *                   - phone
  *                 properties:
  *                   address:

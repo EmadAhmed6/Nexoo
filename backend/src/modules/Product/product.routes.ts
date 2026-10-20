@@ -8,6 +8,7 @@ import {
   deleteProduct,
   getAllProducts,
   getProductById,
+  getProductSuggestions,
   toggleLikeProduct,
   updateProduct,
 } from "./product.controller.js";
@@ -21,8 +22,11 @@ router
   .get(getAllProducts)
   .post(verifyToken, upload.array("productImages", 5), createProduct);
 
+router.get("/suggestions", getProductSuggestions);
+
 router
   .route("/:productId")
+
   .get(getProductById)
   .put(verifyProductOwner, upload.array("productImages", 5), updateProduct)
   .patch(verifyToken, toggleLikeProduct)

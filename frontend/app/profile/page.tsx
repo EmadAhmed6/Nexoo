@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppStore } from "@/store/use-app-store";
 import { useUserProfile, useUpdateUser, useDeleteUser } from "@/features/user/hooks/useUser";
+import { UserAddressesSection } from "@/features/user/components/UserAddressesSection";
 import {
   User as UserIcon,
   Mail,
@@ -430,6 +431,9 @@ function ProfileContent() {
               </div>
             </form>
           </div>
+
+          {/* Addresses Section */}
+          <UserAddressesSection userId={user._id} />
 
           {/* Danger Zone */}
           <div className="rounded-2xl border border-red-500/25 bg-red-500/5 p-6 space-y-4">

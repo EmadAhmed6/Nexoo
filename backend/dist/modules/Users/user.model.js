@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import { CreateAddressSchema, UpdateAdressSchema, } from "./user.schema.js";
 import jwt from "jsonwebtoken";
 import { LoginSchema, RegisterSchema, } from "../Auth/auth.schema.js";
 const UserSchema = new Schema({
@@ -86,5 +87,11 @@ const validateRegister = (user) => {
 const validateLogin = (user) => {
     return LoginSchema.safeParse(user);
 };
-export { validateRegister, validateLogin };
+const validateCreateAddress = (address) => {
+    return CreateAddressSchema.safeParse(address);
+};
+const validateUpdateAddress = (address) => {
+    return UpdateAdressSchema.safeParse(address);
+};
+export { validateRegister, validateLogin, validateCreateAddress, validateUpdateAddress, };
 //# sourceMappingURL=user.model.js.map

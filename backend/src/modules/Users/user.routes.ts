@@ -4,6 +4,10 @@ import {
   GetUserById,
   getUsers,
   updateUser,
+  getUserAddress,
+  addUserAddress,
+  updateUserAddress,
+  deleteUserAddress,
 } from "./user.controller.js";
 import {
   verifyToken,
@@ -18,4 +22,14 @@ router
   .get(verifyToken, GetUserById)
   .put(verifyAuthorizedToken, updateUser)
   .delete(verifyAuthorizedToken, deleteUser);
+
+router
+  .route("/:userId/addresses")
+  .post(verifyAuthorizedToken, addUserAddress)
+  .get(verifyToken, getUserAddress);
+
+router
+  .route("/:userId/addresses/:addressId")
+  .put(verifyAuthorizedToken, updateUserAddress)
+  .delete(verifyAuthorizedToken, deleteUserAddress);
 export default router;

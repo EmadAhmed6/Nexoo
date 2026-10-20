@@ -1,8 +1,10 @@
 // GET    /products
 // POST   /products
+// GET    /products/suggestions
 // GET    /products/{productId}
 // PUT    /products/{productId}
 // DELETE /products/{productId}
+// PATCH  /products/{productId}
 
 /**
  * @swagger
@@ -206,6 +208,85 @@
  *         description: Invalid inputs or no file uploaded
  *       401:
  *         description: Unauthorized
+ */
+
+// GET    /products/suggestions
+/**
+ * @swagger
+ * /products/suggestions:
+ *   get:
+ *     summary: Get product and category autocomplete suggestions
+ *     description: Retrieve fast autocomplete search suggestions for matching product titles, descriptions, and categories based on search query.
+ *     tags:
+ *       - Products
+ *     parameters:
+ *       - name: q
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Search query string to match products and categories
+ *       - name: search
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Alternative search query parameter
+ *     responses:
+ *       200:
+ *         description: Suggestions fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Suggestions fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     products:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 6ac92261707ab25c5d1ed396
+ *                           title:
+ *                             type: string
+ *                             example: Casual Cotton Shirt
+ *                           description:
+ *                             type: string
+ *                             example: High quality pure cotton casual shirt for men
+ *                           category:
+ *                             type: string
+ *                             example: Clothes
+ *                           price:
+ *                             type: number
+ *                             example: 200
+ *                           priceAfterDiscount:
+ *                             type: number
+ *                             example: 150
+ *                           stock:
+ *                             type: number
+ *                             example: 25
+ *                           productImages:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 url:
+ *                                   type: string
+ *                                 publicId:
+ *                                   type: string
+ *                     categories:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       example: ["Clothes", "Accessories"]
  */
 
 // GET    /products/{productId}

@@ -24,7 +24,7 @@ export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
@@ -95,7 +95,7 @@ export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
           </Text>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-7">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
           {products.map((product) => (
             <ProductCard key={product._id} product={product} />
           ))}

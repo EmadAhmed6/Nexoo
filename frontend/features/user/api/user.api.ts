@@ -1,5 +1,5 @@
-import { apiGet, apiPut, apiDelete } from "@/lib/axios-client";
-import { User } from "@/features/auth/types/auth.types";
+import { apiGet, apiPut, apiPost, apiDelete } from "@/lib/axios-client";
+import { User, UserAddress } from "@/features/auth/types/auth.types";
 
 export interface UpdateUserPayload {
   fullName?: string;
@@ -8,6 +8,15 @@ export interface UpdateUserPayload {
   phone?: string;
   password?: string;
   role?: "User" | "Admin" | "SuperAdmin";
+}
+
+export interface AddressPayload {
+  street: string;
+  city: string;
+  state: string;
+  postalCode?: string;
+  phone: string;
+  isDefault?: boolean;
 }
 
 export const userApi = {
@@ -21,5 +30,28 @@ export const userApi = {
 
   deleteUser: async (userId: string) => {
     return apiDelete<null>(`/users/${userId}`);
+  },
+
+  getUserAddresses: async (userId: string) => {
+    return apiGet<UserAddress[]>(`/users/${userId}/addresses`);
+  },
+
+  addUserAddress: async (userId: string, payload: AddressPayload) => {
+    return apiPost<UserAddress[]>(`/users/${userId}/addresses`, payload);
+  },
+
+  updateUserAddress: async (
+    userId: string,
+    addressId: string,
+    payload: Partial<AddressPayload>
+  ) => {
+    return apiPut<UserAddress[]>(
+      `/users/${userId}/addresses/${addressId}`,
+      payload
+    );
+  },
+
+  deleteUserAddress: async (userId: string, addressId: string) => {
+    return apiDelete<UserAddress[]>(`/users/${userId}/addresses/${addressId}`);
   },
 };

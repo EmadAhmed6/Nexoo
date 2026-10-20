@@ -1,5 +1,11 @@
-import { Document, model, Schema } from "mongoose";
-import { IUserSchema } from "./user.schema.js";
+import { Document, model, Schema, Types } from "mongoose";
+import {
+  CreateAddressSchema,
+  ICreateAddressSchema,
+  IUpdateAdressSchema,
+  IUserSchema,
+  UpdateAdressSchema,
+} from "./user.schema.js";
 import jwt from "jsonwebtoken";
 
 import {
@@ -20,7 +26,7 @@ interface IAddress extends Document {
 
 interface IUser extends IUserSchema, Document {
   generateAccessToken(): string;
-  addresses: IAddress[];
+  addresses: Types.DocumentArray<IAddress>;
   phone: string;
   provider: "local" | "google";
   role: "User" | "Admin" | "SuperAdmin";
@@ -129,4 +135,17 @@ const validateLogin = (user: ILoginSchema) => {
   return LoginSchema.safeParse(user);
 };
 
-export { validateRegister, validateLogin };
+const validateCreateAddress = (address: ICreateAddressSchema) => {
+  return CreateAddressSchema.safeParse(address);
+};
+
+const validateUpdateAddress = (address: IUpdateAdressSchema) => {
+  return UpdateAdressSchema.safeParse(address);
+};
+
+export {
+  validateRegister,
+  validateLogin,
+  validateCreateAddress,
+  validateUpdateAddress,
+};

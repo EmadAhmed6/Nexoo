@@ -44,6 +44,23 @@ export function useProduct(productId: string) {
 }
 
 /**
+ * Hook to retrieve product suggestions / autocomplete
+ */
+export function useProductSuggestions(query: string) {
+  const trimmed = query.trim();
+  return useQuery({
+    queryKey: ["products", "suggestions", trimmed],
+    queryFn: async () => {
+      const response = await productsApi.getSuggestions(trimmed);
+      return response.data;
+    },
+    enabled: trimmed.length >= 1,
+    staleTime: 1000 * 30, // 30s
+  });
+}
+
+
+/**
  * Hook to create a product (Admin / Owner)
  */
 export function useCreateProduct() {

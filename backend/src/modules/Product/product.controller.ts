@@ -302,12 +302,62 @@ const updateStockAfterPayment = async (orderItems: any[]) => {
   }
 };
 
+// GET PRODUCT AUTOCOMPLETE SUGGESTIONS
+const getProductSuggestions = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const q = ((req.query.q || req.query.search || "") as string).trim();
+    if (!q) {
+      successMsg(res, 200, "Suggestions fetched successfully", {
+        products: [],
+        categories: [],
+      });
+      return;
+    }
+
+    const safeRegex = q.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    const regex = new RegExp(safeRegex, "i");
+
+    const categoriesList = [
+      "Electronics",
+      "Clothes",
+      "Shoes",
+      "Furniture",
+      "Bags",
+      "Books",
+      "Accessories",
+      "Watches & Accessories",
+      "Luxury Fragrances",
+      "Eyewear",
+      "Leather Goods",
+    ];
+
+    const matchingCategories = categoriesList.filter((cat) => regex.test(cat));
+
+    const products = await Product.find({
+      $or: [
+        { title: { $regex: safeRegex, $options: "i" } },
+        { description: { $regex: safeRegex, $options: "i" } },
+        { category: { $regex: safeRegex, $options: "i" } },
+      ],
+    })
+      .select("title description category price priceAfterDiscount productImages stock")
+      .limit(6);
+
+    successMsg(res, 200, "Suggestions fetched successfully", {
+      products,
+      categories: matchingCategories,
+    });
+  },
+);
+
 export {
   createProduct,
   getAllProducts,
   getProductById,
+  getProductSuggestions,
   updateProduct,
   deleteProduct,
   toggleLikeProduct,
   updateStockAfterPayment,
 };
+

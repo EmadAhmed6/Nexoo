@@ -29,6 +29,12 @@ export interface ProductListResponse {
   totalProducts: number;
 }
 
+export interface ProductSuggestionsResponse {
+  products: Product[];
+  categories: string[];
+}
+
+
 export interface ProductFilters {
   page?: number;
   limit?: number;

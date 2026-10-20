@@ -11,3 +11,6 @@ export type { TextProps } from "./Text";
 
 export { Navbar } from "./Navbar";
 export { Sidebar } from "./Sidebar";
+export { HeroBanner } from "./HeroBanner";
+export { HeroSection } from "./HeroSection";
+export { MultiPanelBanner } from "./MultiPanelBanner";

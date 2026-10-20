@@ -26,4 +26,25 @@ const UserSchema = z.object({
   password: passwordSchema,
 });
 
+const CreateAddressSchema = z.object({
+  street: z.string().min(3).max(100).trim(),
+  city: z.string().min(3).max(100).trim(),
+  state: z.string().min(3).max(100).trim(),
+  postalCode: z.preprocess(
+    (val) =>
+      val === null || (typeof val === "string" && val.trim() === "")
+        ? undefined
+        : val,
+    z.string().min(3).max(100).trim().optional()
+  ),
+  phone: z.string().min(11).max(11).trim(),
+  isDefault: z.boolean().default(false),
+});
+
+const UpdateAdressSchema = CreateAddressSchema.partial();
+
 export type IUserSchema = z.infer<typeof UserSchema>;
+export type ICreateAddressSchema = z.infer<typeof CreateAddressSchema>;
+export type IUpdateAdressSchema = z.infer<typeof UpdateAdressSchema>;
+
+export { UserSchema, CreateAddressSchema, UpdateAdressSchema };

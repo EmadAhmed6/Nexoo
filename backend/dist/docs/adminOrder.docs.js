@@ -15,6 +15,76 @@ export {};
  *       - Admin Orders
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: orderStatus
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [Pending, Processing, Shipped, Delivered, Cancelled, all]
+ *         description: Filter by order status
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Alias for orderStatus
+ *       - in: query
+ *         name: orderId
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Filter by exact Order ID
+ *       - in: query
+ *         name: customerName
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Filter by customer full name or username
+ *       - in: query
+ *         name: email
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Filter by customer email address
+ *       - in: query
+ *         name: phone
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Filter by shipping phone number
+ *       - in: query
+ *         name: minPrice
+ *         required: false
+ *         schema:
+ *           type: number
+ *         description: Filter orders with total price greater than or equal to this value
+ *       - in: query
+ *         name: maxPrice
+ *         required: false
+ *         schema:
+ *           type: number
+ *         description: Filter orders with total price less than or equal to this value
+ *       - in: query
+ *         name: isPaid
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *         description: Filter orders by payment completion status (true/false)
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of orders per page
  *     responses:
  *       200:
  *         description: Orders fetched successfully
@@ -67,6 +137,59 @@ export {};
  *         description: Forbidden - Requires Admin or SuperAdmin role
  *       404:
  *         description: Orders not found
+ */
+/**
+ * @swagger
+ * /admin/orders/overview:
+ *   get:
+ *     summary: Retrieve store order overview and metrics (Admin only)
+ *     description: Returns aggregated order statistics including total order count, counts categorized by status, and total revenue accumulated from paid orders.
+ *     tags:
+ *       - Admin Orders
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Order overview statistics fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Stats fetched Succeed
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalOrders:
+ *                       type: integer
+ *                       example: 128
+ *                     pendingOrders:
+ *                       type: integer
+ *                       example: 14
+ *                     DeliveredOrders:
+ *                       type: integer
+ *                       example: 82
+ *                     deliveredOrders:
+ *                       type: integer
+ *                       example: 82
+ *                     processingOrders:
+ *                       type: integer
+ *                       example: 24
+ *                     cancelledOrders:
+ *                       type: integer
+ *                       example: 8
+ *                     totalPaidAmount:
+ *                       type: number
+ *                       example: 425300
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       403:
+ *         description: Forbidden - Requires Admin or SuperAdmin role
  */
 /**
  * @swagger

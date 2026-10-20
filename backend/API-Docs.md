@@ -45,44 +45,49 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 2   | POST   | `/auth/login`            | Authenticate existing user with email & password and retrieve access token     |  ❌  |
 | 3   | GET    | `/users`                 | Retrieve list of all registered users (passwords excluded)                     |  🔒  |
 | 4   | GET    | `/users/:userId`         | Retrieve single user profile by ID                                             |  🔒  |
-| 5   | PUT    | `/users/:userId`         | Update user profile details (Owner, Admin, or SuperAdmin)                      |  🔒  |
-| 6   | DELETE | `/users/:userId`         | Delete user account permanently (Owner, Admin, or SuperAdmin)                  |  🔒  |
-| 7   | GET    | `/products`              | Retrieve products with filters (search, price range, stock, rating, discount)  |  ❌  |
-| 8   | POST   | `/products`              | Create a new product with multiple image uploads to Cloudinary (up to 5 files) |  🔒  |
-| 9   | GET    | `/products/:productId`   | Retrieve single product details by ID                                          |  ❌  |
-| 10  | PUT    | `/products/:productId`   | Update existing product details and images (Owner or Admin)                    |  🔒  |
-| 11  | PATCH  | `/products/:productId`   | Toggle like / unlike on a product                                              |  🔒  |
-| 12  | DELETE | `/products/:productId`   | Delete a product by ID (Owner or Admin)                                        |  🔒  |
-| 13  | GET    | `/cart`                  | Retrieve authenticated user's cart with populated product info                 |  🔒  |
-| 14  | POST   | `/cart/:productId`       | Add product to user cart with quantity (defaults to 1)                         |  🔒  |
-| 15  | PUT    | `/cart/:productId`       | Update item quantity in user cart                                              |  🔒  |
-| 16  | DELETE | `/cart/:productId`       | Remove product from user cart                                                  |  🔒  |
-| 17  | DELETE | `/cart`                  | Clear entire user shopping cart                                                |  🔒  |
-| 18  | GET    | `/wishlist`              | Retrieve authenticated user's wishlist with populated products                 |  🔒  |
-| 19  | POST   | `/wishlist/:productId`   | Add product to user's wishlist                                                 |  🔒  |
-| 20  | DELETE | `/wishlist/:productId`   | Remove product from user's wishlist                                            |  🔒  |
-| 21  | DELETE | `/wishlist`              | Clear entire user wishlist                                                     |  🔒  |
-| 22  | POST   | `/orders`                | Create new order from user's current cart                                      |  🔒  |
-| 23  | GET    | `/orders`                | Retrieve list of all orders belonging to authenticated user                    |  🔒  |
-| 24  | GET    | `/orders/:orderId`       | Retrieve single order details by ID                                            |  🔒  |
-| 25  | POST   | `/orders/paymob/create`  | Initiate Paymob Unified Checkout session and obtain `checkoutUrl`              |  🔒  |
-| 26  | POST   | `/orders/paymob/verify`  | Verify Paymob payment after customer redirect and mark order as paid           |  🔒  |
-| 27  | POST   | `/orders/paymob/webhook` | Paymob server-to-server webhook to automatically confirm payment               |  ❌  |
-| 28  | PUT    | `/orders/:orderId`       | Update shipping address or payment method of pending order                     |  🔒  |
-| 29  | DELETE | `/orders/:orderId`       | Cancel and delete a pending order                                              |  🔒  |
-| 30  | GET    | `/coupons`               | Retrieve list of all coupons (Admin only)                                      |  🔒  |
-| 31  | POST   | `/coupons`               | Create a new discount coupon with advanced limits (Admin only)                 |  🔒  |
-| 32  | POST   | `/coupons/apply`         | Apply coupon code to user cart and recalculate prices                          |  🔒  |
-| 33  | DELETE | `/coupons/remove`        | Remove applied coupon from user cart                                           |  🔒  |
-| 34  | PUT    | `/coupons/:couponId`     | Update coupon details, limits, validity dates, or status (Admin only)          |  🔒  |
-| 35  | DELETE | `/coupons/:couponId`     | Delete unused coupon (Admin only)                                              |  🔒  |
-| 36  | GET    | `/reviews/:productId`    | Retrieve all reviews and ratings for a product with reviewer details           |  ❌  |
-| 37  | POST   | `/reviews/:productId`    | Submit a new review or update existing review (recalculates product ratings)   |  🔒  |
-| 38  | PUT    | `/reviews/:reviewId`     | Update review rating or text (Review Owner, Admin, or SuperAdmin)              |  🔒  |
-| 39  | DELETE | `/reviews/:reviewId`     | Delete a review permanently and recalculate product stats (Owner or Admin)     |  🔒  |
-| 40  | GET    | `/admin/orders`          | Retrieve all platform orders with populated customer info (Admin only)         |  🔒  |
-| 41  | GET    | `/admin/orders/:orderId` | Retrieve complete details of any order by ID (Admin only)                      |  🔒  |
-| 42  | PATCH  | `/admin/orders/:orderId` | Update order delivery and fulfillment status (Admin only)                      |  🔒  |
+| 5   | PUT    | `/users/:userId`                      | Update user profile details (Owner, Admin, or SuperAdmin)                      |  🔒  |
+| 6   | DELETE | `/users/:userId`                      | Delete user account permanently (Owner, Admin, or SuperAdmin)                  |  🔒  |
+| 7   | GET    | `/users/:userId/addresses`            | Retrieve list of all saved addresses for a user                                |  🔒  |
+| 8   | POST   | `/users/:userId/addresses`            | Add a new address to user profile (Owner, Admin, or SuperAdmin)                |  🔒  |
+| 9   | PUT    | `/users/:userId/addresses/:addressId` | Update an existing user address (Owner, Admin, or SuperAdmin)                  |  🔒  |
+| 10  | DELETE | `/users/:userId/addresses/:addressId` | Delete an address from user profile (Owner, Admin, or SuperAdmin)              |  🔒  |
+| 11  | GET    | `/products`                           | Retrieve products with filters (search, price range, stock, rating, discount)  |  ❌  |
+| 12  | GET    | `/products/suggestions`               | Retrieve product and category autocomplete suggestions for search query        |  ❌  |
+| 13  | POST   | `/products`                           | Create a new product with multiple image uploads to Cloudinary (up to 5 files) |  🔒  |
+| 14  | GET    | `/products/:productId`                | Retrieve single product details by ID                                          |  ❌  |
+| 15  | PUT    | `/products/:productId`                | Update existing product details and images (Owner or Admin)                    |  🔒  |
+| 16  | PATCH  | `/products/:productId`                | Toggle like / unlike on a product                                              |  🔒  |
+| 17  | DELETE | `/products/:productId`                | Delete a product by ID (Owner or Admin)                                        |  🔒  |
+| 18  | GET    | `/cart`                               | Retrieve authenticated user's cart with populated product info                 |  🔒  |
+| 19  | POST   | `/cart/:productId`                    | Add product to user cart with quantity (defaults to 1)                         |  🔒  |
+| 20  | PUT    | `/cart/:productId`                    | Update item quantity in user cart                                              |  🔒  |
+| 21  | DELETE | `/cart/:productId`                    | Remove product from user cart                                                  |  🔒  |
+| 22  | DELETE | `/cart`                               | Clear entire user shopping cart                                                |  🔒  |
+| 23  | GET    | `/wishlist`                           | Retrieve authenticated user's wishlist with populated products                 |  🔒  |
+| 24  | POST   | `/wishlist/:productId`                | Add product to user's wishlist                                                 |  🔒  |
+| 25  | DELETE | `/wishlist/:productId`                | Remove product from user's wishlist                                            |  🔒  |
+| 26  | DELETE | `/wishlist`                           | Clear entire user wishlist                                                     |  🔒  |
+| 27  | POST   | `/orders`                             | Create new order from user's current cart                                      |  🔒  |
+| 28  | GET    | `/orders`                             | Retrieve list of all orders belonging to authenticated user                    |  🔒  |
+| 29  | GET    | `/orders/:orderId`                    | Retrieve single order details by ID                                            |  🔒  |
+| 30  | POST   | `/orders/paymob/create`               | Initiate Paymob Unified Checkout session and obtain `checkoutUrl`              |  🔒  |
+| 31  | POST   | `/orders/paymob/verify`               | Verify Paymob payment after customer redirect and mark order as paid           |  🔒  |
+| 32  | POST   | `/orders/paymob/webhook`              | Paymob server-to-server webhook to automatically confirm payment               |  ❌  |
+| 33  | PUT    | `/orders/:orderId`                    | Update shipping address or payment method of pending order                     |  🔒  |
+| 34  | DELETE | `/orders/:orderId`                    | Cancel and delete a pending order                                              |  🔒  |
+| 35  | GET    | `/coupons`                            | Retrieve list of all coupons (Admin only)                                      |  🔒  |
+| 36  | POST   | `/coupons`                            | Create a new discount coupon with advanced limits (Admin only)                 |  🔒  |
+| 37  | POST   | `/coupons/apply`                      | Apply coupon code to user cart and recalculate prices                          |  🔒  |
+| 38  | DELETE | `/coupons/remove`                     | Remove applied coupon from user cart                                           |  🔒  |
+| 39  | PUT    | `/coupons/:couponId`                  | Update coupon details, limits, validity dates, or status (Admin only)          |  🔒  |
+| 40  | DELETE | `/coupons/:couponId`                  | Delete unused coupon (Admin only)                                              |  🔒  |
+| 41  | GET    | `/reviews/:productId`                 | Retrieve all reviews and ratings for a product with reviewer details           |  ❌  |
+| 42  | POST   | `/reviews/:productId`                 | Submit a new review or update existing review (recalculates product ratings)   |  🔒  |
+| 43  | PUT    | `/reviews/:reviewId`                  | Update review rating or text (Review Owner, Admin, or SuperAdmin)              |  🔒  |
+| 44  | DELETE | `/reviews/:reviewId`                  | Delete a review permanently and recalculate product stats (Owner or Admin)     |  🔒  |
+| 45  | GET    | `/admin/orders`                       | Retrieve all platform orders with populated customer info (Admin only)         |  🔒  |
+| 46  | GET    | `/admin/orders/:orderId`              | Retrieve complete details of any order by ID (Admin only)                      |  🔒  |
+| 47  | PATCH  | `/admin/orders/:orderId`              | Update order delivery and fulfillment status (Admin only)                      |  🔒  |
 
 ---
 
@@ -513,6 +518,366 @@ User does not exist.
 
 ---
 
+### GET /users/:userId/addresses
+
+Retrieve all saved shipping addresses for a specific user. Requires authentication.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter | Type   | Required | Description    |
+| :-------- | :----- | :------: | :------------- |
+| `userId`  | string |    ✅    | The user's ID. |
+
+#### Responses
+
+##### Response 200
+
+User addresses fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "User addresses fetched successfully",
+  "data": [
+    {
+      "_id": "664fa1e2b5c7e1234567891b",
+      "street": "15 El-Tahrir Street, Apt 4B",
+      "city": "Cairo",
+      "state": "Cairo",
+      "postalCode": "11511",
+      "phone": "01012345678",
+      "isDefault": true
+    }
+  ]
+}
+```
+
+##### Response 401
+
+Unauthorized. No token provided or token invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 404
+
+User does not exist.
+
+```json
+{
+  "status": "fail",
+  "message": "User not found"
+}
+```
+
+---
+
+### POST /users/:userId/addresses
+
+Add a new address to the user's addresses list. Restricted to the account owner, an Admin, or a SuperAdmin. If `isDefault` is set to `true`, all other addresses for this user are automatically set to `false`.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
+
+#### Path Parameters
+
+| Parameter | Type   | Required | Description    |
+| :-------- | :----- | :------: | :------------- |
+| `userId`  | string |    ✅    | The user's ID. |
+
+#### Request Body
+
+| Field        | Type    | Required | Description                                                          |
+| :----------- | :------ | :------: | :------------------------------------------------------------------- |
+| `street`     | string  |    ✅    | Street address (Min 3 chars, Max 100 chars).                         |
+| `city`       | string  |    ✅    | City name (Min 3 chars, Max 100 chars).                              |
+| `state`      | string  |    ✅    | State or governorate (Min 3 chars, Max 100 chars).                   |
+| `postalCode` | string  |    ❌    | Optional postal code (3–100 chars if provided; empty string allowed). |
+| `phone`      | string  |    ✅    | Contact phone number (Must be exactly 11 digits).                    |
+| `isDefault`  | boolean |    ❌    | Whether this is the default address. Defaults to `false`.            |
+
+```json
+{
+  "street": "15 El-Tahrir Street, Apt 4B",
+  "city": "Cairo",
+  "state": "Cairo",
+  "postalCode": "11511",
+  "phone": "01012345678",
+  "isDefault": true
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Address added successfully. Returns updated list of all user addresses.
+
+```json
+{
+  "status": "success",
+  "message": "Address added successfully",
+  "data": [
+    {
+      "_id": "664fa1e2b5c7e1234567891b",
+      "street": "15 El-Tahrir Street, Apt 4B",
+      "city": "Cairo",
+      "state": "Cairo",
+      "postalCode": "11511",
+      "phone": "01012345678",
+      "isDefault": true
+    }
+  ]
+}
+```
+
+##### Response 400
+
+Validation error (missing required fields or invalid format).
+
+```json
+{
+  "status": "fail",
+  "message": "Validation error details"
+}
+```
+
+##### Response 401
+
+Unauthorized. No token provided or token invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. The requester is neither the owner nor an Admin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+##### Response 404
+
+User does not exist.
+
+```json
+{
+  "status": "fail",
+  "message": "User was not found"
+}
+```
+
+---
+
+### PUT /users/:userId/addresses/:addressId
+
+Update an existing address in the user's addresses list. Restricted to the account owner, an Admin, or a SuperAdmin. If `isDefault` is set to `true`, all other addresses for this user are automatically set to `false`.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+| `Content-Type`  | `application/json`        |
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description       |
+| :---------- | :----- | :------: | :---------------- |
+| `userId`    | string |    ✅    | The user's ID.    |
+| `addressId` | string |    ✅    | The address's ID. |
+
+#### Request Body
+
+| Field        | Type    | Required | Description                                                    |
+| :----------- | :------ | :------: | :------------------------------------------------------------- |
+| `street`     | string  |    ❌    | Updated street address (Min 3, Max 100).                       |
+| `city`       | string  |    ❌    | Updated city name (Min 3, Max 100).                            |
+| `state`      | string  |    ❌    | Updated state/governorate (Min 3, Max 100).                    |
+| `postalCode` | string  |    ❌    | Optional postal code (3–100 chars if provided, or empty).      |
+| `phone`      | string  |    ❌    | Updated phone number (11 digits).                              |
+| `isDefault`  | boolean |    ❌    | Set whether this address is the default.                       |
+
+```json
+{
+  "street": "20 Updated Street, 5th Floor",
+  "city": "Giza",
+  "state": "Giza",
+  "postalCode": "12511",
+  "phone": "01099999999",
+  "isDefault": false
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Address updated successfully. Returns updated list of all user addresses.
+
+```json
+{
+  "status": "success",
+  "message": "Address updated successfully",
+  "data": [
+    {
+      "_id": "664fa1e2b5c7e1234567891b",
+      "street": "20 Updated Street, 5th Floor",
+      "city": "Giza",
+      "state": "Giza",
+      "postalCode": "12511",
+      "phone": "01099999999",
+      "isDefault": false
+    }
+  ]
+}
+```
+
+##### Response 400
+
+Validation error.
+
+```json
+{
+  "status": "fail",
+  "message": "Validation error details"
+}
+```
+
+##### Response 401
+
+Unauthorized. No token provided or token invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. The requester is neither the owner nor an Admin.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+##### Response 404
+
+User or address not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Address not found"
+}
+```
+
+---
+
+### DELETE /users/:userId/addresses/:addressId
+
+Delete an address from the user's profile. Restricted to the account owner, an Admin, or a SuperAdmin.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter   | Type   | Required | Description       |
+| :---------- | :----- | :------: | :---------------- |
+| `userId`    | string |    ✅    | The user's ID.    |
+| `addressId` | string |    ✅    | The address's ID. |
+
+#### Responses
+
+##### Response 200
+
+Address deleted successfully. Returns updated list of remaining addresses.
+
+```json
+{
+  "status": "success",
+  "message": "Address deleted successfully",
+  "data": []
+}
+```
+
+##### Response 400
+
+Address not found or invalid ID.
+
+```json
+{
+  "status": "fail",
+  "message": "Address not found"
+}
+```
+
+##### Response 401
+
+Unauthorized. No token provided or token invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Requester is not authorized.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+##### Response 404
+
+User does not exist.
+
+```json
+{
+  "status": "fail",
+  "message": "User not found"
+}
+```
+
+---
+
 ## Product Management Endpoints
 
 ### GET /products
@@ -570,6 +935,56 @@ Products retrieved successfully.
     "currentPage": 1,
     "totalPages": 3,
     "totalProducts": 28
+  }
+}
+```
+
+---
+
+### GET /products/suggestions
+
+Retrieve search autocomplete suggestions for matching product titles, descriptions, and predefined product categories. No authentication required. Fast response suitable for instant dropdown suggestions while the user types.
+
+#### Query Parameters
+
+| Parameter | Type   | Required | Description                                                                                        |
+| :-------- | :----- | :------: | :------------------------------------------------------------------------------------------------- |
+| `q`       | string |    ❌    | Search query string to match against product titles, descriptions, and categories.                 |
+| `search`  | string |    ❌    | Alternative parameter name for the search query string (used if `q` is not provided).              |
+
+#### Responses
+
+##### Response 200
+
+Suggestions retrieved successfully. If the query string is empty or missing, empty arrays are returned.
+
+```json
+{
+  "status": "success",
+  "message": "Suggestions fetched successfully",
+  "data": {
+    "products": [
+      {
+        "_id": "6acb8f0d1be5a1c30428c164",
+        "title": "Luxury Chronograph Watch",
+        "description": "Stainless steel automatic luxury watch with sapphire crystal glass",
+        "price": 250,
+        "priceAfterDiscount": 199,
+        "stock": 14,
+        "category": "Watches & Accessories",
+        "productImages": [
+          {
+            "url": "https://res.cloudinary.com/dgypt8dkr/image/upload/v1791725329/Products/sample.jpg",
+            "publicId": "Products/sample123",
+            "_id": "6acb8f0d1be5a1c30428c165"
+          }
+        ]
+      }
+    ],
+    "categories": [
+      "Watches & Accessories",
+      "Accessories"
+    ]
   }
 }
 ```
@@ -1602,9 +2017,9 @@ Create a new order from the items currently in the authenticated user's cart. Up
 | `shippingAddress.address`    | string |    ✅    | Street address (Min 5 chars).                |
 | `shippingAddress.city`       | string |    ✅    | City name (Min 2 chars).                     |
 | `shippingAddress.state`      | string |    ✅    | State or governorate (Min 2 chars).          |
-| `shippingAddress.country`    | string |    ✅    | Country name (Min 2 chars).                  |
-| `shippingAddress.postalCode` | string |    ✅    | Exactly 5 digits postal code (e.g. `11371`). |
-| `shippingAddress.phone`      | string |    ✅    | Phone number starting with `01` (11 digits). |
+| `shippingAddress.country`    | string |    ✅    | Country name (Min 2 chars).                   |
+| `shippingAddress.postalCode` | string |    ❌    | Optional 5 digits postal code (e.g. `11371`). |
+| `shippingAddress.phone`      | string |    ✅    | Phone number starting with `01` (11 digits).  |
 | `paymentMethod`              | string |    ✅    | Payment method enum: `"Paymob"` or `"COD"`.  |
 
 ```json

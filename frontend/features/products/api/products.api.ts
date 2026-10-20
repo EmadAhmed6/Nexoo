@@ -4,6 +4,7 @@ import {
   Product,
   ProductFilters,
   ProductListResponse,
+  ProductSuggestionsResponse,
   CreateProductInput,
   UpdateProductInput,
 } from "../types/product.types";
@@ -18,12 +19,21 @@ export const productsApi = {
   },
 
   /**
+   * Get search autocomplete suggestions
+   * GET /products/suggestions
+   */
+  getSuggestions: async (query: string) => {
+    return apiGet<ProductSuggestionsResponse>("/products/suggestions", { q: query });
+  },
+
+  /**
    * Get single product details by ID
    * GET /products/:productId
    */
   getProductById: async (productId: string) => {
     return apiGet<Product>(`/products/${productId}`);
   },
+
 
   /**
    * Create product with multipart image upload (up to 5 files)

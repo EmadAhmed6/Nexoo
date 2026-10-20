@@ -18,10 +18,16 @@ const CreateOrderSchema = z.object({
       .string()
       .min(1, "Country is required")
       .min(2, "Country must be at least 2 characters"),
-    postalCode: z
-      .string()
-      .min(1, "Postal Code is required")
-      .regex(/^\d{5}$/, "Postal Code must be exactly 5 digits"),
+    postalCode: z.preprocess(
+      (val) =>
+        val === null || (typeof val === "string" && val.trim() === "")
+          ? undefined
+          : val,
+      z
+        .string()
+        .regex(/^\d{5}$/, "Postal Code must be exactly 5 digits")
+        .optional()
+    ),
     phone: z
       .string()
       .min(1, "Phone is required")
