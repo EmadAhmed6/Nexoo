@@ -23,6 +23,7 @@ import {
   Home,
   Package,
   Bell,
+  LifeBuoy,
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/store/useCartStore";
 import { useCart } from "@/features/cart/hooks/useCart";
@@ -262,6 +263,16 @@ export function Navbar() {
                             <span>Notifications</span>
                           </Link>
 
+                          {/* Support Tickets */}
+                          <Link
+                            href="/tickets"
+                            onClick={() => setProfileMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-textSecondary hover:text-textPrimary hover:bg-bgPrimary transition-colors"
+                          >
+                            <LifeBuoy className="w-4 h-4 shrink-0 text-primary" />
+                            <span>Support Tickets</span>
+                          </Link>
+
                           {/* Logout */}
                           <button
                             onClick={() => {
@@ -400,6 +411,7 @@ export function Navbar() {
                       ...(isAuthenticated ? [
                         { label: "My Profile", href: "/profile", icon: UserIcon },
                         { label: "Notifications", href: "/notifications", icon: Bell },
+                        { label: "Support Tickets", href: "/tickets", icon: LifeBuoy },
                         { label: "My Orders", href: "/orders", icon: Package },
                         { label: "Wishlist", href: "/wishlist", icon: Bookmark },
                       ] : []),

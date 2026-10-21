@@ -13,6 +13,7 @@ import {
   X,
   LogOut,
   ChevronRight,
+  LifeBuoy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Coupons", href: "/admin/coupons", icon: Tag },
+  { label: "Tickets", href: "/admin/tickets", icon: LifeBuoy },
 ];
 
 function AdminSidebar({

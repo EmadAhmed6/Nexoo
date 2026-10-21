@@ -53,10 +53,6 @@ const options: Options = {
         description: "Order processing and Paymob checkout APIs",
       },
       {
-        name: "Admin Orders",
-        description: "Admin order management and fulfillment APIs",
-      },
-      {
         name: "Coupons",
         description: "Coupons and discount management APIs",
       },
@@ -67,6 +63,18 @@ const options: Options = {
       {
         name: "Notifications",
         description: "User notifications management APIs",
+      },
+      {
+        name: "Tickets",
+        description: "Support tickets and user assistance APIs",
+      },
+      {
+        name: "Admin Orders",
+        description: "Admin order management and fulfillment APIs",
+      },
+      {
+        name: "Admin Tickets",
+        description: "Admin support ticket management and status resolution APIs",
       },
     ],
     components: {

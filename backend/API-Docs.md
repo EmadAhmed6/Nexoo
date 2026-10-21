@@ -39,14 +39,14 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 
 ---
 
-| #   | Method | Endpoint                 | Description                                                                    | Auth |
-| :-- | :----- | :----------------------- | :----------------------------------------------------------------------------- | :--: |
-| 1   | POST   | `/auth/register`         | Register a new user account and obtain access token                            |  ❌  |
-| 2   | POST   | `/auth/login`            | Authenticate existing user with email & password and retrieve access token     |  ❌  |
-| 3   | GET    | `/users`                 | Retrieve list of all registered users (passwords excluded)                     |  🔒  |
-| 4   | GET    | `/users/:userId`         | Retrieve single user profile by ID                                             |  🔒  |
-| 5   | PUT    | `/users/:userId`                      | Update user profile details (Owner, Admin, or SuperAdmin)                      |  🔒  |
-| 6   | DELETE | `/users/:userId`                      | Delete user account permanently (Owner, Admin, or SuperAdmin)                  |  🔒  |
+| #   | Method | Endpoint                             | Description                                                                    | Auth |
+| :-- | :----- | :----------------------------------- | :----------------------------------------------------------------------------- | :--: |
+| 1   | POST   | `/auth/register`                     | Register a new user account and obtain access token                            |  ❌  |
+| 2   | POST   | `/auth/login`                        | Authenticate existing user with email & password and retrieve access token     |  ❌  |
+| 3   | GET    | `/users`                             | Retrieve list of all registered users (passwords excluded)                     |  🔒  |
+| 4   | GET    | `/users/:userId`                     | Retrieve single user profile by ID                                             |  🔒  |
+| 5   | PUT    | `/users/:userId`                     | Update user profile details (Owner, Admin, or SuperAdmin)                      |  🔒  |
+| 6   | DELETE | `/users/:userId`                     | Delete user account permanently (Owner, Admin, or SuperAdmin)                  |  🔒  |
 | 7   | GET    | `/users/:userId/addresses`            | Retrieve list of all saved addresses for a user                                |  🔒  |
 | 8   | POST   | `/users/:userId/addresses`            | Add a new address to user profile (Owner, Admin, or SuperAdmin)                |  🔒  |
 | 9   | PUT    | `/users/:userId/addresses/:addressId` | Update an existing user address (Owner, Admin, or SuperAdmin)                  |  🔒  |
@@ -85,16 +85,24 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 42  | POST   | `/reviews/:productId`                 | Submit a new review or update existing review (recalculates product ratings)   |  🔒  |
 | 43  | PUT    | `/reviews/:reviewId`                  | Update review rating or text (Review Owner, Admin, or SuperAdmin)              |  🔒  |
 | 44  | DELETE | `/reviews/:reviewId`                  | Delete a review permanently and recalculate product stats (Owner or Admin)     |  🔒  |
-| 45  | GET    | `/admin/orders`                       | Retrieve all platform orders with populated customer info (Admin only)         |  🔒  |
-| 46  | GET    | `/admin/orders/:orderId`              | Retrieve complete details of any order by ID (Admin only)                      |  🔒  |
-| 47  | PATCH  | `/admin/orders/:orderId`              | Update order delivery and fulfillment status (Admin only)                      |  🔒  |
-| 48  | GET    | `/admin/orders/overview`              | Retrieve aggregated store-wide order stats and total revenue (Admin only)      |  🔒  |
-| 49  | GET    | `/notifications`                      | Retrieve all notifications for the authenticated user                          |  🔒  |
-| 50  | PATCH  | `/notifications/read-all`             | Mark all notifications as read for the authenticated user                      |  🔒  |
-| 51  | DELETE | `/notifications`                      | Delete all notifications for the authenticated user                            |  🔒  |
-| 52  | GET    | `/notifications/:notificationId`      | Retrieve a single notification by ID                                           |  🔒  |
-| 53  | PATCH  | `/notifications/:notificationId`      | Mark a single notification as read by ID                                       |  🔒  |
-| 54  | DELETE | `/notifications/:notificationId`      | Delete a single notification by ID                                             |  🔒  |
+| 45  | GET    | `/notifications`                      | Retrieve all notifications for the authenticated user                          |  🔒  |
+| 46  | PATCH  | `/notifications/read-all`             | Mark all notifications as read for the authenticated user                      |  🔒  |
+| 47  | DELETE | `/notifications`                      | Delete all notifications for the authenticated user                            |  🔒  |
+| 48  | GET    | `/notifications/:notificationId`      | Retrieve a single notification by ID                                           |  🔒  |
+| 49  | PATCH  | `/notifications/:notificationId`      | Mark a single notification as read by ID                                       |  🔒  |
+| 50  | DELETE | `/notifications/:notificationId`      | Delete a single notification by ID                                             |  🔒  |
+| 51  | GET    | `/tickets/my`                         | Retrieve all tickets created by the authenticated user                         |  🔒  |
+| 52  | POST   | `/tickets`                            | Create a new support ticket with an initial message                            |  🔒  |
+| 53  | GET    | `/tickets/:ticketId`                  | Retrieve ticket details with messages (Owner or Admin)                         |  🔒  |
+| 54  | PUT    | `/tickets/:ticketId`                  | Update ticket details or status (Owner or Admin)                               |  🔒  |
+| 55  | DELETE | `/tickets/:ticketId`                  | Delete a support ticket permanently (Owner or Admin)                           |  🔒  |
+| 56  | POST   | `/tickets/:ticketId/messages`         | Send a reply message to the ticket conversation (Owner or Admin)               |  🔒  |
+| 57  | GET    | `/admin/orders`                       | Retrieve all platform orders with populated customer info (Admin only)         |  🔒  |
+| 58  | GET    | `/admin/orders/:orderId`              | Retrieve complete details of any order by ID (Admin only)                      |  🔒  |
+| 59  | PATCH  | `/admin/orders/:orderId`              | Update order delivery and fulfillment status (Admin only)                      |  🔒  |
+| 60  | GET    | `/admin/orders/overview`              | Retrieve aggregated store-wide order stats and total revenue (Admin only)      |  🔒  |
+| 61  | GET    | `/admin/tickets`                      | Retrieve all tickets across the platform (Admin only)                          |  🔒  |
+| 62  | PUT    | `/admin/tickets/:ticketId`            | Update ticket status (Admin only)                                              |  🔒  |
 
 ---
 
@@ -106,10 +114,12 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 - [Cart Management Endpoints](#cart-management-endpoints)
 - [Wishlist Management Endpoints](#wishlist-management-endpoints)
 - [Order & Checkout Endpoints](#order--checkout-endpoints)
-- [Admin Order Management Endpoints](#admin-order-management-endpoints)
 - [Coupon Management Endpoints](#coupon-management-endpoints)
 - [Review & Rating Endpoints](#review--rating-endpoints)
 - [Notification Endpoints](#notification-endpoints)
+- [Ticket Endpoints](#ticket-endpoints)
+- [Admin Order Management Endpoints](#admin-order-management-endpoints)
+- [Admin Ticket Management Endpoints](#admin-ticket-management-endpoints)
 - [Common HTTP Status Codes](#common-http-status-codes)
 
 ---
@@ -3533,6 +3543,820 @@ Review not found.
 
 ---
 
+## Notification Endpoints
+
+### GET /notifications
+
+Retrieve all notifications for the authenticated user, ordered by creation date descending.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+Notifications fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Notifications fetched successfully",
+  "data": [
+    {
+      "_id": "664fa1e2b5c7e1234567890a",
+      "user": "664fa1e2b5c7e1234567890b",
+      "title": "Order Status Updated",
+      "message": "Your order #abc123 has been marked as Shipped.",
+      "type": "order",
+      "isRead": false,
+      "relatedId": "664fa1e2b5c7e1234567890c",
+      "createdAt": "2026-10-21T14:30:00.000Z",
+      "updatedAt": "2026-10-21T14:30:00.000Z"
+    }
+  ]
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### PATCH /notifications/read-all
+
+Mark all unread notifications of the authenticated user as read in a single operation.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+All notifications marked as read.
+
+```json
+{
+  "status": "success",
+  "message": "All notifications marked as read",
+  "data": {
+    "acknowledged": true,
+    "modifiedCount": 5
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### DELETE /notifications
+
+Delete all notifications belonging to the authenticated user.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+All notifications deleted successfully.
+
+```json
+{
+  "status": "success",
+  "message": "All notifications deleted successfully",
+  "data": []
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### GET /notifications/:notificationId
+
+Retrieve a specific notification by its ID. The notification must belong to the authenticated user.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter        | Type   | Required | Description              |
+| :--------------- | :----- | :------: | :----------------------- |
+| `notificationId` | string |    ✅    | The notification's ID.   |
+
+#### Responses
+
+##### Response 200
+
+Notification fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Notification fetched successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "title": "Order Shipped",
+    "message": "Your order is on the way!",
+    "type": "order",
+    "isRead": true,
+    "relatedId": "664fa1e2b5c7e1234567890c",
+    "createdAt": "2026-10-21T14:30:00.000Z",
+    "updatedAt": "2026-10-21T14:30:00.000Z"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Attempting to access another user's notification.
+
+```json
+{
+  "status": "fail",
+  "message": "You cannot access other user notifications"
+}
+```
+
+##### Response 404
+
+Notification not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No notification found with this id"
+}
+```
+
+---
+
+### PATCH /notifications/:notificationId
+
+Mark a single notification as read by its ID. The notification must belong to the authenticated user.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter        | Type   | Required | Description            |
+| :--------------- | :----- | :------: | :--------------------- |
+| `notificationId` | string |    ✅    | The notification's ID. |
+
+#### Responses
+
+##### Response 200
+
+Notification marked as read.
+
+```json
+{
+  "status": "success",
+  "message": "Notification marked as read",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "title": "Order Shipped",
+    "message": "Your order is on the way!",
+    "type": "order",
+    "isRead": true,
+    "relatedId": "664fa1e2b5c7e1234567890c",
+    "createdAt": "2026-10-21T14:30:00.000Z",
+    "updatedAt": "2026-10-21T14:30:00.000Z"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Attempting to access another user's notification.
+
+```json
+{
+  "status": "fail",
+  "message": "You cannot access other user notifications"
+}
+```
+
+##### Response 404
+
+Notification not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No notification found with this id"
+}
+```
+
+---
+
+### DELETE /notifications/:notificationId
+
+Delete a specific notification by its ID. The notification must belong to the authenticated user.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter        | Type   | Required | Description            |
+| :--------------- | :----- | :------: | :--------------------- |
+| `notificationId` | string |    ✅    | The notification's ID. |
+
+#### Responses
+
+##### Response 200
+
+Notification deleted successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Notification deleted successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "title": "Order Shipped",
+    "message": "Your order is on the way!",
+    "type": "order",
+    "isRead": true,
+    "relatedId": "664fa1e2b5c7e1234567890c"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Attempting to access another user's notification.
+
+```json
+{
+  "status": "fail",
+  "message": "You cannot access other user notifications"
+}
+```
+
+##### Response 404
+
+Notification not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No notification found with this id"
+}
+```
+
+---
+
+## Ticket Endpoints
+
+### GET /tickets/my
+
+Retrieve all support tickets created by the authenticated user, ordered by creation date descending.
+
+#### Request Headers
+
+| Header          | Value            | Required |
+| :-------------- | :--------------- | :------: |
+| `Authorization` | `Bearer <token>` |    ✅    |
+
+#### Responses
+
+##### Response 200
+
+User tickets fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Your Tickets fetched successfully",
+  "data": [
+    {
+      "_id": "67b901234567890abcdef123",
+      "subject": "Issue with order delivery",
+      "category": "shipping",
+      "status": "open",
+      "priority": "High",
+      "messages": [
+        "67b901234567890abcdef999"
+      ],
+      "createdAt": "2026-10-21T18:00:00.000Z",
+      "updatedAt": "2026-10-21T18:00:00.000Z"
+    }
+  ]
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid Bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### POST /tickets
+
+Create a new customer support ticket along with the initial inquiry message.
+
+#### Request Headers
+
+| Header          | Value              | Required |
+| :-------------- | :----------------- | :------: |
+| `Content-Type`  | `application/json` |    ✅    |
+| `Authorization` | `Bearer <token>`   |    ✅    |
+
+#### Request Body
+
+| Field      | Type   | Required | Description                                                         |
+| :--------- | :----- | :------: | :------------------------------------------------------------------ |
+| `subject`  | string |    ✅    | Ticket subject summary (3-100 characters).                          |
+| `category` | string |    ✅    | Category: `"shipping"`, `"payment"`, `"product"`, or `"other"`.     |
+| `priority` | string |    ✅    | Priority level: `"Low"`, `"Medium"`, `"High"`, or `"Urgent"`.       |
+| `message`  | string |    ✅    | The initial support message / problem description (3-1000 chars).   |
+| `order`    | string |    ❌    | Optional associated Order ID.                                       |
+
+```json
+{
+  "subject": "Damaged package received",
+  "category": "product",
+  "priority": "High",
+  "message": "The outer carton was crushed and the item has deep scratches.",
+  "order": "664fa1e2b5c7e1234567890b"
+}
+```
+
+#### Responses
+
+##### Response 201
+
+Ticket created successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Ticket created successfully",
+  "data": {
+    "_id": "67b901234567890abcdef123",
+    "user": "67b901234567890abcdef001",
+    "order": "664fa1e2b5c7e1234567890b",
+    "subject": "Damaged package received",
+    "category": "product",
+    "priority": "High",
+    "status": "open",
+    "messages": [
+      "67b901234567890abcdef999"
+    ],
+    "createdAt": "2026-10-21T18:00:00.000Z",
+    "updatedAt": "2026-10-21T18:00:00.000Z"
+  }
+}
+```
+
+##### Response 400
+
+Bad request. Validation failed on input fields.
+
+```json
+{
+  "status": "fail",
+  "message": "Subject must be at least 3 characters"
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid Bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### GET /tickets/:ticketId
+
+Retrieve full details of a specific ticket including the complete conversation messages history and sender info. Accessible only to the ticket owner or admins.
+
+#### Request Headers
+
+| Header          | Value            | Required |
+| :-------------- | :--------------- | :------: |
+| `Authorization` | `Bearer <token>` |    ✅    |
+
+#### URL Parameters
+
+| Parameter  | Type   | Required | Description             |
+| :--------- | :----- | :------: | :---------------------- |
+| `ticketId` | string |    ✅    | The ticket's MongoDB ID |
+
+#### Responses
+
+##### Response 200
+
+Ticket fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Ticket fetched successfully",
+  "data": {
+    "_id": "67b901234567890abcdef123",
+    "subject": "Damaged package received",
+    "category": "product",
+    "priority": "High",
+    "status": "open",
+    "user": {
+      "_id": "67b901234567890abcdef001",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@example.com"
+    },
+    "messages": [
+      {
+        "_id": "67b901234567890abcdef999",
+        "sender": {
+          "_id": "67b901234567890abcdef001",
+          "firstName": "John",
+          "lastName": "Doe",
+          "role": "User"
+        },
+        "content": "The outer carton was crushed and the item has deep scratches.",
+        "createdAt": "2026-10-21T18:00:00.000Z"
+      }
+    ],
+    "createdAt": "2026-10-21T18:00:00.000Z",
+    "updatedAt": "2026-10-21T18:00:00.000Z"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid Bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Requester is neither the ticket owner nor an admin.
+
+```json
+{
+  "status": "fail",
+  "message": "You are not authorized to view this ticket"
+}
+```
+
+##### Response 404
+
+Ticket not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No Ticket found with this id"
+}
+```
+
+---
+
+### PUT /tickets/:ticketId
+
+Update ticket fields or modify ticket status (`"open"`, `"in_progress"`, `"resolved"`, `"closed"`). Accessible to ticket owner or admins.
+
+#### Request Headers
+
+| Header          | Value              | Required |
+| :-------------- | :----------------- | :------: |
+| `Content-Type`  | `application/json` |    ✅    |
+| `Authorization` | `Bearer <token>`   |    ✅    |
+
+#### URL Parameters
+
+| Parameter  | Type   | Required | Description             |
+| :--------- | :----- | :------: | :---------------------- |
+| `ticketId` | string |    ✅    | The ticket's MongoDB ID |
+
+#### Request Body
+
+| Field      | Type   | Required | Description                                                    |
+| :--------- | :----- | :------: | :------------------------------------------------------------- |
+| `subject`  | string |    ❌    | Updated subject (3-100 characters).                            |
+| `category` | string |    ❌    | `"shipping"`, `"payment"`, `"product"`, or `"other"`.          |
+| `priority` | string |    ❌    | `"Low"`, `"Medium"`, `"High"`, or `"Urgent"`.                  |
+| `status`   | string |    ❌    | `"open"`, `"in_progress"`, `"resolved"`, or `"closed"`.       |
+
+```json
+{
+  "status": "resolved"
+}
+```
+
+#### Responses
+
+##### Response 200
+
+Ticket updated successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Ticket updated successfully",
+  "data": {
+    "_id": "67b901234567890abcdef123",
+    "status": "resolved",
+    "subject": "Damaged package received",
+    "category": "product",
+    "priority": "High"
+  }
+}
+```
+
+##### Response 403
+
+Forbidden. Requester is not authorized to update this ticket.
+
+```json
+{
+  "status": "fail",
+  "message": "You are not authorized to update this ticket"
+}
+```
+
+##### Response 404
+
+Ticket not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No Ticket found with this id"
+}
+```
+
+---
+
+### DELETE /tickets/:ticketId
+
+Permanently delete a support ticket. Accessible to ticket owner or admins.
+
+#### Request Headers
+
+| Header          | Value            | Required |
+| :-------------- | :--------------- | :------: |
+| `Authorization` | `Bearer <token>` |    ✅    |
+
+#### URL Parameters
+
+| Parameter  | Type   | Required | Description             |
+| :--------- | :----- | :------: | :---------------------- |
+| `ticketId` | string |    ✅    | The ticket's MongoDB ID |
+
+#### Responses
+
+##### Response 200
+
+Ticket deleted successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Ticket deleted successfully",
+  "data": {
+    "_id": "67b901234567890abcdef123"
+  }
+}
+```
+
+##### Response 403
+
+Forbidden. Requester is not authorized to delete this ticket.
+
+```json
+{
+  "status": "fail",
+  "message": "You are not authorized to delete this ticket"
+}
+```
+
+##### Response 404
+
+Ticket not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No Ticket found with this id"
+}
+```
+
+---
+
+### POST /tickets/:ticketId/messages
+
+Send a reply message to an ongoing ticket conversation. Accessible to ticket owner or admins.
+
+#### Request Headers
+
+| Header          | Value              | Required |
+| :-------------- | :----------------- | :------: |
+| `Content-Type`  | `application/json` |    ✅    |
+| `Authorization` | `Bearer <token>`   |    ✅    |
+
+#### URL Parameters
+
+| Parameter  | Type   | Required | Description             |
+| :--------- | :----- | :------: | :---------------------- |
+| `ticketId` | string |    ✅    | The ticket's MongoDB ID |
+
+#### Request Body
+
+| Field     | Type   | Required | Description                                   |
+| :-------- | :----- | :------: | :-------------------------------------------- |
+| `content` | string |    ✅    | Message content text to append to the ticket. |
+
+```json
+{
+  "content": "Thank you for the update. The replacement has arrived in perfect condition."
+}
+```
+
+#### Responses
+
+##### Response 201
+
+Message added successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Message added successfully",
+  "data": {
+    "_id": "67b901234567890abcdef123",
+    "subject": "Damaged package received",
+    "messages": [
+      {
+        "_id": "67b901234567890abcdef999",
+        "sender": {
+          "_id": "67b901234567890abcdef001",
+          "firstName": "John",
+          "lastName": "Doe",
+          "role": "User"
+        },
+        "content": "The outer carton was crushed and the item has deep scratches.",
+        "createdAt": "2026-10-21T18:00:00.000Z"
+      },
+      {
+        "_id": "67b901234567890abcdef888",
+        "sender": {
+          "_id": "67b901234567890abcdef001",
+          "firstName": "John",
+          "lastName": "Doe",
+          "role": "User"
+        },
+        "content": "Thank you for the update. The replacement has arrived in perfect condition.",
+        "createdAt": "2026-10-21T18:30:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+##### Response 400
+
+Message content is required.
+
+```json
+{
+  "status": "fail",
+  "message": "Message content is required"
+}
+```
+
+##### Response 403
+
+Forbidden. Requester is not authorized to reply to this ticket.
+
+```json
+{
+  "status": "fail",
+  "message": "You are not authorized to reply to this ticket"
+}
+```
+
+##### Response 404
+
+Ticket not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No Ticket found with this id"
+}
+```
+
+---
+
 ## Admin Order Management Endpoints
 
 ### GET /admin/orders
@@ -3935,39 +4759,48 @@ Forbidden. Caller is not an Admin or SuperAdmin.
 
 ---
 
-## Notification Endpoints
+---
 
-### GET /notifications
+## Admin Ticket Management Endpoints
 
-Retrieve all notifications for the authenticated user, ordered by creation date descending.
+### GET /admin/tickets
+
+Retrieve all customer support tickets across the platform with user details populated, sorted newest first. Accessible only to administrators (`Admin` or `SuperAdmin`).
 
 #### Request Headers
 
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
+| Header          | Value            | Required |
+| :-------------- | :--------------- | :------: |
+| `Authorization` | `Bearer <token>` |    ✅    |
 
 #### Responses
 
 ##### Response 200
 
-Notifications fetched successfully.
+Tickets fetched successfully.
 
 ```json
 {
   "status": "success",
-  "message": "Notifications fetched successfully",
+  "message": "Tickets fetched successfully",
   "data": [
     {
-      "_id": "664fa1e2b5c7e1234567890a",
-      "user": "664fa1e2b5c7e1234567890b",
-      "title": "Order Status Updated",
-      "message": "Your order #abc123 has been marked as Shipped.",
-      "type": "order",
-      "isRead": false,
-      "relatedId": "664fa1e2b5c7e1234567890c",
-      "createdAt": "2026-10-21T14:30:00.000Z",
-      "updatedAt": "2026-10-21T14:30:00.000Z"
+      "_id": "67b901234567890abcdef123",
+      "user": {
+        "_id": "67b901234567890abcdef001",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john@example.com"
+      },
+      "subject": "Issue with order delivery",
+      "category": "shipping",
+      "status": "open",
+      "priority": "High",
+      "messages": [
+        "67b901234567890abcdef999"
+      ],
+      "createdAt": "2026-10-21T18:00:00.000Z",
+      "updatedAt": "2026-10-21T18:00:00.000Z"
     }
   ]
 }
@@ -3975,137 +4808,7 @@ Notifications fetched successfully.
 
 ##### Response 401
 
-Unauthorized. Missing or invalid token.
-
-```json
-{
-  "status": "fail",
-  "message": "Unauthorized"
-}
-```
-
----
-
-### PATCH /notifications/read-all
-
-Mark all unread notifications of the authenticated user as read in a single operation.
-
-#### Request Headers
-
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
-
-#### Responses
-
-##### Response 200
-
-All notifications marked as read.
-
-```json
-{
-  "status": "success",
-  "message": "All notifications marked as read",
-  "data": {
-    "acknowledged": true,
-    "modifiedCount": 5
-  }
-}
-```
-
-##### Response 401
-
-Unauthorized. Missing or invalid token.
-
-```json
-{
-  "status": "fail",
-  "message": "Unauthorized"
-}
-```
-
----
-
-### DELETE /notifications
-
-Delete all notifications belonging to the authenticated user.
-
-#### Request Headers
-
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
-
-#### Responses
-
-##### Response 200
-
-All notifications deleted successfully.
-
-```json
-{
-  "status": "success",
-  "message": "All notifications deleted successfully",
-  "data": []
-}
-```
-
-##### Response 401
-
-Unauthorized. Missing or invalid token.
-
-```json
-{
-  "status": "fail",
-  "message": "Unauthorized"
-}
-```
-
----
-
-### GET /notifications/:notificationId
-
-Retrieve a specific notification by its ID. The notification must belong to the authenticated user.
-
-#### Request Headers
-
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
-
-#### Path Parameters
-
-| Parameter        | Type   | Required | Description              |
-| :--------------- | :----- | :------: | :----------------------- |
-| `notificationId` | string |    ✅    | The notification's ID.   |
-
-#### Responses
-
-##### Response 200
-
-Notification fetched successfully.
-
-```json
-{
-  "status": "success",
-  "message": "Notification fetched successfully",
-  "data": {
-    "_id": "664fa1e2b5c7e1234567890a",
-    "user": "664fa1e2b5c7e1234567890b",
-    "title": "Order Shipped",
-    "message": "Your order is on the way!",
-    "type": "order",
-    "isRead": true,
-    "relatedId": "664fa1e2b5c7e1234567890c",
-    "createdAt": "2026-10-21T14:30:00.000Z",
-    "updatedAt": "2026-10-21T14:30:00.000Z"
-  }
-}
-```
-
-##### Response 401
-
-Unauthorized. Missing or invalid token.
+Unauthorized. Missing or invalid Bearer token.
 
 ```json
 {
@@ -4116,71 +4819,78 @@ Unauthorized. Missing or invalid token.
 
 ##### Response 403
 
-Forbidden. Attempting to access another user's notification.
+Forbidden. Requester does not have administrator privileges.
 
 ```json
 {
   "status": "fail",
-  "message": "You cannot access other user notifications"
-}
-```
-
-##### Response 404
-
-Notification not found.
-
-```json
-{
-  "status": "fail",
-  "message": "No notification found with this id"
+  "message": "Not Authorized"
 }
 ```
 
 ---
 
-### PATCH /notifications/:notificationId
+### PUT /admin/tickets/:ticketId
 
-Mark a single notification as read by its ID. The notification must belong to the authenticated user.
+Update support ticket resolution status (`open`, `in_progress`, `resolved`, `closed`). Accessible only to administrators (`Admin` or `SuperAdmin`).
 
 #### Request Headers
 
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
+| Header          | Value              | Required |
+| :-------------- | :----------------- | :------: |
+| `Content-Type`  | `application/json` |    ✅    |
+| `Authorization` | `Bearer <token>`   |    ✅    |
 
-#### Path Parameters
+#### URL Parameters
 
-| Parameter        | Type   | Required | Description            |
-| :--------------- | :----- | :------: | :--------------------- |
-| `notificationId` | string |    ✅    | The notification's ID. |
+| Parameter  | Type   | Required | Description             |
+| :--------- | :----- | :------: | :---------------------- |
+| `ticketId` | string |    ✅    | The ticket's MongoDB ID |
+
+#### Request Body
+
+| Field    | Type   | Required | Description                                              |
+| :------- | :----- | :------: | :------------------------------------------------------- |
+| `status` | string |    ✅    | `"open"`, `"in_progress"`, `"resolved"`, or `"closed"`. |
+
+```json
+{
+  "status": "in_progress"
+}
+```
 
 #### Responses
 
 ##### Response 200
 
-Notification marked as read.
+Ticket status updated successfully.
 
 ```json
 {
   "status": "success",
-  "message": "Notification marked as read",
+  "message": "Ticket updated successfully",
   "data": {
-    "_id": "664fa1e2b5c7e1234567890a",
-    "user": "664fa1e2b5c7e1234567890b",
-    "title": "Order Shipped",
-    "message": "Your order is on the way!",
-    "type": "order",
-    "isRead": true,
-    "relatedId": "664fa1e2b5c7e1234567890c",
-    "createdAt": "2026-10-21T14:30:00.000Z",
-    "updatedAt": "2026-10-21T14:30:00.000Z"
+    "_id": "67b901234567890abcdef123",
+    "status": "in_progress",
+    "updatedAt": "2026-10-21T18:00:00.000Z"
   }
+}
+```
+
+##### Response 400
+
+Bad request. Ticket ID or Status is required.
+
+```json
+{
+  "status": "fail",
+  "message": "Status is required"
 }
 ```
 
 ##### Response 401
 
-Unauthorized. Missing or invalid token.
+Unauthorized. Missing or invalid Bearer token.
 
 ```json
 {
@@ -4191,96 +4901,23 @@ Unauthorized. Missing or invalid token.
 
 ##### Response 403
 
-Forbidden. Attempting to access another user's notification.
+Forbidden. Requester does not have administrator privileges.
 
 ```json
 {
   "status": "fail",
-  "message": "You cannot access other user notifications"
+  "message": "Not Authorized"
 }
 ```
 
 ##### Response 404
 
-Notification not found.
+Ticket not found.
 
 ```json
 {
   "status": "fail",
-  "message": "No notification found with this id"
-}
-```
-
----
-
-### DELETE /notifications/:notificationId
-
-Delete a specific notification by its ID. The notification must belong to the authenticated user.
-
-#### Request Headers
-
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
-
-#### Path Parameters
-
-| Parameter        | Type   | Required | Description            |
-| :--------------- | :----- | :------: | :--------------------- |
-| `notificationId` | string |    ✅    | The notification's ID. |
-
-#### Responses
-
-##### Response 200
-
-Notification deleted successfully.
-
-```json
-{
-  "status": "success",
-  "message": "Notification deleted successfully",
-  "data": {
-    "_id": "664fa1e2b5c7e1234567890a",
-    "user": "664fa1e2b5c7e1234567890b",
-    "title": "Order Shipped",
-    "message": "Your order is on the way!",
-    "type": "order",
-    "isRead": true,
-    "relatedId": "664fa1e2b5c7e1234567890c"
-  }
-}
-```
-
-##### Response 401
-
-Unauthorized. Missing or invalid token.
-
-```json
-{
-  "status": "fail",
-  "message": "Unauthorized"
-}
-```
-
-##### Response 403
-
-Forbidden. Attempting to access another user's notification.
-
-```json
-{
-  "status": "fail",
-  "message": "You cannot access other user notifications"
-}
-```
-
-##### Response 404
-
-Notification not found.
-
-```json
-{
-  "status": "fail",
-  "message": "No notification found with this id"
+  "message": "Ticket not found"
 }
 ```
 

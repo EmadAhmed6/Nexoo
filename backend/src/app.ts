@@ -11,13 +11,14 @@ import orders from "./modules/Order/order.routes.js";
 import coupons from "./modules/Coupon/coupon.routes.js";
 import wishlist from "./modules/Wishlist/wishlist.routes.js";
 import notifications from "./modules/Notification/notification.routes.js";
+import tickets from "./modules/Ticket/ticket.routes.js";
 import connectToDB from "./config/config.js";
 import { errorHandler, notFound } from "./middlewares/errors.js";
 import swaggerui from "swagger-ui-express";
 import adminOrders from "./modules/admin/order/adminOrder.routes.js";
+import adminTickets from "./modules/admin/ticket/ticket.routes.js";
 import spacs from "./config/swagger.js";
 dotenv.config();
-// sFASFSAF
 connectToDB();
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
@@ -39,10 +40,11 @@ app.use("/wishlist", wishlist);
 app.use("/orders", orders);
 app.use("/coupons", coupons);
 app.use("/notifications", notifications);
+app.use("/tickets", tickets);
 
 // ADMIN ROUTES
-
 app.use("/admin/orders", adminOrders);
+app.use("/admin/tickets", adminTickets);
 
 // ERROR HANDLING MIDDLEWARES
 app.use(notFound);

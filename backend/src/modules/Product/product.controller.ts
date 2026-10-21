@@ -1,6 +1,5 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-
 import { sendError, successMsg } from "../../middlewares/errors.js";
 import {
   IProduct,

@@ -4,6 +4,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { Product } from "../modules/Product/product.model.js";
 import { Cart } from "../modules/Cart/cart.model.js";
 import { Order } from "../modules/Order/order.model.js";
+import { Ticket } from "../modules/Ticket/ticket.model.js";
 
 const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   let token = req.headers.authorization;
@@ -165,6 +166,37 @@ const verifyOrderOwner = async (
   });
 };
 
+const verifyTicketOwner = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  verifyToken(req, res, async () => {
+    try {
+      const userId = req.user?.id;
+      const ticketId = req.params.ticketId;
+      const ticket = await Ticket.findById(ticketId);
+      if (!ticket) {
+        sendError(res, 404, "Ticket was not found");
+        return;
+      }
+      if (
+        ticket.user.toString() === userId?.toString() ||
+        req.user?.role === "Admin" ||
+        req.user?.role === "SuperAdmin"
+      ) {
+        next();
+      } else {
+        sendError(res, 403, "Not Authorized");
+        return;
+      }
+    } catch (err) {
+      sendError(res, 500, "Internal Server Error");
+      return;
+    }
+  });
+};
+
 export {
   verifyToken,
   verifyAuthorizedToken,
@@ -172,4 +204,5 @@ export {
   verifyProductOwner,
   verifyCartOwner,
   verifyOrderOwner,
+  verifyTicketOwner,
 };

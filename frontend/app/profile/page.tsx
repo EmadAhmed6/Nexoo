@@ -21,6 +21,7 @@ import {
   Trash2,
   ArrowLeft,
   AlertTriangle,
+  LifeBuoy,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -268,6 +269,17 @@ function ProfileContent() {
                 <span>My Orders</span>
               </div>
               <span className="text-textSecondary text-xs">View →</span>
+            </Link>
+
+            <Link
+              href="/tickets"
+              className="flex items-center justify-between p-3 rounded-xl border border-borderPrimary bg-bgPrimary hover:border-primary/40 text-textPrimary transition-all text-xs font-semibold"
+            >
+              <div className="flex items-center gap-2.5">
+                <LifeBuoy className="w-4 h-4 text-textSecondary" />
+                <span>Support Tickets</span>
+              </div>
+              <span className="text-textSecondary text-xs">Help →</span>
             </Link>
           </div>
         </div>
