@@ -47,9 +47,21 @@ interface IPayment {
 
 interface IOrderStatus {
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  updatedAt: Date;
   isDelivered: boolean;
   deliveredAt?: Date;
 }
+interface IOrderStatusHistory {
+  status: "Pending" | "Processing" | "Shipped" | "Delievered" | "Cancelled";
+  timestamp: Date;
+  note?: string;
+}
+
+// interface IOrderStatusHistory {
+//   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+//   timestamp: Date;
+//   note?: string;
+// }
 
 interface IOrder extends Document {
   user: Types.ObjectId;
@@ -60,6 +72,7 @@ interface IOrder extends Document {
   orderStatus: IOrderStatus;
   createdAt?: Date;
   updatedAt?: Date;
+  statusHistory: IOrderStatusHistory[];
 }
 
 const OrderSchema = new Schema<IOrder>(
@@ -191,6 +204,11 @@ const OrderSchema = new Schema<IOrder>(
         type: String,
         enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
         required: true,
+        default: "Pending",
+      },
+      updatedAt: {
+        type: Date,
+        default: Date.now,
       },
       isDelivered: {
         type: Boolean,
@@ -200,6 +218,22 @@ const OrderSchema = new Schema<IOrder>(
         type: Date,
       },
     },
+    statusHistory: [
+      {
+        status: {
+          type: String,
+          enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+          required: true,
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+        note: {
+          type: String,
+        },
+      },
+    ],
   },
   { timestamps: true },
 );

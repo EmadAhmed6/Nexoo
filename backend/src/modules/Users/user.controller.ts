@@ -106,6 +106,7 @@ const addUserAddress = asyncHandler(
       sendError(res, 400, error.message);
       return;
     }
+
     const userId = req.params.userId;
     const { street, city, state, postalCode, phone, isDefault } = req.body;
     if (!userId) {
@@ -118,6 +119,7 @@ const addUserAddress = asyncHandler(
       sendError(res, 404, "User was not found");
       return;
     }
+
     const address = {
       street,
       city,
@@ -160,6 +162,7 @@ const updateUserAddress = asyncHandler(
       sendError(res, 404, "User was not found");
       return;
     }
+
     const address = user.addresses.id(addressId);
     if (!address) {
       sendError(res, 404, "Address not found");
@@ -171,7 +174,7 @@ const updateUserAddress = asyncHandler(
         addr.isDefault = false;
       });
     }
-    
+
     if (street) address.street = street;
     if (city) address.city = city;
     if (state) address.state = state;

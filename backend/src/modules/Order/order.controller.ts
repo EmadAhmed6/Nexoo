@@ -11,6 +11,7 @@ import {
 } from "./order.model.js";
 import { Coupon } from "../Coupon/coupon.model.js";
 import { updateStockAfterPayment } from "../Product/product.controller.js";
+import { Notification } from "../Notification/notification.model.js";
 
 // GET USER ORDERS
 const getOrders = asyncHandler(
@@ -109,7 +110,15 @@ const createOrder = asyncHandler(
       orderStatus: {
         status: "Pending",
         isDelivered: false,
+        updatedAt: new Date(),
       },
+      statusHistory: [
+        {
+          status: "Pending",
+          timestamp: new Date(),
+          note: "Order placed successfully",
+        },
+      ],
     });
 
     if (cart.couponApplied) {
@@ -130,6 +139,42 @@ const createOrder = asyncHandler(
     }
 
     await Cart.findByIdAndDelete(cart._id);
+
+    try {
+      await Notification.create({
+        user: userId,
+        title: "Order Placed Successfully",
+        message: `Your order #${order._id.toString().slice(-6)} has been placed successfully.`,
+        type: "order",
+        relatedId: order._id,
+      });
+    } catch (notifErr) {
+      console.error("Failed to create order placement notification:", notifErr);
+    }
+
+    for (const item of cart.cartItems) {
+      const prod = item.product as any;
+      if (!prod) continue;
+      const productOwner = prod.userId || prod.user;
+      if (productOwner && productOwner.toString() !== userId?.toString()) {
+        const buyerName = req.user?.username || "A customer";
+        try {
+          await Notification.create({
+            user: productOwner,
+            title: "Product Sold!",
+            message: `${buyerName} purchased ${item.productQuantity}x "${prod.title}"`,
+            type: "order",
+            relatedId: order._id,
+          });
+        } catch (sellerNotifErr) {
+          console.error(
+            "Failed to notify seller about purchase:",
+            sellerNotifErr,
+          );
+        }
+      }
+    }
+
     successMsg(res, 201, "Order created successfully", order);
   },
 );
@@ -222,8 +267,27 @@ const verifyPaymobPayment = asyncHandler(
         update_time: new Date().toISOString(),
       };
       order.orderStatus.status = "Processing";
+      order.orderStatus.updatedAt = new Date();
+      if (!order.statusHistory) order.statusHistory = [];
+      order.statusHistory.push({
+        status: "Processing",
+        timestamp: new Date(),
+        note: "Payment verified via Paymob",
+      });
       await order.save();
       await updateStockAfterPayment(order.orderItems);
+
+      try {
+        await Notification.create({
+          user: order.user,
+          title: "Payment Confirmed",
+          message: `Your payment for order #${order._id.toString().slice(-6)} was successful.`,
+          type: "order",
+          relatedId: order._id,
+        });
+      } catch (notifErr) {
+        console.error("Failed to create payment notification:", notifErr);
+      }
 
       successMsg(res, 200, "Payment verified successfully", order);
       return;
@@ -258,8 +322,27 @@ const paymobWebhook = asyncHandler(
           update_time: new Date().toISOString(),
         };
         order.orderStatus.status = "Processing";
+        order.orderStatus.updatedAt = new Date();
+        if (!order.statusHistory) order.statusHistory = [];
+        order.statusHistory.push({
+          status: "Processing",
+          timestamp: new Date(),
+          note: "Payment received via Paymob webhook",
+        });
         await order.save();
         await updateStockAfterPayment(order.orderItems);
+
+        try {
+          await Notification.create({
+            user: order.user,
+            title: "Payment Confirmed",
+            message: `Your payment for order #${order._id.toString().slice(-6)} was successful.`,
+            type: "order",
+            relatedId: order._id,
+          });
+        } catch (err) {
+          console.error("Failed to create webhook payment notification:", err);
+        }
       }
     }
 

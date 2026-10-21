@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { sendError, successMsg } from "../../../middlewares/errors.js";
 import { Order } from "../../Order/order.model.js";
 import { User } from "../../Users/user.model.js";
+import { Notification } from "../../Notification/notification.model.js";
 
 interface IOrderQuery {
   orderStatus?: string;
@@ -106,7 +107,7 @@ const getOrderById = asyncHandler(
 const updateOrderStatus = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const orderId = req.params.orderId;
-    const orderStatus = req.body.orderStatus;
+    const { orderStatus, note } = req.body;
 
     if (!orderStatus) {
       sendError(res, 400, "Order status is required");
@@ -137,6 +138,16 @@ const updateOrderStatus = asyncHandler(
     }
 
     order.orderStatus.status = orderStatus;
+    order.orderStatus.updatedAt = new Date();
+
+    if (!order.statusHistory) {
+      order.statusHistory = [];
+    }
+    order.statusHistory.push({
+      status: orderStatus,
+      timestamp: new Date(),
+      note,
+    });
 
     if (order.orderStatus.status === "Delivered") {
       order.orderStatus.isDelivered = true;
@@ -153,6 +164,18 @@ const updateOrderStatus = asyncHandler(
     }
 
     await order.save();
+
+    try {
+      await Notification.create({
+        user: order.user,
+        title: `Order Status: ${orderStatus}`,
+        message: `Your order #${order._id.toString().slice(-6)} status has been updated to "${orderStatus}".`,
+        type: "order",
+        relatedId: order._id,
+      });
+    } catch (notifErr) {
+      console.error("Failed to create order status notification:", notifErr);
+    }
 
     successMsg(res, 200, "Order status updated successfully", order);
   },

@@ -262,6 +262,10 @@
  *                 type: string
  *                 enum: [Pending, Processing, Shipped, Delivered, Cancelled]
  *                 example: Shipped
+ *               note:
+ *                 type: string
+ *                 description: Optional tracking note or reason for the status update
+ *                 example: Handed over to courier with tracking code #EGY-987654
  *               isPaid:
  *                 type: boolean
  *                 example: true
@@ -281,6 +285,32 @@
  *                   example: Order status updated successfully
  *                 data:
  *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     orderStatus:
+ *                       type: object
+ *                       properties:
+ *                         status:
+ *                           type: string
+ *                           example: Shipped
+ *                         updatedAt:
+ *                           type: string
+ *                           format: date-time
+ *                     statusHistory:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           status:
+ *                             type: string
+ *                             example: Shipped
+ *                           timestamp:
+ *                             type: string
+ *                             format: date-time
+ *                           note:
+ *                             type: string
+ *                             example: Handed over to courier with tracking code #EGY-987654
  *       400:
  *         description: Bad Request - Missing or invalid orderStatus
  *       401:

@@ -10,6 +10,7 @@ import {
 import { Product } from "../product.model.js";
 import { updateProductRatingStats } from "./calculateProductRating.js";
 import { treeifyError } from "zod/v4/core";
+import { createNotification } from "../../Notification/notification.controller.js";
 
 // GET PRODUCT REVIEWS
 const getProductReviews = asyncHandler(
@@ -86,6 +87,23 @@ const createReview = asyncHandler(
       "user",
       "fullName username profilePicture email role",
     );
+
+    const productOwner = product.userId || (product as any).user;
+    if (productOwner && productOwner.toString() !== req.user?.id) {
+      const reviewerName =
+        (review.user as any)?.fullName ||
+        (review.user as any)?.username ||
+        req.user?.username ||
+        "Someone";
+
+      await createNotification({
+        user: productOwner,
+        title: "New review on your product",
+        message: `${reviewerName} gave a ${review.ratings}★ review on "${product.title}"`,
+        type: "review",
+        relatedId: product._id as any,
+      });
+    }
 
     successMsg(
       res,

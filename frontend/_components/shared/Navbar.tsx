@@ -22,6 +22,7 @@ import {
   Sparkles,
   Home,
   Package,
+  Bell,
 } from "lucide-react";
 import { useCartStore } from "@/features/cart/store/useCartStore";
 import { useCart } from "@/features/cart/hooks/useCart";
@@ -30,6 +31,7 @@ import { useAppStore } from "@/store/use-app-store";
 import { ThemeToggle } from "@/_components/theme-toggle";
 import { PRODUCT_CATEGORIES, CATEGORY_ICONS } from "@/features/products/types/categories";
 import { SearchAutocomplete } from "@/features/products/components/SearchAutocomplete";
+import { NotificationDropdown } from "@/features/notifications/components/NotificationDropdown";
 
 const ALL_CATEGORIES = ["All", ...PRODUCT_CATEGORIES] as const;
 
@@ -155,6 +157,9 @@ export function Navbar() {
                 </Link>
               )}
 
+              {/* Notifications Dropdown */}
+              {isAuthenticated && <NotificationDropdown />}
+
               {/* Cart */}
               <button
                 onClick={openCart}
@@ -245,6 +250,16 @@ export function Navbar() {
                           >
                             <UserIcon className="w-4 h-4 shrink-0 text-primary" />
                             <span>My Profile</span>
+                          </Link>
+
+                          {/* Notifications */}
+                          <Link
+                            href="/notifications"
+                            onClick={() => setProfileMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-textSecondary hover:text-textPrimary hover:bg-bgPrimary transition-colors"
+                          >
+                            <Bell className="w-4 h-4 shrink-0 text-primary" />
+                            <span>Notifications</span>
                           </Link>
 
                           {/* Logout */}
@@ -384,6 +399,7 @@ export function Navbar() {
                       { label: "Products", href: "/#products", icon: Sparkles },
                       ...(isAuthenticated ? [
                         { label: "My Profile", href: "/profile", icon: UserIcon },
+                        { label: "Notifications", href: "/notifications", icon: Bell },
                         { label: "My Orders", href: "/orders", icon: Package },
                         { label: "Wishlist", href: "/wishlist", icon: Bookmark },
                       ] : []),

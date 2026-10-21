@@ -10,6 +10,7 @@ import cart from "./modules/Cart/cart.routes.js";
 import orders from "./modules/Order/order.routes.js";
 import coupons from "./modules/Coupon/coupon.routes.js";
 import wishlist from "./modules/Wishlist/wishlist.routes.js";
+import notifications from "./modules/Notification/notification.routes.js";
 import connectToDB from "./config/config.js";
 import { errorHandler, notFound } from "./middlewares/errors.js";
 import swaggerui from "swagger-ui-express";
@@ -37,6 +38,7 @@ app.use("/cart", cart);
 app.use("/wishlist", wishlist);
 app.use("/orders", orders);
 app.use("/coupons", coupons);
+app.use("/notifications", notifications);
 
 // ADMIN ROUTES
 

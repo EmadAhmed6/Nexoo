@@ -45,8 +45,15 @@ export interface IPayment {
 
 export interface IOrderStatus {
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  updatedAt?: string;
   isDelivered: boolean;
   deliveredAt?: string;
+}
+
+export interface IOrderStatusHistory {
+  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  timestamp: string;
+  note?: string;
 }
 
 export interface IOrderUser {
@@ -67,6 +74,7 @@ export interface Order {
   pricing: IPricing;
   payment: IPayment;
   orderStatus: IOrderStatus;
+  statusHistory?: IOrderStatusHistory[];
   createdAt: string;
   updatedAt: string;
 }
@@ -74,6 +82,7 @@ export interface Order {
 export interface UpdateAdminOrderStatusPayload {
   orderStatus: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
   isPaid?: boolean;
+  note?: string;
 }
 
 export interface CreateOrderPayload {

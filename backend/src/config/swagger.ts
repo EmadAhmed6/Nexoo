@@ -64,6 +64,10 @@ const options: Options = {
         name: "Reviews",
         description: "Product reviews and ratings management APIs",
       },
+      {
+        name: "Notifications",
+        description: "User notifications management APIs",
+      },
     ],
     components: {
       securitySchemes: {

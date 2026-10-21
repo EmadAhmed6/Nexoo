@@ -88,6 +88,13 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 45  | GET    | `/admin/orders`                       | Retrieve all platform orders with populated customer info (Admin only)         |  🔒  |
 | 46  | GET    | `/admin/orders/:orderId`              | Retrieve complete details of any order by ID (Admin only)                      |  🔒  |
 | 47  | PATCH  | `/admin/orders/:orderId`              | Update order delivery and fulfillment status (Admin only)                      |  🔒  |
+| 48  | GET    | `/admin/orders/overview`              | Retrieve aggregated store-wide order stats and total revenue (Admin only)      |  🔒  |
+| 49  | GET    | `/notifications`                      | Retrieve all notifications for the authenticated user                          |  🔒  |
+| 50  | PATCH  | `/notifications/read-all`             | Mark all notifications as read for the authenticated user                      |  🔒  |
+| 51  | DELETE | `/notifications`                      | Delete all notifications for the authenticated user                            |  🔒  |
+| 52  | GET    | `/notifications/:notificationId`      | Retrieve a single notification by ID                                           |  🔒  |
+| 53  | PATCH  | `/notifications/:notificationId`      | Mark a single notification as read by ID                                       |  🔒  |
+| 54  | DELETE | `/notifications/:notificationId`      | Delete a single notification by ID                                             |  🔒  |
 
 ---
 
@@ -102,6 +109,7 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 - [Admin Order Management Endpoints](#admin-order-management-endpoints)
 - [Coupon Management Endpoints](#coupon-management-endpoints)
 - [Review & Rating Endpoints](#review--rating-endpoints)
+- [Notification Endpoints](#notification-endpoints)
 - [Common HTTP Status Codes](#common-http-status-codes)
 
 ---
@@ -3922,6 +3930,357 @@ Forbidden. Caller is not an Admin or SuperAdmin.
 {
   "status": "fail",
   "message": "Not Authorized"
+}
+```
+
+---
+
+## Notification Endpoints
+
+### GET /notifications
+
+Retrieve all notifications for the authenticated user, ordered by creation date descending.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+Notifications fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Notifications fetched successfully",
+  "data": [
+    {
+      "_id": "664fa1e2b5c7e1234567890a",
+      "user": "664fa1e2b5c7e1234567890b",
+      "title": "Order Status Updated",
+      "message": "Your order #abc123 has been marked as Shipped.",
+      "type": "order",
+      "isRead": false,
+      "relatedId": "664fa1e2b5c7e1234567890c",
+      "createdAt": "2026-10-21T14:30:00.000Z",
+      "updatedAt": "2026-10-21T14:30:00.000Z"
+    }
+  ]
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### PATCH /notifications/read-all
+
+Mark all unread notifications of the authenticated user as read in a single operation.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+All notifications marked as read.
+
+```json
+{
+  "status": "success",
+  "message": "All notifications marked as read",
+  "data": {
+    "acknowledged": true,
+    "modifiedCount": 5
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### DELETE /notifications
+
+Delete all notifications belonging to the authenticated user.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Responses
+
+##### Response 200
+
+All notifications deleted successfully.
+
+```json
+{
+  "status": "success",
+  "message": "All notifications deleted successfully",
+  "data": []
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### GET /notifications/:notificationId
+
+Retrieve a specific notification by its ID. The notification must belong to the authenticated user.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter        | Type   | Required | Description              |
+| :--------------- | :----- | :------: | :----------------------- |
+| `notificationId` | string |    ✅    | The notification's ID.   |
+
+#### Responses
+
+##### Response 200
+
+Notification fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Notification fetched successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "title": "Order Shipped",
+    "message": "Your order is on the way!",
+    "type": "order",
+    "isRead": true,
+    "relatedId": "664fa1e2b5c7e1234567890c",
+    "createdAt": "2026-10-21T14:30:00.000Z",
+    "updatedAt": "2026-10-21T14:30:00.000Z"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Attempting to access another user's notification.
+
+```json
+{
+  "status": "fail",
+  "message": "You cannot access other user notifications"
+}
+```
+
+##### Response 404
+
+Notification not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No notification found with this id"
+}
+```
+
+---
+
+### PATCH /notifications/:notificationId
+
+Mark a single notification as read by its ID. The notification must belong to the authenticated user.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter        | Type   | Required | Description            |
+| :--------------- | :----- | :------: | :--------------------- |
+| `notificationId` | string |    ✅    | The notification's ID. |
+
+#### Responses
+
+##### Response 200
+
+Notification marked as read.
+
+```json
+{
+  "status": "success",
+  "message": "Notification marked as read",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "title": "Order Shipped",
+    "message": "Your order is on the way!",
+    "type": "order",
+    "isRead": true,
+    "relatedId": "664fa1e2b5c7e1234567890c",
+    "createdAt": "2026-10-21T14:30:00.000Z",
+    "updatedAt": "2026-10-21T14:30:00.000Z"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Attempting to access another user's notification.
+
+```json
+{
+  "status": "fail",
+  "message": "You cannot access other user notifications"
+}
+```
+
+##### Response 404
+
+Notification not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No notification found with this id"
+}
+```
+
+---
+
+### DELETE /notifications/:notificationId
+
+Delete a specific notification by its ID. The notification must belong to the authenticated user.
+
+#### Request Headers
+
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
+
+#### Path Parameters
+
+| Parameter        | Type   | Required | Description            |
+| :--------------- | :----- | :------: | :--------------------- |
+| `notificationId` | string |    ✅    | The notification's ID. |
+
+#### Responses
+
+##### Response 200
+
+Notification deleted successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Notification deleted successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "user": "664fa1e2b5c7e1234567890b",
+    "title": "Order Shipped",
+    "message": "Your order is on the way!",
+    "type": "order",
+    "isRead": true,
+    "relatedId": "664fa1e2b5c7e1234567890c"
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Attempting to access another user's notification.
+
+```json
+{
+  "status": "fail",
+  "message": "You cannot access other user notifications"
+}
+```
+
+##### Response 404
+
+Notification not found.
+
+```json
+{
+  "status": "fail",
+  "message": "No notification found with this id"
 }
 ```
 

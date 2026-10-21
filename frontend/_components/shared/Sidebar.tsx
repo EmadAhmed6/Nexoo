@@ -17,9 +17,11 @@ import {
   Compass,
   Layers,
   Bookmark,
+  Bell,
 } from "lucide-react";
 import { useAppStore } from "@/store/use-app-store";
 import { useWishlist } from "@/features/wishlist/hooks/useWishlist";
+import { useNotifications } from "@/features/notifications/hooks/useNotifications";
 import { CreateProductModal } from "@/features/products/components/CreateProductModal";
 import { Text } from "@/_components/shared/Text";
 import { cn } from "@/lib/utils";
@@ -38,6 +40,7 @@ export function Sidebar({
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAppStore();
   const { data: wishlist } = useWishlist();
+  const { unreadCount } = useNotifications();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const wishlistCount = (wishlist?.products ?? []).length;
 
@@ -59,6 +62,13 @@ export function Sidebar({
     ...(isAuthenticated
       ? [
           {
+            label: "Notifications",
+            href: "/notifications",
+            icon: Bell,
+            isActive: pathname.startsWith("/notifications"),
+            badge: unreadCount,
+          },
+          {
             label: "My Orders",
             href: "/orders",
             icon: Package,
@@ -69,6 +79,7 @@ export function Sidebar({
             href: "/wishlist",
             icon: Bookmark,
             isActive: pathname.startsWith("/wishlist"),
+            badge: wishlistCount,
           },
         ]
       : []),
@@ -112,14 +123,14 @@ export function Sidebar({
                         )}
                       />
                       <span>{link.label}</span>
-                      {link.label === "My Wishlist" && wishlistCount > 0 && (
+                      {typeof link.badge === "number" && link.badge > 0 && (
                         <span className={cn(
                           "text-[10px] px-1.5 py-0.5 rounded font-black",
                           isActive
                             ? "bg-black/20 text-black"
                             : "bg-primary/20 text-primary",
                         )}>
-                          {wishlistCount}
+                          {link.badge}
                         </span>
                       )}
                     </div>

@@ -25,6 +25,7 @@ import {
 } from "@/features/orders/hooks/useOrders";
 import { Text } from "@/_components/shared/Text";
 import { Sidebar } from "@/_components/shared";
+import { OrderStatusTimeline } from "@/features/orders/components/OrderStatusTimeline";
 
 const STATUS_CONFIG: Record<
   string,
@@ -348,6 +349,11 @@ export default function OrdersPage() {
                       </button>
                     )}
                 </div>
+              </div>
+
+              {/* Order Status Timeline & Tracking History */}
+              <div className="px-5 pb-5 sm:px-6 sm:pb-6 border-t border-borderPrimary pt-4 bg-bgPrimary/20">
+                <OrderStatusTimeline order={order} />
               </div>
             </div>
           );
