@@ -62,6 +62,21 @@ const login = asyncHandler(
       sendError(res, 400, "Invalid email or password");
       return;
     }
+
+    if (user.isBanned) {
+      if (user.banExpires && user.banExpires < new Date()) {
+        user.isBanned = false;
+        user.banExpires = undefined;
+        await user.save();
+      } else {
+        const banExpiryMsg = user.banExpires
+          ? ` until ${new Date(user.banExpires).toLocaleDateString()}`
+          : "";
+        sendError(res, 403, `Your account has been banned${banExpiryMsg}`);
+        return;
+      }
+    }
+
     const accessToken = user.generateAccessToken();
     const { password, ...others } = user.toObject();
     successMsg(res, 200, "User logged in successfully", {

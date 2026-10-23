@@ -6,6 +6,14 @@ import {
   UpdateTicketInput,
 } from "../types/ticket.types";
 
+export interface TicketOverview {
+  totalTickets: number;
+  openTickets: number;
+  inprogressTickets: number;
+  resolvedTickets: number;
+  closedTickets: number;
+}
+
 export const ticketApi = {
   /**
    * Fetch tickets created by current authenticated user
@@ -15,10 +23,17 @@ export const ticketApi = {
   },
 
   /**
+   * Fetch ticket overview counts (Admin only)
+   */
+  getTicketOverview: async () => {
+    return apiGet<TicketOverview>("/admin/tickets/overview");
+  },
+
+  /**
    * Fetch all platform tickets (Admin only)
    */
-  getAllTickets: async () => {
-    return apiGet<TicketItem[]>("/admin/tickets");
+  getAllTickets: async (params?: { status?: string; search?: string }) => {
+    return apiGet<TicketItem[]>("/admin/tickets", params);
   },
 
   /**

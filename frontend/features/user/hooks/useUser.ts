@@ -99,3 +99,31 @@ export function useDeleteUserAddress(userId: string) {
     },
   });
 }
+
+export function useBanUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      userId,
+      banDuration,
+    }: {
+      userId: string;
+      banDuration: number;
+    }) => userApi.banUser(userId, banDuration),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}
+
+export function useUnbanUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => userApi.unbanUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}

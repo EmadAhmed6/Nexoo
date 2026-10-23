@@ -10,14 +10,71 @@
 
 /**
  * @swagger
- * /admin/tickets:
+ * /admin/tickets/overview:
  *   get:
- *     summary: Retrieve all tickets (Admin only)
- *     description: Retrieve all customer support tickets across the platform with user details populated, sorted newest first.
+ *     summary: Retrieve support ticket overview statistics (Admin only)
+ *     description: Retrieve total, open, in-progress, resolved, and closed ticket counts store-wide.
  *     tags:
  *       - Admin Tickets
  *     security:
  *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Ticket overview fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Ticket overview fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalTickets:
+ *                       type: number
+ *                       example: 45
+ *                     openTickets:
+ *                       type: number
+ *                       example: 12
+ *                     inprogressTickets:
+ *                       type: number
+ *                       example: 5
+ *                     resolvedTickets:
+ *                       type: number
+ *                       example: 22
+ *                     closedTickets:
+ *                       type: number
+ *                       example: 6
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin access required
+ *
+ * /admin/tickets:
+ *   get:
+ *     summary: Retrieve all tickets (Admin only)
+ *     description: Retrieve all customer support tickets across the platform with optional status and search filters, sorted newest first.
+ *     tags:
+ *       - Admin Tickets
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [open, in_progress, resolved, closed, all]
+ *         description: Filter tickets by status
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search query matching ticket title
  *     responses:
  *       200:
  *         description: Tickets fetched successfully

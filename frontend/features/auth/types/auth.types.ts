@@ -21,6 +21,8 @@ export interface User {
   addresses?: UserAddress[];
   isActive?: boolean;
   isVerified?: boolean;
+  isBanned?: boolean;
+  banExpires?: string | null;
 }
 
 export interface AuthResponseData extends User {

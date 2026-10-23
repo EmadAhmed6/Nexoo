@@ -65,6 +65,21 @@ export function useAllTickets() {
   };
 }
 
+export function useTicketOverview() {
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const user = useAppStore((s) => s.user);
+  const isAdmin = user?.role === "Admin" || user?.role === "SuperAdmin";
+
+  return useQuery({
+    queryKey: ["admin", "tickets", "overview"],
+    queryFn: async () => {
+      const res = await ticketApi.getTicketOverview();
+      return res.data ?? null;
+    },
+    enabled: isAuthenticated && isAdmin,
+  });
+}
+
 export function useTicketDetails(ticketId: string | null) {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
 

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
 import {
   ArrowRight,
   ChevronLeft,
@@ -11,372 +12,252 @@ import {
   ShieldCheck,
   Truck,
   RotateCcw,
-  Sparkles,
-  Star,
   CheckCircle2,
-  Flame,
+  Sparkles,
 } from "lucide-react";
+import { Banner } from "@/features/banners/types/banner.types";
+import { useActiveBanners } from "@/features/banners/hooks/useBanners";
 
-interface HeroSlide {
-  id: string;
-  badge: string;
-  badgeIcon: React.ElementType;
-  badgeColor: string;
-  title: string;
-  highlightText: string;
-  subtitle: string;
-  price: string;
-  originalPrice?: string;
-  discountBadge?: string;
-  primaryCtaText: string;
-  primaryCtaHref: string;
-  secondaryCtaText: string;
-  secondaryCtaHref: string;
-  imageUrl: string;
-  imageAlt: string;
-  accentGlow: string;
-  productFeatures: string[];
-  floatingCard: {
-    title: string;
-    subtitle: string;
-    rating?: number;
-  };
+import "swiper/css";
+import "swiper/css/effect-fade";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
+/* ── Helpers ─────────────────────────────────────────────────── */
+
+function buildCtaHref(banner: Banner): string {
+  switch (banner.linkType) {
+    case "category":
+      return banner.linkValue
+        ? `/?category=${encodeURIComponent(banner.linkValue)}#products`
+        : "/#products";
+    case "product":
+      return banner.linkValue ? `/products/${banner.linkValue}` : "/#products";
+    case "external":
+      return banner.linkValue || "/#products";
+    default:
+      return "/#products";
+  }
 }
 
-const HERO_SLIDES: HeroSlide[] = [
-  {
-    id: "smartwatch-titanium",
-    badge: "Special Release 2026",
-    badgeIcon: Sparkles,
-    badgeColor: "bg-primary/15 text-primary border-primary/30",
-    title: "Next-Generation",
-    highlightText: "Ultra Luxury Smartwatch",
-    subtitle:
-      "Crafted with grade-5 aerospace titanium, sapphire crystal display, and advanced cellular biometric monitoring. Engineered for precision and endurance.",
-    price: "24,999 EGP",
-    originalPrice: "29,500 EGP",
-    discountBadge: "SAVE 15%",
-    primaryCtaText: "Order Now",
-    primaryCtaHref: "/#products",
-    secondaryCtaText: "Explore Watches",
-    secondaryCtaHref: "/?category=Watches%20%26%20Accessories#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1000&auto=format&fit=crop&q=80",
-    imageAlt: "Luxury Smartwatch Ultra Titanium",
-    accentGlow: "rgba(212, 175, 55, 0.25)",
-    productFeatures: [
-      "Grade 5 Titanium Casing",
-      "Sapphire Crystal Display",
-      "72-Hour Extreme Battery",
-    ],
-    floatingCard: {
-      title: "Top Rated Flagship",
-      subtitle: "1,420+ Verified Buyers",
-      rating: 4.9,
-    },
-  },
-  {
-    id: "studio-headphones",
-    badge: "High-Fidelity Acoustic Audio",
-    badgeIcon: Flame,
-    badgeColor: "bg-rose-500/15 text-rose-400 border-rose-500/30",
-    title: "Pure Sound.",
-    highlightText: "Zero Distractions.",
-    subtitle:
-      "Immerse yourself in studio-grade acoustics. Custom 40mm carbon drivers, industry-leading active noise cancellation, and ultra-plush memory foam cushions.",
-    price: "12,499 EGP",
-    originalPrice: "15,800 EGP",
-    discountBadge: "SAVE 21%",
-    primaryCtaText: "Shop Audio Deals",
-    primaryCtaHref: "/#products",
-    secondaryCtaText: "View Electronics",
-    secondaryCtaHref: "/?category=Electronics#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1000&auto=format&fit=crop&q=80",
-    imageAlt: "Studio Pro Wireless ANC Headphones",
-    accentGlow: "rgba(239, 68, 68, 0.22)",
-    productFeatures: [
-      "Adaptive Active Noise Cancelling",
-      "40-Hour Hi-Res Playtime",
-      "Lossless Spatial Audio",
-    ],
-    floatingCard: {
-      title: "Editor's Choice Award",
-      subtitle: "Over 850 sold this week",
-      rating: 4.95,
-    },
-  },
-  {
-    id: "luxury-designer-sneakers",
-    badge: "Exclusive Italian Drop",
-    badgeIcon: Sparkles,
-    badgeColor: "bg-amber-400/15 text-amber-300 border-amber-400/30",
-    title: "Iconic Streetwear",
-    highlightText: "Luxury Redefined",
-    subtitle:
-      "Handcrafted in Italy using supple calfskin leather and ergonomic cushioned soles. Modern luxury silhouette designed for all-day comfort and standout presence.",
-    price: "8,950 EGP",
-    originalPrice: "11,200 EGP",
-    discountBadge: "20% OFF",
-    primaryCtaText: "Explore Collection",
-    primaryCtaHref: "/#products",
-    secondaryCtaText: "View Footwear",
-    secondaryCtaHref: "/?category=Shoes#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1000&auto=format&fit=crop&q=80",
-    imageAlt: "Luxury Designer Sneaker Collection",
-    accentGlow: "rgba(245, 158, 11, 0.22)",
-    productFeatures: [
-      "100% Genuine Italian Calfskin",
-      "Ergonomic Memory Sole",
-      "Signature Collector Box",
-    ],
-    floatingCard: {
-      title: "Trending Fashion Drop",
-      subtitle: "Limited Edition Stock",
-      rating: 4.85,
-    },
-  },
+function buildCtaLabel(banner: Banner): string {
+  switch (banner.linkType) {
+    case "category":
+      return banner.linkValue ? `Shop ${banner.linkValue}` : "Shop Now";
+    case "product":
+      return "View Product";
+    case "external":
+      return "Learn More";
+    default:
+      return "Explore Now";
+  }
+}
+
+const FEATURE_BADGES = [
+  "Official Warranty",
+  "Express Shipping in Egypt",
+  "Secure Checkout",
 ];
 
+/* ── Component ───────────────────────────────────────────────── */
+
 export function HeroSection() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const { data: banners, isLoading } = useActiveBanners("hero_home");
 
-  const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-  }, []);
+  /* Loading skeleton */
+  if (isLoading) {
+    return (
+      <div className="relative w-full rounded-3xl overflow-hidden border border-borderPrimary bg-bgSecondary animate-pulse min-h-[400px] lg:min-h-[460px]" />
+    );
+  }
 
-  const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
-  }, []);
-
-  useEffect(() => {
-    if (isPaused) return;
-    const interval = setInterval(nextSlide, 6000);
-    return () => clearInterval(interval);
-  }, [isPaused, nextSlide]);
-
-  const slide = HERO_SLIDES[currentSlide];
-  const BadgeIcon = slide.badgeIcon;
+  /* No banners — return null so the page doesn't break */
+  if (!banners || banners.length === 0) return null;
 
   return (
-    <div
-      className="relative w-full rounded-3xl overflow-hidden border border-borderPrimary bg-bgSecondary shadow-2xl"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
-      {/* Background Ambient Glow */}
-      <div
-        className="absolute -top-32 right-1/4 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none transition-colors duration-700 opacity-25"
-        style={{ background: slide.accentGlow }}
-      />
-      <div
-        className="absolute -bottom-32 -left-20 w-[450px] h-[450px] rounded-full blur-[120px] pointer-events-none transition-colors duration-700 opacity-15"
-        style={{ background: slide.accentGlow }}
-      />
-
-      {/* Main Slide Content */}
-      <div className="relative z-10 px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 min-h-[520px] lg:min-h-[560px] flex items-center">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={slide.id}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full"
-          >
-            {/* Left Content (Text, Pricing, CTA) */}
-            <div className="lg:col-span-7 flex flex-col items-start text-left">
-              {/* Badge */}
-              <div
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold mb-4 shadow-sm backdrop-blur-md ${slide.badgeColor}`}
-              >
-                <BadgeIcon className="w-3.5 h-3.5" />
-                <span>{slide.badge}</span>
-              </div>
-
-              {/* Headlines */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-textPrimary tracking-tight leading-[1.12] mb-4">
-                <span>{slide.title}</span>{" "}
-                <span className="bg-gradient-to-r from-primary via-amber-300 to-primary bg-clip-text text-transparent">
-                  {slide.highlightText}
-                </span>
-              </h1>
-
-              {/* Subheading */}
-              <p className="text-sm sm:text-base text-textSecondary max-w-xl leading-relaxed mb-6">
-                {slide.subtitle}
-              </p>
-
-              {/* Feature Pills */}
-              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-7">
-                {slide.productFeatures.map((feat) => (
-                  <span
-                    key={feat}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-bgPrimary/70 border border-borderPrimary text-textPrimary backdrop-blur-sm shadow-sm"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span>{feat}</span>
-                  </span>
-                ))}
-              </div>
-
-              {/* Price & CTA Row */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 w-full sm:w-auto pt-2">
-                {/* Price Display */}
-                <div className="flex flex-col">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl sm:text-3xl font-black text-primary tracking-tight">
-                      {slide.price}
-                    </span>
-                    {slide.originalPrice && (
-                      <span className="text-sm sm:text-base text-textSecondary line-through font-medium">
-                        {slide.originalPrice}
-                      </span>
-                    )}
-                    {slide.discountBadge && (
-                      <span className="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-400 font-extrabold text-[11px] border border-rose-500/30">
-                        {slide.discountBadge}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[11px] text-textSecondary">
-                    Official Warranty • 0% Interest Available
-                  </span>
-                </div>
-
-                {/* Buttons */}
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <Link
-                    href={slide.primaryCtaHref}
-                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-primary text-black font-extrabold text-sm hover:bg-primaryHover transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 group cursor-pointer"
-                  >
-                    <span>{slide.primaryCtaText}</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-
-                  <Link
-                    href={slide.secondaryCtaHref}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl border border-borderPrimary bg-bgPrimary/80 hover:bg-bgPrimary text-textPrimary text-sm font-bold hover:border-primary/40 transition-all cursor-pointer"
-                  >
-                    <span>{slide.secondaryCtaText}</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Content (Prominent Product Image Showcase) */}
-            <div className="lg:col-span-5 relative flex items-center justify-center mt-4 lg:mt-0">
-              <div className="relative w-full max-w-[420px] lg:max-w-none aspect-square flex items-center justify-center">
-                {/* Product Radial Glow Aura */}
-                <div
-                  className="absolute inset-4 rounded-full blur-[80px] opacity-40 transition-all duration-700 pointer-events-none"
-                  style={{ background: slide.accentGlow }}
-                />
-
-                {/* Outer Glass Card for Product */}
-                <div className="relative w-full h-full rounded-3xl overflow-hidden border border-borderPrimary/80 bg-gradient-to-b from-bgPrimary/80 to-bgSecondary/60 shadow-2xl p-4 flex items-center justify-center group">
-                  <motion.div
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{
-                      duration: 4.5,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className="relative w-full h-full flex items-center justify-center"
-                  >
-                    <Image
-                      src={slide.imageUrl}
-                      alt={slide.imageAlt}
-                      fill
-                      priority
-                      sizes="(max-width: 1024px) 100vw, 500px"
-                      className="object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700"
-                    />
-                  </motion.div>
-
-                  {/* Floating Micro Highlights Card */}
-                  <div className="absolute bottom-5 left-5 right-5 p-3.5 rounded-2xl bg-bgSecondary/90 backdrop-blur-md border border-borderPrimary/80 shadow-xl flex items-center justify-between pointer-events-none">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary font-black shrink-0">
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-textPrimary">
-                          {slide.floatingCard.title}
-                        </p>
-                        <p className="text-[11px] text-textSecondary">
-                          {slide.floatingCard.subtitle}
-                        </p>
-                      </div>
-                    </div>
-
-                    {slide.floatingCard.rating && (
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-bgPrimary/80 border border-borderPrimary text-primary font-black text-xs">
-                        <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-                        <span>{slide.floatingCard.rating}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Slide Navigation Controls */}
-      <div className="absolute top-1/2 -translate-y-1/2 left-3 sm:left-4 z-20">
-        <button
-          onClick={prevSlide}
-          className="w-10 h-10 rounded-2xl border border-borderPrimary bg-bgSecondary/85 backdrop-blur-md text-textSecondary hover:text-textPrimary hover:border-primary/50 transition-all flex items-center justify-center shadow-lg hover:scale-105 cursor-pointer"
-          aria-label="Previous Slide"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-      </div>
-
-      <div className="absolute top-1/2 -translate-y-1/2 right-3 sm:right-4 z-20">
-        <button
-          onClick={nextSlide}
-          className="w-10 h-10 rounded-2xl border border-borderPrimary bg-bgSecondary/85 backdrop-blur-md text-textSecondary hover:text-textPrimary hover:border-primary/50 transition-all flex items-center justify-center shadow-lg hover:scale-105 cursor-pointer"
-          aria-label="Next Slide"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Slide Indicators & Progress Bar */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
-        {HERO_SLIDES.map((s, idx) => (
-          <button
-            key={s.id}
-            onClick={() => setCurrentSlide(idx)}
-            className={`transition-all duration-300 rounded-full cursor-pointer ${
-              idx === currentSlide
-                ? "w-8 h-2.5 bg-primary shadow-sm shadow-primary/40"
-                : "w-2.5 h-2.5 bg-borderPrimary hover:bg-textSecondary"
-            }`}
-            aria-label={`Go to slide ${idx + 1}`}
-          />
+    <div className="relative w-full rounded-3xl overflow-hidden border border-borderPrimary bg-[#121316] shadow-2xl group/hero">
+      {/* ── Swiper ──────────────────────────────────────────────── */}
+      <Swiper
+        modules={[Navigation, Pagination, Autoplay, EffectFade]}
+        effect="fade"
+        fadeEffect={{ crossFade: true }}
+        speed={800}
+        loop={banners.length > 1}
+        autoplay={{ delay: 4000, disableOnInteraction: false, pauseOnMouseEnter: true }}
+        navigation={{
+          prevEl: ".hero-swiper-prev",
+          nextEl: ".hero-swiper-next",
+        }}
+        pagination={{
+          el: ".hero-swiper-pagination",
+          clickable: true,
+          bulletClass: "hero-bullet",
+          bulletActiveClass: "hero-bullet-active",
+        }}
+        className="w-full"
+      >
+        {banners.map((banner) => (
+          <SwiperSlide key={banner._id}>
+            <HeroSlide banner={banner} />
+          </SwiperSlide>
         ))}
-      </div>
+      </Swiper>
 
-      {/* Trust & Guarantee Strip (Bottom of Hero) */}
-      <div className="border-t border-borderPrimary bg-bgPrimary/60 backdrop-blur-sm px-6 sm:px-12 py-3.5 hidden md:grid grid-cols-3 gap-4 text-xs font-semibold text-textSecondary">
+      {/* ── Custom Navigation Arrows ────────────────────────────── */}
+      {banners.length > 1 && (
+        <>
+          <button
+            className="hero-swiper-prev absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-white/10 bg-black/40 backdrop-blur-xl text-white/60 hover:text-[#fbbf24] hover:border-[#fbbf24]/50 hover:bg-black/60 hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-300 flex items-center justify-center opacity-0 group-hover/hero:opacity-100 cursor-pointer"
+            aria-label="Previous Slide"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            className="hero-swiper-next absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-white/10 bg-black/40 backdrop-blur-xl text-white/60 hover:text-[#fbbf24] hover:border-[#fbbf24]/50 hover:bg-black/60 hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-300 flex items-center justify-center opacity-0 group-hover/hero:opacity-100 cursor-pointer"
+            aria-label="Next Slide"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+
+      {/* ── Custom Pagination ───────────────────────────────────── */}
+      {banners.length > 1 && (
+        <div className="hero-swiper-pagination absolute !bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-2" />
+      )}
+
+      {/* ── Trust Strip (Bottom) ────────────────────────────────── */}
+      <div className="relative z-10 border-t border-white/[0.06] bg-black/30 backdrop-blur-sm px-6 sm:px-12 py-3.5 hidden md:grid grid-cols-3 gap-4 text-xs font-semibold text-white/50">
         <div className="flex items-center gap-2.5 justify-center">
-          <Truck className="w-4 h-4 text-primary" />
+          <Truck className="w-4 h-4 text-[#fbbf24]" />
           <span>Free Express Shipping across Egypt</span>
         </div>
-        <div className="flex items-center gap-2.5 justify-center border-x border-borderPrimary">
-          <ShieldCheck className="w-4 h-4 text-primary" />
-          <span>100% Genuine & 2-Year Official Warranty</span>
+        <div className="flex items-center gap-2.5 justify-center border-x border-white/[0.06]">
+          <ShieldCheck className="w-4 h-4 text-[#fbbf24]" />
+          <span>100% Genuine &amp; Official Warranty</span>
         </div>
         <div className="flex items-center gap-2.5 justify-center">
-          <RotateCcw className="w-4 h-4 text-primary" />
+          <RotateCcw className="w-4 h-4 text-[#fbbf24]" />
           <span>14-Day Hassle-Free Returns</span>
+        </div>
+      </div>
+
+      {/* ── Swiper Bullet Styles (injected via <style>) ─────────── */}
+      <style jsx global>{`
+        .hero-bullet {
+          display: inline-block;
+          width: 10px;
+          height: 10px;
+          border-radius: 9999px;
+          background: rgba(255, 255, 255, 0.2);
+          cursor: pointer;
+          transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hero-bullet:hover {
+          background: rgba(255, 255, 255, 0.45);
+        }
+        .hero-bullet-active {
+          width: 32px !important;
+          background: #fbbf24 !important;
+          box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* ── Single Slide ────────────────────────────────────────────── */
+
+function HeroSlide({ banner }: { banner: Banner }) {
+  const ctaHref = buildCtaHref(banner);
+  const ctaLabel = buildCtaLabel(banner);
+
+  return (
+    <div className="relative w-full min-h-[400px] lg:min-h-[460px]">
+      {/* ── Ambient Background Glows ───────────────────────────── */}
+      <div className="absolute -top-24 -left-24 w-[500px] h-[500px] rounded-full bg-[#fbbf24]/[0.06] blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-20 right-0 w-[400px] h-[400px] rounded-full bg-[#fbbf24]/[0.04] blur-[100px] pointer-events-none" />
+
+      {/* ── 2-Column Content Grid ──────────────────────────────── */}
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center px-6 sm:px-10 lg:px-14 py-10 sm:py-14 lg:py-16 h-full">
+        {/* ── Left Column — Text & CTA ─────────────────────────── */}
+        <div className="lg:col-span-7 flex flex-col items-start text-left space-y-5">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#fbbf24]/25 bg-[#fbbf24]/[0.08] text-[#fbbf24] text-xs font-bold shadow-sm backdrop-blur-md">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>✨ Featured Selection</span>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.4rem] font-black text-white tracking-tight leading-[1.12]">
+            {banner.title}
+          </h1>
+
+          {/* Subtitle / Description */}
+          {banner.subtitle && (
+            <p className="text-sm sm:text-base text-white/55 max-w-xl leading-relaxed">
+              {banner.subtitle}
+            </p>
+          )}
+
+          {/* Feature Badges */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            {FEATURE_BADGES.map((feat) => (
+              <span
+                key={feat}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-white/[0.04] border border-white/[0.08] text-white/75 backdrop-blur-sm shadow-sm"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#fbbf24] shrink-0" />
+                <span>{feat}</span>
+              </span>
+            ))}
+          </div>
+
+          {/* CTA Button */}
+          <Link
+            href={ctaHref}
+            className="group/cta inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-extrabold text-sm shadow-lg shadow-[#fbbf24]/20 hover:shadow-[#fbbf24]/35 transition-all duration-300 hover:-translate-y-0.5"
+          >
+            <span>{ctaLabel}</span>
+            <ArrowRight className="w-4 h-4 group-hover/cta:translate-x-1 transition-transform duration-300" />
+          </Link>
+        </div>
+
+        {/* ── Right Column — Product Image ─────────────────────── */}
+        <div className="lg:col-span-5 relative flex items-center justify-center mt-4 lg:mt-0">
+          <div className="relative w-full max-w-[420px] lg:max-w-none aspect-[4/3] flex items-center justify-center group/img">
+            {/* Radial glow behind image */}
+            <div className="absolute inset-6 rounded-full bg-[#fbbf24]/[0.08] blur-[70px] pointer-events-none transition-all duration-700 group-hover/img:bg-[#fbbf24]/[0.14]" />
+
+            {/* Glass card container */}
+            <div className="relative w-full h-full rounded-3xl overflow-hidden border border-white/[0.06] bg-gradient-to-b from-white/[0.03] to-transparent shadow-2xl">
+              <div className="relative w-full h-full transition-transform duration-700 ease-out group-hover/img:scale-[1.04]">
+                <Image
+                  src={banner.image.url}
+                  alt={banner.title}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 500px"
+                  className="object-cover rounded-2xl"
+                />
+              </div>
+
+              {/* Floating info card overlay */}
+              <div className="absolute bottom-4 left-4 right-4 p-3.5 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/[0.08] shadow-xl flex items-center gap-3 pointer-events-none">
+                <div className="w-10 h-10 rounded-xl bg-[#fbbf24]/15 border border-[#fbbf24]/30 flex items-center justify-center text-[#fbbf24] font-black shrink-0">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white line-clamp-1">
+                    {banner.title}
+                  </p>
+                  <p className="text-[11px] text-white/50">
+                    {banner.subtitle ? banner.subtitle.slice(0, 40) + "…" : "Curated for You"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

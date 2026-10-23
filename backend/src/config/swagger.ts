@@ -76,6 +76,22 @@ const options: Options = {
         name: "Admin Tickets",
         description: "Admin support ticket management and status resolution APIs",
       },
+      {
+        name: "Banners",
+        description: "Public promotional and hero banners APIs",
+      },
+      {
+        name: "Admin Banners",
+        description: "Admin banner management, upload, and scheduling APIs",
+      },
+      {
+        name: "Admin Users",
+        description: "Admin user moderation, banning, and account control APIs",
+      },
+      {
+        name: "Admin Coupons",
+        description: "Admin coupon management and discount campaign APIs",
+      },
     ],
     components: {
       securitySchemes: {

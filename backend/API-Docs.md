@@ -101,8 +101,22 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 | 58  | GET    | `/admin/orders/:orderId`              | Retrieve complete details of any order by ID (Admin only)                      |  🔒  |
 | 59  | PATCH  | `/admin/orders/:orderId`              | Update order delivery and fulfillment status (Admin only)                      |  🔒  |
 | 60  | GET    | `/admin/orders/overview`              | Retrieve aggregated store-wide order stats and total revenue (Admin only)      |  🔒  |
-| 61  | GET    | `/admin/tickets`                      | Retrieve all tickets across the platform (Admin only)                          |  🔒  |
+| 61  | GET    | `/admin/tickets`                      | Retrieve all tickets across the platform with search & status filters (Admin)   |  🔒  |
 | 62  | PUT    | `/admin/tickets/:ticketId`            | Update ticket status (Admin only)                                              |  🔒  |
+| 63  | GET    | `/banners`                            | Retrieve active banners filtered by position and valid date range             |  ❌  |
+| 64  | GET    | `/admin/banners`                      | Retrieve all banners across the platform with pagination & search (Admin only) |  🔒  |
+| 65  | POST   | `/admin/banners`                      | Create a new promotional banner with image upload to Cloudinary (Admin only)   |  🔒  |
+| 66  | GET    | `/admin/banners/:bannerId`            | Retrieve single banner details by ID (Admin only)                              |  🔒  |
+| 67  | PUT    | `/admin/banners/:bannerId`            | Update banner details or replace banner image (Admin only)                     |  🔒  |
+| 68  | DELETE | `/admin/banners/:bannerId`            | Delete banner permanently and remove image from Cloudinary (Admin only)        |  🔒  |
+| 69  | GET    | `/admin/tickets/overview`             | Retrieve store-wide ticket counts and status overview (Admin only)             |  🔒  |
+| 70  | GET    | `/admin/banners/overview`             | Retrieve store-wide banner counts and position overview (Admin only)           |  🔒  |
+| 71  | PUT    | `/admin/users/:userId/ban`            | Ban user temporarily for a specified duration in days (Admin only)             |  🔒  |
+| 72  | PUT    | `/admin/users/:userId/unban`          | Lift ban and immediately restore user access (Admin only)                      |  🔒  |
+| 73  | GET    | `/admin/coupons`                      | Retrieve all coupons with search, status, and discountType filters (Admin only)|  🔒  |
+| 74  | POST   | `/admin/coupons`                      | Create a new coupon with limits and validity schedule (Admin only)             |  🔒  |
+| 75  | PUT    | `/admin/coupons/:couponId`            | Update coupon details, limits, or status (Admin only)                          |  🔒  |
+| 76  | DELETE | `/admin/coupons/:couponId`            | Delete unused coupon (Admin only)                                              |  🔒  |
 
 ---
 
@@ -120,6 +134,10 @@ Protected routes require JSON Web Token (JWT) authentication passed in the HTTP 
 - [Ticket Endpoints](#ticket-endpoints)
 - [Admin Order Management Endpoints](#admin-order-management-endpoints)
 - [Admin Ticket Management Endpoints](#admin-ticket-management-endpoints)
+- [Banner Endpoints](#banner-endpoints)
+- [Admin Banner Management Endpoints](#admin-banner-management-endpoints)
+- [Admin User Moderation Endpoints](#admin-user-moderation-endpoints)
+- [Admin Coupon Management Endpoints](#admin-coupon-management-endpoints)
 - [Common HTTP Status Codes](#common-http-status-codes)
 
 ---
@@ -4830,6 +4848,60 @@ Forbidden. Requester does not have administrator privileges.
 
 ---
 
+### GET /admin/tickets/overview
+
+Retrieve store-wide support ticket counts and status breakdown (`totalTickets`, `openTickets`, `inprogressTickets`, `resolvedTickets`, `closedTickets`). Accessible only to administrators (`Admin` or `SuperAdmin`).
+
+#### Request Headers
+
+| Header          | Value            | Required |
+| :-------------- | :--------------- | :------: |
+| `Authorization` | `Bearer <token>` |    ✅    |
+
+#### Responses
+
+##### Response 200
+
+Ticket overview fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Ticket overview fetched successfully",
+  "data": {
+    "totalTickets": 45,
+    "openTickets": 12,
+    "inprogressTickets": 5,
+    "resolvedTickets": 22,
+    "closedTickets": 6
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Missing or invalid Bearer token.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Requester does not have administrator privileges.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+---
+
 ### PUT /admin/tickets/:ticketId
 
 Update support ticket resolution status (`open`, `in_progress`, `resolved`, `closed`). Accessible only to administrators (`Admin` or `SuperAdmin`).
@@ -4918,6 +4990,740 @@ Ticket not found.
 {
   "status": "fail",
   "message": "Ticket not found"
+}
+```
+
+---
+
+## Banner Endpoints
+
+### GET /banners
+
+Retrieve active banners for a specific display position (`hero_home`, `hero_category`, `hero_product`, or `all`). Only returns banners where `isActive` is `true` and the current date falls between `startDate` and `endDate` (if scheduled). Results are ordered by `priority` descending, then `createdAt` descending.
+
+#### Request Headers
+
+None required (Public endpoint).
+
+#### Query Parameters
+
+| Parameter  | Type   | Required | Default     | Description                                                                       |
+| :--------- | :----- | :------: | :---------- | :-------------------------------------------------------------------------------- |
+| `position` | string |    ❌    | `hero_home` | Target position filter: `hero_home`, `hero_category`, `hero_product`, or `all`.   |
+
+#### Responses
+
+##### Response 200
+
+Active banners fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Active banners fetched successfully",
+  "data": [
+    {
+      "_id": "6718a931a9b4c10023e1109a",
+      "title": "Spring Tech Mega Sale 2026",
+      "subtitle": "Discover the latest tech with up to 40% discount and official warranty.",
+      "image": {
+        "publicId": "Banners/banner_spring_2026",
+        "url": "https://res.cloudinary.com/demo/image/upload/v1234567890/banner.webp"
+      },
+      "linkType": "category",
+      "linkValue": "Laptops",
+      "position": "hero_home",
+      "isActive": true,
+      "priority": 10,
+      "startDate": "2026-03-01T00:00:00.000Z",
+      "endDate": "2026-06-01T00:00:00.000Z",
+      "createdAt": "2026-03-01T10:00:00.000Z",
+      "updatedAt": "2026-03-01T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## Admin Banner Management Endpoints
+
+### GET /admin/banners/overview
+
+Retrieve aggregated banner statistics (`activeBanners`, `totalBanners`, `inactiveBanners`, `heroHomeBanners`, `heroCategoryBanners`, `heroProductBanners`). Requires Admin privileges.
+
+#### Request Headers
+
+| Header          | Value                | Required |
+| :-------------- | :------------------- | :------: |
+| `Authorization` | `Bearer <admin_jwt>` |    ✅    |
+
+#### Responses
+
+##### Response 200
+
+Banner overview fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Banner overview fetched successfully",
+  "data": {
+    "activeBanners": 5,
+    "totalBanners": 8,
+    "inactiveBanners": 3,
+    "heroHomeBanners": 4,
+    "heroCategoryBanners": 2,
+    "heroProductBanners": 2
+  }
+}
+```
+
+##### Response 401
+
+Unauthorized. Bearer token missing or invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Requester does not have admin privileges.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+---
+
+### GET /admin/banners
+
+Retrieve all banners in the database with optional search, active status, position filters, and pagination. Requires Admin privileges.
+
+#### Request Headers
+
+| Header          | Value                | Required |
+| :-------------- | :------------------- | :------: |
+| `Authorization` | `Bearer <admin_jwt>` |    ✅    |
+
+#### Query Parameters
+
+| Parameter  | Type    | Required | Default | Description                                                        |
+| :--------- | :------ | :------: | :------ | :----------------------------------------------------------------- |
+| `position` | string  |    ❌    | none    | Optional filter: `hero_home`, `hero_category`, `hero_product`, `all` |
+| `isActive` | boolean |    ❌    | none    | Filter by active state (`true` or `false`).                        |
+| `search`   | string  |    ❌    | none    | Case-insensitive regex match against title or subtitle.            |
+| `page`     | number  |    ❌    | `1`     | Current pagination page.                                           |
+| `limit`    | number  |    ❌    | `10`    | Number of banners per page.                                        |
+
+#### Responses
+
+##### Response 200
+
+Banners fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Banners fetched successfully",
+  "data": [
+    {
+      "_id": "6718a931a9b4c10023e1109a",
+      "title": "Spring Tech Mega Sale 2026",
+      "subtitle": "Discover the latest tech with up to 40% discount.",
+      "image": {
+        "publicId": "Banners/banner_spring_2026",
+        "url": "https://res.cloudinary.com/demo/image/upload/v1234567890/banner.webp"
+      },
+      "linkType": "category",
+      "linkValue": "Laptops",
+      "position": "hero_home",
+      "isActive": true,
+      "priority": 10,
+      "startDate": "2026-03-01T00:00:00.000Z",
+      "endDate": "2026-06-01T00:00:00.000Z",
+      "createdAt": "2026-03-01T10:00:00.000Z",
+      "updatedAt": "2026-03-01T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+##### Response 401
+
+Unauthorized. Bearer token missing or invalid.
+
+```json
+{
+  "status": "fail",
+  "message": "Unauthorized"
+}
+```
+
+##### Response 403
+
+Forbidden. Requester does not have admin privileges.
+
+```json
+{
+  "status": "fail",
+  "message": "Not Authorized"
+}
+```
+
+---
+
+### POST /admin/banners
+
+Create a new banner with an image upload to Cloudinary. Requires Admin privileges.
+
+#### Request Headers
+
+| Header          | Value                   |
+| :-------------- | :---------------------- |
+| `Authorization` | `Bearer <admin_jwt>`    |
+| `Content-Type`  | `multipart/form-data`   |
+
+#### Form Data Fields
+
+| Field       | Type    | Required | Default     | Description                                                              |
+| :---------- | :------ | :------: | :---------- | :----------------------------------------------------------------------- |
+| `title`     | string  |    ✅    | —           | Banner title text (1–100 characters).                                    |
+| `subtitle`  | string  |    ❌    | `""`        | Banner subtitle text (max 200 characters).                              |
+| `image`     | file    |    ✅    | —           | Image file (`.jpg`, `.jpeg`, `.png`, `.webp`, max 5MB).                   |
+| `linkType`  | string  |    ❌    | `"none"`    | Redirection type: `category`, `product`, `external`, `none`.              |
+| `linkValue` | string  |    ❌    | `""`        | Target value (slug, category name, or external URL).                     |
+| `position`  | string  |    ❌    | `hero_home` | Placement target: `hero_home`, `hero_category`, `hero_product`.          |
+| `isActive`  | boolean |    ❌    | `true`      | Whether the banner is published and active.                              |
+| `priority`  | number  |    ❌    | `0`         | Display priority (higher numbers render first).                          |
+| `startDate` | string  |    ❌    | —           | ISO 8601 schedule start date (e.g. `2026-03-01T00:00:00.000Z`).           |
+| `endDate`   | string  |    ❌    | —           | ISO 8601 schedule expiration date (e.g. `2026-06-01T00:00:00.000Z`).      |
+
+#### Responses
+
+##### Response 201
+
+Banner created successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Banner created successfully",
+  "data": {
+    "_id": "6718a931a9b4c10023e1109a",
+    "title": "Summer Tech Deals",
+    "subtitle": "Get up to 35% off top brand gadgets.",
+    "image": {
+      "publicId": "Banners/summer_tech_deals",
+      "url": "https://res.cloudinary.com/demo/image/upload/v1234567890/banner.webp"
+    },
+    "linkType": "category",
+    "linkValue": "Smartphones",
+    "position": "hero_home",
+    "isActive": true,
+    "priority": 5,
+    "startDate": "2026-06-01T00:00:00.000Z",
+    "endDate": "2026-08-31T23:59:59.000Z",
+    "createdAt": "2026-06-01T00:00:00.000Z",
+    "updatedAt": "2026-06-01T00:00:00.000Z"
+  }
+}
+```
+
+##### Response 400
+
+Bad request. Image file missing or input validation error.
+
+```json
+{
+  "status": "fail",
+  "message": "Banner image file is required"
+}
+```
+
+---
+
+### GET /admin/banners/:bannerId
+
+Retrieve single banner details by its MongoDB ID. Requires Admin privileges.
+
+#### Request Headers
+
+| Header          | Value                |
+| :-------------- | :------------------- |
+| `Authorization` | `Bearer <admin_jwt>` |
+
+#### URL Parameters
+
+| Parameter  | Type   | Required | Description                 |
+| :--------- | :----- | :------: | :-------------------------- |
+| `bannerId` | string |    ✅    | MongoDB ObjectId of banner. |
+
+#### Responses
+
+##### Response 200
+
+Banner retrieved successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Banner fetched successfully",
+  "data": {
+    "_id": "6718a931a9b4c10023e1109a",
+    "title": "Summer Tech Deals",
+    "subtitle": "Get up to 35% off top brand gadgets.",
+    "image": {
+      "publicId": "Banners/summer_tech_deals",
+      "url": "https://res.cloudinary.com/demo/image/upload/v1234567890/banner.webp"
+    },
+    "linkType": "category",
+    "linkValue": "Smartphones",
+    "position": "hero_home",
+    "isActive": true,
+    "priority": 5
+  }
+}
+```
+
+##### Response 404
+
+Banner not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Banner not found"
+}
+```
+
+---
+
+### PUT /admin/banners/:bannerId
+
+Update an existing banner. Accepts multipart form data if a new image file is uploaded, replacing the existing asset on Cloudinary. Requires Admin privileges.
+
+#### Request Headers
+
+| Header          | Value                   |
+| :-------------- | :---------------------- |
+| `Authorization` | `Bearer <admin_jwt>`    |
+| `Content-Type`  | `multipart/form-data`   |
+
+#### Form Data Fields
+
+Any subset of banner fields can be provided: `title`, `subtitle`, `image` (file, optional), `linkType`, `linkValue`, `position`, `isActive`, `priority`, `startDate`, `endDate`.
+
+#### Responses
+
+##### Response 200
+
+Banner updated successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Banner updated successfully",
+  "data": {
+    "_id": "6718a931a9b4c10023e1109a",
+    "title": "Updated Banner Title",
+    "isActive": false,
+    "priority": 8
+  }
+}
+```
+
+##### Response 404
+
+Banner not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Banner not found"
+}
+```
+
+---
+
+### DELETE /admin/banners/:bannerId
+
+Delete a banner permanently and delete its image asset from Cloudinary. Requires Admin privileges.
+
+#### Request Headers
+
+| Header          | Value                |
+| :-------------- | :------------------- |
+| `Authorization` | `Bearer <admin_jwt>` |
+
+#### URL Parameters
+
+| Parameter  | Type   | Required | Description                 |
+| :--------- | :----- | :------: | :-------------------------- |
+| `bannerId` | string |    ✅    | MongoDB ObjectId of banner. |
+
+#### Responses
+
+##### Response 200
+
+Banner deleted successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Banner deleted successfully",
+  "data": null
+}
+```
+
+##### Response 404
+
+Banner not found.
+
+```json
+{
+  "status": "fail",
+  "message": "Banner not found"
+}
+```
+
+---
+
+## Admin User Moderation Endpoints
+
+### PUT /admin/users/:userId/ban
+
+Ban a user account temporarily for a specified number of days (`banDuration`). When banned, the user cannot log in and will receive a 403 Forbidden response on protected routes until the ban expires. SuperAdmin accounts cannot be banned. Accessible only to administrators (`Admin` or `SuperAdmin`). Also supports `PATCH /admin/users/:userId/ban`.
+
+#### Request Headers
+
+| Header          | Value                | Required |
+| :-------------- | :------------------- | :------: |
+| `Content-Type`  | `application/json`   |    ✅    |
+| `Authorization` | `Bearer <admin_jwt>` |    ✅    |
+
+#### URL Parameters
+
+| Parameter | Type   | Required | Description              |
+| :-------- | :----- | :------: | :----------------------- |
+| `userId`  | string |    ✅    | The user's MongoDB ID    |
+
+#### Request Body
+
+| Field         | Type   | Required | Description                     |
+| :------------ | :----- | :------: | :------------------------------ |
+| `banDuration` | number |    ✅    | Ban duration in days (e.g. `7`) |
+
+```json
+{
+  "banDuration": 7
+}
+```
+
+#### Responses
+
+##### Response 200
+
+User banned successfully.
+
+```json
+{
+  "status": "success",
+  "message": "User banned successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "fullName": "Ahmed Mohamed",
+    "username": "ahmed_dev",
+    "email": "ahmed@example.com",
+    "isBanned": true,
+    "banExpires": "2026-10-30T12:00:00.000Z"
+  }
+}
+```
+
+##### Response 400
+
+Bad request. Invalid or missing ban duration.
+
+```json
+{
+  "status": "fail",
+  "message": "Please enter a valid ban duration in days"
+}
+```
+
+##### Response 403
+
+Forbidden. Requester is not an administrator, or target is a SuperAdmin.
+
+```json
+{
+  "status": "fail",
+  "message": "Cannot ban a SuperAdmin"
+}
+```
+
+##### Response 404
+
+User not found.
+
+```json
+{
+  "status": "fail",
+  "message": "User was not found"
+}
+```
+
+---
+
+### PUT /admin/users/:userId/unban
+
+Immediately lift the ban on a user account, setting `isBanned` to `false` and clearing `banExpires`. Accessible only to administrators (`Admin` or `SuperAdmin`). Also supports `PATCH /admin/users/:userId/unban`.
+
+#### Request Headers
+
+| Header          | Value                | Required |
+| :-------------- | :------------------- | :------: |
+| `Authorization` | `Bearer <admin_jwt>` |    ✅    |
+
+#### URL Parameters
+
+| Parameter | Type   | Required | Description              |
+| :-------- | :----- | :------: | :----------------------- |
+| `userId`  | string |    ✅    | The user's MongoDB ID    |
+
+#### Responses
+
+##### Response 200
+
+User unbanned successfully.
+
+```json
+{
+  "status": "success",
+  "message": "User unbanned successfully",
+  "data": {
+    "_id": "664fa1e2b5c7e1234567890a",
+    "fullName": "Ahmed Mohamed",
+    "username": "ahmed_dev",
+    "email": "ahmed@example.com",
+    "isBanned": false,
+    "banExpires": null
+  }
+}
+```
+
+##### Response 404
+
+User not found.
+
+```json
+{
+  "status": "fail",
+  "message": "User was not found"
+}
+```
+
+---
+
+## Admin Coupon Management Endpoints
+
+### GET /admin/coupons
+
+Retrieve all discount coupons in the system with optional search, active status, and discount type filters. Accessible only to administrators.
+
+#### Request Headers
+
+| Header          | Value                | Required |
+| :-------------- | :------------------- | :------: |
+| `Authorization` | `Bearer <admin_jwt>` |    ✅    |
+
+#### Query Parameters
+
+| Parameter      | Type    | Required | Default | Description                                                     |
+| :------------- | :------ | :------: | :------ | :-------------------------------------------------------------- |
+| `search`       | string  |    ❌    | none    | Case-insensitive search on coupon code.                        |
+| `isActive`     | boolean |    ❌    | none    | Filter by status (`true` or `false`).                           |
+| `discountType` | string  |    ❌    | none    | Filter by type: `percentage` or `fixed`.                        |
+
+#### Responses
+
+##### Response 200
+
+Coupons fetched successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Coupons fetched successfully",
+  "data": [
+    {
+      "_id": "6650b2f3c6d8e2345678901b",
+      "couponCode": "NEXO50",
+      "discountType": "percentage",
+      "discountValue": 50,
+      "usageLimit": 100,
+      "usedCount": 12,
+      "usageLimitPerUser": 1,
+      "minOrderValue": 200,
+      "isActive": true,
+      "startDate": "2026-01-01T00:00:00.000Z",
+      "expireDate": "2026-12-31T23:59:59.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### POST /admin/coupons
+
+Create a new discount coupon with advanced usage limits, category restrictions, and validity period. Accessible only to administrators.
+
+#### Request Headers
+
+| Header          | Value                | Required |
+| :-------------- | :------------------- | :------: |
+| `Content-Type`  | `application/json`   |    ✅    |
+| `Authorization` | `Bearer <admin_jwt>` |    ✅    |
+
+#### Request Body
+
+| Field                  | Type     | Required | Default  | Description                                                 |
+| :--------------------- | :------- | :------: | :------- | :---------------------------------------------------------- |
+| `couponCode`           | string   |    ✅    | —        | Unique coupon code (automatically converted to uppercase).   |
+| `discountType`         | string   |    ✅    | —        | `"percentage"` or `"fixed"`.                                |
+| `discountValue`        | number   |    ✅    | —        | Discount amount (1-100 for percentage, >0 for fixed).       |
+| `startDate`            | string   |    ✅    | —        | ISO 8601 validity start date.                               |
+| `expireDate`           | string   |    ✅    | —        | ISO 8601 validity expiration date.                          |
+| `usageLimit`           | number   |    ❌    | `10`     | Total times this coupon can be redeemed platform-wide.      |
+| `usageLimitPerUser`    | number   |    ❌    | `1`      | Max redemptions allowed per customer.                       |
+| `minOrderValue`        | number   |    ❌    | `0`      | Minimum order subtotal required to apply coupon.            |
+| `applicableCategories` | string[] |    ❌    | `[]`     | Restrict to specific category names.                        |
+| `maxUsersLimit`        | number   |    ❌    | `null`   | Max unique users who can redeem.                            |
+| `isActive`             | boolean  |    ❌    | `true`   | Active status toggle.                                       |
+
+```json
+{
+  "couponCode": "SUMMER2026",
+  "discountType": "percentage",
+  "discountValue": 25,
+  "usageLimit": 200,
+  "usageLimitPerUser": 1,
+  "minOrderValue": 500,
+  "applicableCategories": ["Laptops", "Accessories"],
+  "isActive": true,
+  "startDate": "2026-06-01T00:00:00.000Z",
+  "expireDate": "2026-08-31T23:59:59.000Z"
+}
+```
+
+#### Responses
+
+##### Response 201
+
+Coupon created successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Coupon created successfully",
+  "data": {
+    "_id": "67b901234567890abcdef789",
+    "couponCode": "SUMMER2026",
+    "discountType": "percentage",
+    "discountValue": 25,
+    "usageLimit": 200,
+    "usedCount": 0,
+    "isActive": true
+  }
+}
+```
+
+---
+
+### PUT /admin/coupons/:couponId
+
+Update an existing coupon's fields, limits, dates, or active status. Accessible only to administrators.
+
+#### Request Headers
+
+| Header          | Value                | Required |
+| :-------------- | :------------------- | :------: |
+| `Content-Type`  | `application/json`   |    ✅    |
+| `Authorization` | `Bearer <admin_jwt>` |    ✅    |
+
+#### URL Parameters
+
+| Parameter  | Type   | Required | Description              |
+| :--------- | :----- | :------: | :----------------------- |
+| `couponId` | string |    ✅    | The coupon's MongoDB ID  |
+
+#### Responses
+
+##### Response 200
+
+Coupon updated successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Coupon updated successfully",
+  "data": {
+    "_id": "67b901234567890abcdef789",
+    "couponCode": "SUMMER2026",
+    "isActive": false
+  }
+}
+```
+
+---
+
+### DELETE /admin/coupons/:couponId
+
+Delete an unused coupon from the database. Coupons with `usedCount > 0` cannot be deleted. Accessible only to administrators.
+
+#### Request Headers
+
+| Header          | Value                | Required |
+| :-------------- | :------------------- | :------: |
+| `Authorization` | `Bearer <admin_jwt>` |    ✅    |
+
+#### URL Parameters
+
+| Parameter  | Type   | Required | Description              |
+| :--------- | :----- | :------: | :----------------------- |
+| `couponId` | string |    ✅    | The coupon's MongoDB ID  |
+
+#### Responses
+
+##### Response 200
+
+Coupon deleted successfully.
+
+```json
+{
+  "status": "success",
+  "message": "Coupon deleted successfully",
+  "data": null
+}
+```
+
+##### Response 400
+
+Coupon cannot be deleted as it is already used.
+
+```json
+{
+  "status": "fail",
+  "message": "Coupon cannot be deleted as it is already used"
 }
 ```
 

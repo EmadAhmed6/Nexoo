@@ -6,7 +6,15 @@ import { Ticket } from "../../../modules/Ticket/ticket.model.js";
 // GET ALL TICKET
 const getAllTickets = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const tickets = await Ticket.find()
+    const { status, search } = req.query;
+    const query: Record<string, any> = {};
+    if (status && typeof status === "string" && status !== "all") {
+      query.status = status;
+    }
+    if (search && typeof search === "string" && search.trim() !== "") {
+      query.title = { $regex: search, $options: "i" };
+    }
+    const tickets = await Ticket.find(query)
       .populate("user", "firstName lastName email")
       .sort({ createdAt: -1 });
     successMsg(res, 200, "Tickets fetched successfully", tickets);
@@ -39,4 +47,22 @@ const updateTicketStatus = asyncHandler(
   },
 );
 
-export { getAllTickets, updateTicketStatus };
+// GET TICKET OVERVIEW
+const getTicketOverview = asyncHandler(async (req: Request, res: Response) => {
+  const totalTickets = await Ticket.countDocuments();
+  const openTickets = await Ticket.countDocuments({ status: "open" });
+  const inprogressTickets = await Ticket.countDocuments({
+    status: "in_progress",
+  });
+  const resolvedTickets = await Ticket.countDocuments({ status: "resolved" });
+  const closedTickets = await Ticket.countDocuments({ status: "closed" });
+  successMsg(res, 200, "Ticket overview fetched successfully", {
+    totalTickets,
+    openTickets,
+    inprogressTickets,
+    resolvedTickets,
+    closedTickets,
+  });
+});
+
+export { getAllTickets, updateTicketStatus, getTicketOverview };

@@ -17,6 +17,10 @@ import { errorHandler, notFound } from "./middlewares/errors.js";
 import swaggerui from "swagger-ui-express";
 import adminOrders from "./modules/admin/order/adminOrder.routes.js";
 import adminTickets from "./modules/admin/ticket/ticket.routes.js";
+import adminBanners from "./modules/admin/banner/adminBanner.routes.js";
+import adminCoupons from "./modules/admin/coupons/adminCoupons.routes.js";
+import adminUsers from "./modules/admin/users/adminUsers.routes.js";
+import banners from "./modules/Banner/banner.routes.js";
 import spacs from "./config/swagger.js";
 dotenv.config();
 connectToDB();
@@ -41,10 +45,14 @@ app.use("/orders", orders);
 app.use("/coupons", coupons);
 app.use("/notifications", notifications);
 app.use("/tickets", tickets);
+app.use("/banners", banners);
 
 // ADMIN ROUTES
 app.use("/admin/orders", adminOrders);
 app.use("/admin/tickets", adminTickets);
+app.use("/admin/banners", adminBanners);
+app.use("/admin/coupons", adminCoupons);
+app.use("/admin/users", adminUsers);
 
 // ERROR HANDLING MIDDLEWARES
 app.use(notFound);

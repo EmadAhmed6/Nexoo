@@ -54,4 +54,14 @@ export const userApi = {
   deleteUserAddress: async (userId: string, addressId: string) => {
     return apiDelete<UserAddress[]>(`/users/${userId}/addresses/${addressId}`);
   },
+
+  banUser: async (userId: string, banDuration: number) => {
+    return apiPut<User, { banDuration: number }>(`/admin/users/${userId}/ban`, {
+      banDuration,
+    });
+  },
+
+  unbanUser: async (userId: string) => {
+    return apiPut<User>(`/admin/users/${userId}/unban`);
+  },
 };

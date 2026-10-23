@@ -36,6 +36,8 @@ interface IUser extends IUserSchema, Document {
   };
   isVerified: boolean;
   isActive: boolean;
+  isBanned: boolean;
+  banExpires?: Date;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -106,6 +108,14 @@ const UserSchema = new Schema<IUser>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
+    banExpires: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true },
