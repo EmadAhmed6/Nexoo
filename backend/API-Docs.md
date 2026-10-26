@@ -62,78 +62,78 @@ Login, OTP verification, and Google sign-in issue an access token and set an HTT
 | 9 | GET, POST | /auth/logout | Clear refresh-token cookie and end session | ❌ | 500 req/15min |
 | 10 | GET | /auth/google | Start Google OAuth redirect | ❌ | 500 req/15min |
 | 11 | GET | /auth/google/callback | Complete Google OAuth and redirect to frontend | ❌ | 500 req/15min |
-| 12 | GET | /users | Retrieve list of all registered users (passwords excluded) | 🔒 | 500 req/15min |
-| 13 | GET | /users/:userId | Retrieve single user profile by ID | 🔒 | 500 req/15min |
-| 14 | PUT | /users/:userId | Update user profile details (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
-| 15 | DELETE | /users/:userId | Delete user account permanently (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
-| 16 | GET | /users/:userId/addresses | Retrieve list of all saved addresses for a user | 🔒 | 500 req/15min |
-| 17 | POST | /users/:userId/addresses | Add a new address to user profile (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
-| 18 | PUT | /users/:userId/addresses/:addressId | Update an existing user address (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
-| 19 | DELETE | /users/:userId/addresses/:addressId | Delete an address from user profile (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
-| 20 | DELETE | /users/:userId/profile-picture | Delete profile picture | 🔒 | 500 req/15min |
-| 21 | PUT | /users/:userId/change-password | Change account password | 🔒 | 500 req/15min |
-| 22 | GET | /products | Retrieve products with filters (search, price range, stock, rating, discount) | ❌ | 500 req/15min |
-| 23 | GET | /products/suggestions | Retrieve product and category autocomplete suggestions for search query | ❌ | 500 req/15min |
-| 24 | POST | /products | Create a new product with multiple image uploads to Cloudinary (up to 5 files) | 🔒 | 500 req/15min |
-| 25 | GET | /products/:productId | Retrieve single product details by ID | ❌ | 500 req/15min |
-| 26 | PUT | /products/:productId | Update existing product details and images (Owner or Admin) | 🔒 | 500 req/15min |
-| 27 | PATCH | /products/:productId | Toggle like / unlike on a product | 🔒 | 500 req/15min |
-| 28 | DELETE | /products/:productId | Delete a product by ID (Owner or Admin) | 🔒 | 500 req/15min |
-| 29 | GET | /reviews/:productId | Retrieve all reviews and ratings for a product with reviewer details | ❌ | 500 req/15min |
-| 30 | POST | /reviews/:productId | Submit a new review or update existing review (recalculates product ratings) | 🔒 | 500 req/15min |
-| 31 | PUT | /reviews/:reviewId | Update review rating or text (Review Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
-| 32 | DELETE | /reviews/:reviewId | Delete a review permanently and recalculate product stats (Owner or Admin) | 🔒 | 500 req/15min |
-| 33 | GET | /products/:productId/reviews | Retrieve reviews for the product | ❌ | 500 req/15min |
-| 34 | POST | /products/:productId/reviews | Create or update own product review | 🔒 | 500 req/15min |
-| 35 | PUT, DELETE | /products/:productId/reviews/:reviewId | Update or delete review through product route | 🔒 | 500 req/15min |
-| 36 | PUT, DELETE | /reviews/:productId/:reviewId | Update or delete review by product and review IDs | 🔒 | 500 req/15min |
-| 37 | GET | /cart | Retrieve authenticated user's cart with populated product info | 🔒 | 500 req/15min |
-| 38 | POST | /cart/:productId | Add product to user cart with quantity (defaults to 1) | 🔒 | 500 req/15min |
-| 39 | PUT | /cart/:productId | Update item quantity in user cart | 🔒 | 500 req/15min |
-| 40 | DELETE | /cart/:productId | Remove product from user cart | 🔒 | 500 req/15min |
-| 41 | DELETE | /cart | Clear entire user shopping cart | 🔒 | 500 req/15min |
-| 42 | GET | /wishlist | Retrieve authenticated user's wishlist with populated products | 🔒 | 500 req/15min |
-| 43 | POST | /wishlist/:productId | Add product to user's wishlist | 🔒 | 500 req/15min |
-| 44 | DELETE | /wishlist/:productId | Remove product from user's wishlist | 🔒 | 500 req/15min |
-| 45 | DELETE | /wishlist | Clear entire user wishlist | 🔒 | 500 req/15min |
-| 46 | POST | /orders | Create new order from user's current cart | 🔒 | 500 req/15min |
-| 47 | GET | /orders | Retrieve list of all orders belonging to authenticated user | 🔒 | 500 req/15min |
-| 48 | GET | /orders/:orderId | Retrieve single order details by ID | 🔒 | 500 req/15min |
-| 49 | POST | /orders/paymob/create | Initiate Paymob Unified Checkout session and obtain `checkoutUrl` | 🔒 | 500 req/15min |
-| 50 | POST | /orders/paymob/verify | Verify Paymob payment after customer redirect and mark order as paid | 🔒 | 500 req/15min |
-| 51 | POST | /orders/paymob/webhook | Paymob server-to-server webhook to automatically confirm payment | ❌ | Exempt |
-| 52 | PUT | /orders/:orderId | Update shipping address or payment method of pending order | 🔒 | 500 req/15min |
-| 53 | DELETE | /orders/:orderId | Cancel and delete a pending order | 🔒 | 500 req/15min |
-| 54 | GET | /admin/orders | Retrieve all platform orders with populated customer info (Admin only) | 🔒 | 500 req/15min |
-| 55 | GET | /admin/orders/:orderId | Retrieve complete details of any order by ID (Admin only) | 🔒 | 500 req/15min |
-| 56 | PATCH | /admin/orders/:orderId | Update order delivery and fulfillment status (Admin only) | 🔒 | 500 req/15min |
-| 57 | GET | /admin/orders/overview | Retrieve aggregated store-wide order stats and total revenue (Admin only) | 🔒 | 500 req/15min |
-| 58 | PUT | /admin/orders/:orderId | Update order status (PUT alias) | 🔒 | 500 req/15min |
-| 59 | POST | /coupons/apply | Apply coupon code to user cart and recalculate prices | 🔒 | 500 req/15min |
-| 60 | DELETE | /coupons/remove | Remove applied coupon from user cart | 🔒 | 500 req/15min |
-| 61 | PUT | /coupons/:couponId | Update coupon details, limits, validity dates, or status (Admin only) | 🔒 | 500 req/15min |
-| 62 | DELETE | /coupons/:couponId | Delete unused coupon (Admin only) | 🔒 | 500 req/15min |
-| 63 | GET | /admin/coupons | Retrieve all coupons with search, status, and discountType filters (Admin only) | 🔒 | 500 req/15min |
-| 64 | POST | /admin/coupons | Create a new coupon with limits and validity schedule (Admin only) | 🔒 | 500 req/15min |
-| 65 | PUT | /admin/coupons/:couponId | Update coupon details, limits, or status (Admin only) | 🔒 | 500 req/15min |
-| 66 | DELETE | /admin/coupons/:couponId | Delete unused coupon (Admin only) | 🔒 | 500 req/15min |
-| 67 | GET | /notifications | Retrieve all notifications for the authenticated user | 🔒 | 500 req/15min |
-| 68 | PATCH | /notifications/read-all | Mark all notifications as read for the authenticated user | 🔒 | 500 req/15min |
-| 69 | DELETE | /notifications | Delete all notifications for the authenticated user | 🔒 | 500 req/15min |
-| 70 | GET | /notifications/:notificationId | Retrieve a single notification by ID | 🔒 | 500 req/15min |
-| 71 | PATCH | /notifications/:notificationId | Mark a single notification as read by ID | 🔒 | 500 req/15min |
-| 72 | DELETE | /notifications/:notificationId | Delete a single notification by ID | 🔒 | 500 req/15min |
-| 73 | PATCH | /notifications/:notificationId/read | Mark one notification as read | 🔒 | 500 req/15min |
-| 74 | GET | /tickets/my | Retrieve all tickets created by the authenticated user | 🔒 | 500 req/15min |
-| 75 | POST | /tickets | Create a new support ticket with an initial message | 🔒 | 500 req/15min |
-| 76 | GET | /tickets/:ticketId | Retrieve ticket details with messages (Owner or Admin) | 🔒 | 500 req/15min |
-| 77 | PUT | /tickets/:ticketId | Update ticket details or status (Owner or Admin) | 🔒 | 500 req/15min |
-| 78 | DELETE | /tickets/:ticketId | Delete a support ticket permanently (Owner or Admin) | 🔒 | 500 req/15min |
-| 79 | POST | /tickets/:ticketId/messages | Send a reply message to the ticket conversation (Owner or Admin) | 🔒 | 500 req/15min |
-| 80 | GET | /admin/tickets | Retrieve all tickets across the platform with search & status filters (Admin) | 🔒 | 500 req/15min |
-| 81 | PUT | /admin/tickets/:ticketId | Update ticket status (Admin only) | 🔒 | 500 req/15min |
-| 82 | GET | /admin/tickets/overview | Retrieve store-wide ticket counts and status overview (Admin only) | 🔒 | 500 req/15min |
-| 83 | GET | /banners | Retrieve active banners filtered by position and valid date range | ❌ | 500 req/15min |
+| 12 | GET | /users/:userId | Retrieve single user profile by ID | 🔒 | 500 req/15min |
+| 13 | PUT | /users/:userId | Update user profile details (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
+| 14 | DELETE | /users/:userId | Delete user account permanently (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
+| 15 | GET | /users/:userId/addresses | Retrieve list of all saved addresses for a user | 🔒 | 500 req/15min |
+| 16 | POST | /users/:userId/addresses | Add a new address to user profile (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
+| 17 | PUT | /users/:userId/addresses/:addressId | Update an existing user address (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
+| 18 | DELETE | /users/:userId/addresses/:addressId | Delete an address from user profile (Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
+| 19 | DELETE | /users/:userId/profile-picture | Delete profile picture | 🔒 | 500 req/15min |
+| 20 | PUT | /users/:userId/change-password | Change account password | 🔒 | 500 req/15min |
+| 21 | GET | /products | Retrieve products with filters (search, price range, stock, rating, discount) | ❌ | 500 req/15min |
+| 22 | GET | /products/suggestions | Retrieve product and category autocomplete suggestions for search query | ❌ | 500 req/15min |
+| 23 | POST | /products | Create a new product with multiple image uploads to Cloudinary (up to 5 files) | 🔒 | 500 req/15min |
+| 24 | GET | /products/:productId | Retrieve single product details by ID | ❌ | 500 req/15min |
+| 25 | PUT | /products/:productId | Update existing product details and images (Owner or Admin) | 🔒 | 500 req/15min |
+| 26 | PATCH | /products/:productId | Toggle like / unlike on a product | 🔒 | 500 req/15min |
+| 27 | DELETE | /products/:productId | Delete a product by ID (Owner or Admin) | 🔒 | 500 req/15min |
+| 28 | GET | /reviews/:productId | Retrieve all reviews and ratings for a product with reviewer details | ❌ | 500 req/15min |
+| 29 | POST | /reviews/:productId | Submit a new review or update existing review (recalculates product ratings) | 🔒 | 500 req/15min |
+| 30 | PUT | /reviews/:reviewId | Update review rating or text (Review Owner, Admin, or SuperAdmin) | 🔒 | 500 req/15min |
+| 31 | DELETE | /reviews/:reviewId | Delete a review permanently and recalculate product stats (Owner or Admin) | 🔒 | 500 req/15min |
+| 32 | GET | /products/:productId/reviews | Retrieve reviews for the product | ❌ | 500 req/15min |
+| 33 | POST | /products/:productId/reviews | Create or update own product review | 🔒 | 500 req/15min |
+| 34 | PUT, DELETE | /products/:productId/reviews/:reviewId | Update or delete review through product route | 🔒 | 500 req/15min |
+| 35 | PUT, DELETE | /reviews/:productId/:reviewId | Update or delete review by product and review IDs | 🔒 | 500 req/15min |
+| 36 | GET | /cart | Retrieve authenticated user's cart with populated product info | 🔒 | 500 req/15min |
+| 37 | POST | /cart/:productId | Add product to user cart with quantity (defaults to 1) | 🔒 | 500 req/15min |
+| 38 | PUT | /cart/:productId | Update item quantity in user cart | 🔒 | 500 req/15min |
+| 39 | DELETE | /cart/:productId | Remove product from user cart | 🔒 | 500 req/15min |
+| 40 | DELETE | /cart | Clear entire user shopping cart | 🔒 | 500 req/15min |
+| 41 | GET | /wishlist | Retrieve authenticated user's wishlist with populated products | 🔒 | 500 req/15min |
+| 42 | POST | /wishlist/:productId | Add product to user's wishlist | 🔒 | 500 req/15min |
+| 43 | DELETE | /wishlist/:productId | Remove product from user's wishlist | 🔒 | 500 req/15min |
+| 44 | DELETE | /wishlist | Clear entire user wishlist | 🔒 | 500 req/15min |
+| 45 | POST | /orders | Create new order from user's current cart | 🔒 | 500 req/15min |
+| 46 | GET | /orders | Retrieve list of all orders belonging to authenticated user | 🔒 | 500 req/15min |
+| 47 | GET | /orders/:orderId | Retrieve single order details by ID | 🔒 | 500 req/15min |
+| 48 | POST | /orders/paymob/create | Initiate Paymob Unified Checkout session and obtain `checkoutUrl` | 🔒 | 500 req/15min |
+| 49 | POST | /orders/paymob/verify | Verify Paymob payment after customer redirect and mark order as paid | 🔒 | 500 req/15min |
+| 50 | POST | /orders/paymob/webhook | Paymob server-to-server webhook to automatically confirm payment | ❌ | Exempt |
+| 51 | PUT | /orders/:orderId | Update shipping address or payment method of pending order | 🔒 | 500 req/15min |
+| 52 | DELETE | /orders/:orderId | Cancel and delete a pending order | 🔒 | 500 req/15min |
+| 53 | POST | /coupons/apply | Apply coupon code to user cart and recalculate prices | 🔒 | 500 req/15min |
+| 54 | DELETE | /coupons/remove | Remove applied coupon from user cart | 🔒 | 500 req/15min |
+| 55 | GET | /notifications | Retrieve all notifications for the authenticated user | 🔒 | 500 req/15min |
+| 56 | PATCH | /notifications/read-all | Mark all notifications as read for the authenticated user | 🔒 | 500 req/15min |
+| 57 | DELETE | /notifications | Delete all notifications for the authenticated user | 🔒 | 500 req/15min |
+| 58 | GET | /notifications/:notificationId | Retrieve a single notification by ID | 🔒 | 500 req/15min |
+| 59 | PATCH | /notifications/:notificationId | Mark a single notification as read by ID | 🔒 | 500 req/15min |
+| 60 | DELETE | /notifications/:notificationId | Delete a single notification by ID | 🔒 | 500 req/15min |
+| 61 | PATCH | /notifications/:notificationId/read | Mark one notification as read | 🔒 | 500 req/15min |
+| 62 | GET | /tickets/my | Retrieve all tickets created by the authenticated user | 🔒 | 500 req/15min |
+| 63 | POST | /tickets | Create a new support ticket with an initial message | 🔒 | 500 req/15min |
+| 64 | GET | /tickets/:ticketId | Retrieve ticket details with messages (Owner or Admin) | 🔒 | 500 req/15min |
+| 65 | PUT | /tickets/:ticketId | Update ticket details or status (Owner or Admin) | 🔒 | 500 req/15min |
+| 66 | DELETE | /tickets/:ticketId | Delete a support ticket permanently (Owner or Admin) | 🔒 | 500 req/15min |
+| 67 | POST | /tickets/:ticketId/messages | Send a reply message to the ticket conversation (Owner or Admin) | 🔒 | 500 req/15min |
+| 68 | GET | /banners | Retrieve active banners filtered by position and valid date range | ❌ | 500 req/15min |
+| 69 | GET | /users | Retrieve list of all registered users (passwords excluded) | 🔒 | 500 req/15min |
+| 70 | GET | /admin/orders | Retrieve all platform orders with populated customer info (Admin only) | 🔒 | 500 req/15min |
+| 71 | GET | /admin/orders/:orderId | Retrieve complete details of any order by ID (Admin only) | 🔒 | 500 req/15min |
+| 72 | PATCH | /admin/orders/:orderId | Update order delivery and fulfillment status (Admin only) | 🔒 | 500 req/15min |
+| 73 | GET | /admin/orders/overview | Retrieve aggregated store-wide order stats and total revenue (Admin only) | 🔒 | 500 req/15min |
+| 74 | PUT | /admin/orders/:orderId | Update order status (PUT alias) | 🔒 | 500 req/15min |
+| 75 | PUT | /coupons/:couponId | Update coupon details, limits, validity dates, or status (Admin only) | 🔒 | 500 req/15min |
+| 76 | DELETE | /coupons/:couponId | Delete unused coupon (Admin only) | 🔒 | 500 req/15min |
+| 77 | GET | /admin/coupons | Retrieve all coupons with search, status, and discountType filters (Admin only) | 🔒 | 500 req/15min |
+| 78 | POST | /admin/coupons | Create a new coupon with limits and validity schedule (Admin only) | 🔒 | 500 req/15min |
+| 79 | PUT | /admin/coupons/:couponId | Update coupon details, limits, or status (Admin only) | 🔒 | 500 req/15min |
+| 80 | DELETE | /admin/coupons/:couponId | Delete unused coupon (Admin only) | 🔒 | 500 req/15min |
+| 81 | GET | /admin/tickets | Retrieve all tickets across the platform with search & status filters (Admin) | 🔒 | 500 req/15min |
+| 82 | PUT | /admin/tickets/:ticketId | Update ticket status (Admin only) | 🔒 | 500 req/15min |
+| 83 | GET | /admin/tickets/overview | Retrieve store-wide ticket counts and status overview (Admin only) | 🔒 | 500 req/15min |
 | 84 | GET | /admin/banners | Retrieve all banners across the platform with pagination & search (Admin only) | 🔒 | 500 req/15min |
 | 85 | POST | /admin/banners | Create a new promotional banner with image upload to Cloudinary (Admin only) | 🔒 | 500 req/15min |
 | 86 | GET | /admin/banners/:bannerId | Retrieve single banner details by ID (Admin only) | 🔒 | 500 req/15min |
@@ -158,13 +158,14 @@ Login, OTP verification, and Google sign-in issue an access token and set an HTT
 - [Review & Rating Endpoints](#review--rating-endpoints)
 - [Notification Endpoints](#notification-endpoints)
 - [Ticket Endpoints](#ticket-endpoints)
+- [Banner Endpoints](#banner-endpoints)
+- [Authentication, Session & Account Endpoints](#authentication-session--account-endpoints)
 - [Admin Order Management Endpoints](#admin-order-management-endpoints)
 - [Admin Ticket Management Endpoints](#admin-ticket-management-endpoints)
-- [Banner Endpoints](#banner-endpoints)
 - [Admin Banner Management Endpoints](#admin-banner-management-endpoints)
 - [Admin User Moderation Endpoints](#admin-user-moderation-endpoints)
 - [Admin Coupon Management Endpoints](#admin-coupon-management-endpoints)
-- [Authentication, Session & Account Endpoints](#authentication-session--account-endpoints)
+- [Additional Admin Endpoints](#additional-admin-endpoints)
 - [Common HTTP Status Codes](#common-http-status-codes)
 
 ---
@@ -309,54 +310,6 @@ Invalid credentials or user does not exist.
 ---
 
 ## User Management Endpoints
-
-### GET /users
-
-Retrieve a list of all users registered on the platform. Requires authentication.
-
-#### Request Headers
-
-| Header          | Value                     |
-| :-------------- | :------------------------ |
-| `Authorization` | `Bearer <your_jwt_token>` |
-
-#### Responses
-
-##### Response 200
-
-Users fetched successfully.
-
-```json
-{
-  "success": true,
-  "message": "Users fetched successfully",
-  "data": [
-    {
-      "_id": "664fa1e2b5c7e1234567890a",
-      "fullName": "Ahmed Mohamed",
-      "username": "ahmed_dev",
-      "email": "ahmed@example.com",
-      "phone": "01012345678",
-      "role": "User",
-      "isActive": true,
-      "createdAt": "2026-10-09T18:00:00.000Z"
-    }
-  ]
-}
-```
-
-##### Response 401
-
-Unauthorized. No token provided or token invalid.
-
-```json
-{
-  "success": false,
-  "message": "Unauthorized"
-}
-```
-
----
 
 ### GET /users/:userId
 
@@ -2752,183 +2705,7 @@ Order not found.
 
 ## Coupon Management Endpoints
 
-### GET /admin/coupons
-
-Retrieve list of all created coupons. **Admin or SuperAdmin only.** Sorted by creation date descending.
-
-#### Request Headers
-
-| Header          | Value                           |
-| :-------------- | :------------------------------ |
-| `Authorization` | `Bearer <your_admin_jwt_token>` |
-
-#### Responses
-
-##### Response 200
-
-Coupons fetched successfully.
-
-```json
-{
-  "success": true,
-  "message": "Coupons fetched successfully",
-  "data": [
-    {
-      "_id": "673f8e4b1a2b3c4d5e6f7a8b",
-      "couponCode": "SUMMER20",
-      "discountType": "percentage",
-      "discountValue": 20,
-      "usageLimit": 50,
-      "usageLimitPerUser": 1,
-      "minOrderValue": 200,
-      "applicableCategories": ["electronics", "watches"],
-      "maxUsersLimit": 30,
-      "usedCount": 4,
-      "usedBy": [{ "user": "664fa1e2b5c7e1234567890b", "count": 1 }],
-      "isActive": true,
-      "startDate": "2026-06-01T00:00:00.000Z",
-      "expireDate": "2026-08-31T23:59:59.000Z",
-      "createdAt": "2026-05-30T10:00:00.000Z",
-      "updatedAt": "2026-06-02T12:00:00.000Z"
-    }
-  ]
-}
-```
-
-##### Response 401
-
-Missing or invalid bearer token.
-
-```json
-{
-  "success": false,
-  "message": "Unauthorized"
-}
-```
-
-##### Response 403
-
-Requester does not have Admin or SuperAdmin role.
-
-```json
-{
-  "success": false,
-  "message": "Not Authorized"
-}
-```
-
----
-
-### POST /admin/coupons
-
-Create a new discount coupon. **Admin or SuperAdmin only.**
-
-#### Request Headers
-
-| Header          | Value                           |
-| :-------------- | :------------------------------ |
-| `Authorization` | `Bearer <your_admin_jwt_token>` |
-| `Content-Type`  | `application/json`              |
-
-#### Request Body
-
-| Field                  | Type     | Required | Description                                                                               |
-| :--------------------- | :------- | :------: | :---------------------------------------------------------------------------------------- |
-| `couponCode`           | string   |    ✅    | Unique coupon identifier code (case-insensitive, auto-uppercased).                        |
-| `discountType`         | string   |    ✅    | Either `"percentage"` or `"fixed"`.                                                       |
-| `discountValue`        | number   |    ✅    | Value of discount (1–100 for percentage, > 0 for fixed amount in EGP).                    |
-| `usageLimit`           | number   |    ❌    | Maximum total number of times the coupon can be redeemed globally (Default: `10`).        |
-| `usageLimitPerUser`    | number   |    ❌    | Maximum times a **single user** can redeem this coupon (Default: `1`).                    |
-| `minOrderValue`        | number   |    ❌    | Minimum cart total (EGP) required to apply the coupon (Default: `0` = no minimum).        |
-| `applicableCategories` | string[] |    ❌    | Array of category strings the coupon is restricted to. Empty = applies to all categories. |
-| `maxUsersLimit`        | number   |    ❌    | Maximum number of **unique users** who can ever use this coupon. `null` = unlimited.      |
-| `startDate`            | string   |    ✅    | ISO date string indicating when coupon validity begins.                                   |
-| `expireDate`           | string   |    ✅    | ISO date string indicating when coupon expires (must be after `startDate`).               |
-| `isActive`             | boolean  |    ❌    | Whether the coupon is immediately active (Default: `true`).                               |
-
-```json
-{
-  "couponCode": "WATCH20",
-  "discountType": "percentage",
-  "discountValue": 20,
-  "usageLimit": 100,
-  "usageLimitPerUser": 1,
-  "minOrderValue": 500,
-  "applicableCategories": ["watches", "accessories"],
-  "maxUsersLimit": 50,
-  "startDate": "2026-10-01",
-  "expireDate": "2026-12-31",
-  "isActive": true
-}
-```
-
-#### Responses
-
-##### Response 201
-
-Coupon created successfully.
-
-```json
-{
-  "success": true,
-  "message": "Coupon created successfully",
-  "data": {
-    "_id": "673f8e4b1a2b3c4d5e6f7a8b",
-    "couponCode": "WATCH20",
-    "discountType": "percentage",
-    "discountValue": 20,
-    "usageLimit": 100,
-    "usageLimitPerUser": 1,
-    "minOrderValue": 500,
-    "applicableCategories": ["watches", "accessories"],
-    "maxUsersLimit": 50,
-    "usedCount": 0,
-    "usedBy": [],
-    "isActive": true,
-    "startDate": "2026-10-01T00:00:00.000Z",
-    "expireDate": "2026-12-31T00:00:00.000Z",
-    "createdAt": "2026-10-12T15:00:00.000Z",
-    "updatedAt": "2026-10-12T15:00:00.000Z"
-  }
-}
-```
-
-##### Response 400
-
-Validation error (e.g. duplicate code, percentage > 100, or `startDate` after `expireDate`).
-
-```json
-{
-  "success": false,
-  "message": "Coupon code already exists"
-}
-```
-
-##### Response 401
-
-Missing or invalid bearer token.
-
-```json
-{
-  "success": false,
-  "message": "Unauthorized"
-}
-```
-
-##### Response 403
-
-Requester does not have Admin or SuperAdmin role.
-
-```json
-{
-  "success": false,
-  "message": "Not Authorized"
-}
-```
-
----
-
-### POST /admin/coupons/apply
+### POST /coupons/apply
 
 Apply a discount coupon to the authenticated user's current shopping cart and calculate the new total price. The controller enforces all constraints: active status, date range, global usage limit, per-user usage limit, minimum order value, max unique users limit, and applicable categories.
 
@@ -3058,189 +2835,6 @@ User cart is empty or not found.
 {
   "success": false,
   "message": "Cart is empty"
-}
-```
-
----
-
-### PUT /coupons/:couponId
-
-Update details, dates, or active status of an existing coupon. **Admin or SuperAdmin only.**
-
-#### Request Headers
-
-| Header          | Value                           |
-| :-------------- | :------------------------------ |
-| `Authorization` | `Bearer <your_admin_jwt_token>` |
-| `Content-Type`  | `application/json`              |
-
-#### Path Parameters
-
-| Parameter  | Type   | Required | Description      |
-| :--------- | :----- | :------: | :--------------- |
-| `couponId` | string |    ✅    | The coupon's ID. |
-
-#### Request Body
-
-All fields are optional — only send the fields you want to update.
-
-| Field                  | Type         | Required | Description                                                     |
-| :--------------------- | :----------- | :------: | :-------------------------------------------------------------- |
-| `couponCode`           | string       |    ❌    | New unique coupon code (auto-uppercased).                       |
-| `discountType`         | string       |    ❌    | Either `"percentage"` or `"fixed"`.                             |
-| `discountValue`        | number       |    ❌    | New discount numeric value.                                     |
-| `usageLimit`           | number       |    ❌    | New maximum global usage limit.                                 |
-| `usageLimitPerUser`    | number       |    ❌    | New per-user usage cap.                                         |
-| `minOrderValue`        | number       |    ❌    | New minimum cart total required.                                |
-| `applicableCategories` | string[]     |    ❌    | New category restriction list. Send `[]` to remove restriction. |
-| `maxUsersLimit`        | number\|null |    ❌    | New unique user cap. Send `null` to remove limit.               |
-| `startDate`            | string       |    ❌    | New validity start date (ISO).                                  |
-| `expireDate`           | string       |    ❌    | New validity expiration date (ISO).                             |
-| `isActive`             | boolean      |    ❌    | Activate or deactivate coupon.                                  |
-
-```json
-{
-  "isActive": false,
-  "minOrderValue": 1000,
-  "applicableCategories": ["watches"]
-}
-```
-
-#### Responses
-
-##### Response 200
-
-Coupon updated successfully.
-
-```json
-{
-  "success": true,
-  "message": "Coupon updated successfully",
-  "data": {
-    "_id": "673f8e4b1a2b3c4d5e6f7a8b",
-    "couponCode": "WATCH20",
-    "discountType": "percentage",
-    "discountValue": 20,
-    "usageLimit": 100,
-    "usageLimitPerUser": 1,
-    "minOrderValue": 1000,
-    "applicableCategories": ["watches"],
-    "maxUsersLimit": 50,
-    "usedCount": 4,
-    "isActive": false,
-    "startDate": "2026-10-01T00:00:00.000Z",
-    "expireDate": "2026-12-31T00:00:00.000Z",
-    "updatedAt": "2026-10-12T16:30:00.000Z"
-  }
-}
-```
-
-##### Response 401
-
-Missing or invalid bearer token.
-
-```json
-{
-  "success": false,
-  "message": "Unauthorized"
-}
-```
-
-##### Response 403
-
-Requester does not have Admin or SuperAdmin role.
-
-```json
-{
-  "success": false,
-  "message": "Not Authorized"
-}
-```
-
-##### Response 404
-
-Coupon with specified ID does not exist.
-
-```json
-{
-  "success": false,
-  "message": "Coupon not found"
-}
-```
-
----
-
-### DELETE /coupons/:couponId
-
-Delete an unused coupon by ID. **Admin or SuperAdmin only.** Coupons that have already been redeemed by customers cannot be deleted to maintain order history integrity.
-
-#### Request Headers
-
-| Header          | Value                           |
-| :-------------- | :------------------------------ |
-| `Authorization` | `Bearer <your_admin_jwt_token>` |
-
-#### Path Parameters
-
-| Parameter  | Type   | Required | Description      |
-| :--------- | :----- | :------: | :--------------- |
-| `couponId` | string |    ✅    | The coupon's ID. |
-
-#### Responses
-
-##### Response 200
-
-Coupon deleted successfully.
-
-```json
-{
-  "success": true,
-  "message": "Coupon deleted successfully",
-  "data": null
-}
-```
-
-##### Response 400
-
-Coupon cannot be deleted as it has already been redeemed (`usedCount > 0`).
-
-```json
-{
-  "success": false,
-  "message": "Cannot delete a coupon that has already been used"
-}
-```
-
-##### Response 401
-
-Missing or invalid bearer token.
-
-```json
-{
-  "success": false,
-  "message": "Unauthorized"
-}
-```
-
-##### Response 403
-
-Requester does not have Admin or SuperAdmin role.
-
-```json
-{
-  "success": false,
-  "message": "Not Authorized"
-}
-```
-
-##### Response 404
-
-Coupon with specified ID does not exist.
-
-```json
-{
-  "success": false,
-  "message": "Coupon not found"
 }
 ```
 
@@ -4402,6 +3996,186 @@ Ticket not found.
 
 ---
 
+## Banner Endpoints
+
+### GET /banners
+
+Retrieve active banners for a specific display position (`hero_home`, `hero_category`, `hero_product`, or `all`). Only returns banners where `isActive` is `true` and the current date falls between `startDate` and `endDate` (if scheduled). Results are ordered by `priority` descending, then `createdAt` descending.
+
+#### Request Headers
+
+None required (Public endpoint).
+
+#### Query Parameters
+
+| Parameter  | Type   | Required | Default     | Description                                                                       |
+| :--------- | :----- | :------: | :---------- | :-------------------------------------------------------------------------------- |
+| `position` | string |    ❌    | `hero_home` | Target position filter: `hero_home`, `hero_category`, `hero_product`, or `all`.   |
+
+#### Responses
+
+##### Response 200
+
+Active banners fetched successfully.
+
+```json
+{
+  "success": true,
+  "message": "Active banners fetched successfully",
+  "data": [
+    {
+      "_id": "6718a931a9b4c10023e1109a",
+      "title": "Spring Tech Mega Sale 2026",
+      "subtitle": "Discover the latest tech with up to 40% discount and official warranty.",
+      "image": {
+        "publicId": "Banners/banner_spring_2026",
+        "url": "https://res.cloudinary.com/demo/image/upload/v1234567890/banner.webp"
+      },
+      "linkType": "category",
+      "linkValue": "Laptops",
+      "position": "hero_home",
+      "isActive": true,
+      "priority": 10,
+      "startDate": "2026-03-01T00:00:00.000Z",
+      "endDate": "2026-06-01T00:00:00.000Z",
+      "createdAt": "2026-03-01T10:00:00.000Z",
+      "updatedAt": "2026-03-01T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## Authentication, Session & Account Endpoints
+
+These endpoints were added after the original reference. Protected account routes require the bearer access token unless identified as cookie/session-based.
+
+### POST /auth/verify-otp
+
+Verify the email using the 6-digit OTP sent during registration.
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| email | string | ✅ | Registered email |
+| otp | string | ✅ | 6-digit verification code |
+
+#### Responses
+
+- **200** — Email verified; returns account and access token, and sets the HTTP-only refreshToken cookie.
+- **400** — Invalid or expired OTP, or invalid input.
+- **404** — Account not found.
+
+### POST /auth/resend-otp
+
+Send a new verification code to an unverified account.
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :---: | :---: | :--- |
+| email | string | ✅ | Account email |
+
+#### Responses
+
+- **200** — Verification code sent.
+- **400** — Invalid input.
+- **404** — Account not found or already verified.
+
+### POST /auth/forgot-password
+
+Request a password reset email.
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| email | string | ✅ | Account email |
+
+### POST /auth/reset-password
+
+Set a new password using the token sent by email.
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| email | string | ✅ | Account email |
+| token | string | ✅ | Password reset token |
+| newPassword | string | ✅ | 6–72 characters, uppercase, lowercase, and a digit |
+
+### GET /auth/me
+
+Retrieve the account associated with the access token.
+
+#### Request Headers
+
+| Header | Value | Required |
+| :--- | :--- | :---: |
+| Authorization | Bearer <accessToken> | ✅ |
+
+### GET, POST /auth/refresh
+
+Refresh the access token using the refreshToken cookie. Both methods are supported by the current router.
+
+#### Cookies
+
+| Cookie | Required | Description |
+| :--- | :---: | :--- |
+| refreshToken | ✅ | HTTP-only refresh token from a previous authentication flow |
+
+### GET, POST /auth/logout
+
+Clear the refresh-token cookie and end the session. Both methods are supported.
+
+### GET /auth/google and GET /auth/google/callback
+
+Start and complete Google OAuth. The first route redirects the browser to Google. The callback validates state, authenticates/creates the account, sets the refresh cookie, and redirects to the frontend auth result page.
+
+#### Google OAuth Configuration
+
+| Setting | Required value |
+| :--- | :--- |
+| Redirect URI | http://localhost:5000/auth/google/callback (or GOOGLE_CALLBACK_URL) |
+| Authorized JavaScript origin | Frontend origin, for example http://localhost:3000 |
+| Backend variables | GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, FRONTEND_URL |
+
+The callback URL is the Google redirect URI. /auth/google starts sign-in and should not be registered as a redirect URI.
+
+### DELETE /users/:userId/profile-picture
+
+Delete the profile image. The user must be the account owner or an authorized administrator.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| userId | string | ✅ | MongoDB user ID |
+
+### PUT /users/:userId/change-password
+
+Change the account password using the current password. The controller sends the account security email after a successful change.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| userId | string | ✅ | MongoDB user ID |
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| oldPassword | string | ✅ | Current password |
+| newPassword | string | ✅ | New password with uppercase, lowercase, and a digit |
+
+### Rate-limit responses
+
+Auth endpoints listed in Rate Limiting & Security allow 10 requests per IP per minute in addition to the general API quota. Other API routes allow 500 requests per IP per 15 minutes. Exceeding a limit returns **429 Too Many Requests** with standard RateLimit headers.
+
+
 ## Admin Order Management Endpoints
 
 ### GET /admin/orders
@@ -5017,57 +4791,6 @@ Ticket not found.
 {
   "success": false,
   "message": "Ticket not found"
-}
-```
-
----
-
-## Banner Endpoints
-
-### GET /banners
-
-Retrieve active banners for a specific display position (`hero_home`, `hero_category`, `hero_product`, or `all`). Only returns banners where `isActive` is `true` and the current date falls between `startDate` and `endDate` (if scheduled). Results are ordered by `priority` descending, then `createdAt` descending.
-
-#### Request Headers
-
-None required (Public endpoint).
-
-#### Query Parameters
-
-| Parameter  | Type   | Required | Default     | Description                                                                       |
-| :--------- | :----- | :------: | :---------- | :-------------------------------------------------------------------------------- |
-| `position` | string |    ❌    | `hero_home` | Target position filter: `hero_home`, `hero_category`, `hero_product`, or `all`.   |
-
-#### Responses
-
-##### Response 200
-
-Active banners fetched successfully.
-
-```json
-{
-  "success": true,
-  "message": "Active banners fetched successfully",
-  "data": [
-    {
-      "_id": "6718a931a9b4c10023e1109a",
-      "title": "Spring Tech Mega Sale 2026",
-      "subtitle": "Discover the latest tech with up to 40% discount and official warranty.",
-      "image": {
-        "publicId": "Banners/banner_spring_2026",
-        "url": "https://res.cloudinary.com/demo/image/upload/v1234567890/banner.webp"
-      },
-      "linkType": "category",
-      "linkValue": "Laptops",
-      "position": "hero_home",
-      "isActive": true,
-      "priority": 10,
-      "startDate": "2026-03-01T00:00:00.000Z",
-      "endDate": "2026-06-01T00:00:00.000Z",
-      "createdAt": "2026-03-01T10:00:00.000Z",
-      "updatedAt": "2026-03-01T10:00:00.000Z"
-    }
-  ]
 }
 ```
 
@@ -5756,129 +5479,57 @@ Coupon cannot be deleted as it is already used.
 
 ---
 
-## Authentication, Session & Account Endpoints
+## Additional Admin Endpoints
 
-These endpoints were added after the original reference. Protected account routes require the bearer access token unless identified as cookie/session-based.
+### GET /users
 
-### POST /auth/verify-otp
-
-Verify the email using the 6-digit OTP sent during registration.
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| email | string | ✅ | Registered email |
-| otp | string | ✅ | 6-digit verification code |
-
-#### Responses
-
-- **200** — Email verified; returns account and access token, and sets the HTTP-only refreshToken cookie.
-- **400** — Invalid or expired OTP, or invalid input.
-- **404** — Account not found.
-
-### POST /auth/resend-otp
-
-Send a new verification code to an unverified account.
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :---: | :---: | :--- |
-| email | string | ✅ | Account email |
-
-#### Responses
-
-- **200** — Verification code sent.
-- **400** — Invalid input.
-- **404** — Account not found or already verified.
-
-### POST /auth/forgot-password
-
-Request a password reset email.
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| email | string | ✅ | Account email |
-
-### POST /auth/reset-password
-
-Set a new password using the token sent by email.
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| email | string | ✅ | Account email |
-| token | string | ✅ | Password reset token |
-| newPassword | string | ✅ | 6–72 characters, uppercase, lowercase, and a digit |
-
-### GET /auth/me
-
-Retrieve the account associated with the access token.
+Retrieve a list of all users registered on the platform. Requires authentication.
 
 #### Request Headers
 
-| Header | Value | Required |
-| :--- | :--- | :---: |
-| Authorization | Bearer <accessToken> | ✅ |
+| Header          | Value                     |
+| :-------------- | :------------------------ |
+| `Authorization` | `Bearer <your_jwt_token>` |
 
-### GET, POST /auth/refresh
+#### Responses
 
-Refresh the access token using the refreshToken cookie. Both methods are supported by the current router.
+##### Response 200
 
-#### Cookies
+Users fetched successfully.
 
-| Cookie | Required | Description |
-| :--- | :---: | :--- |
-| refreshToken | ✅ | HTTP-only refresh token from a previous authentication flow |
+```json
+{
+  "success": true,
+  "message": "Users fetched successfully",
+  "data": [
+    {
+      "_id": "664fa1e2b5c7e1234567890a",
+      "fullName": "Ahmed Mohamed",
+      "username": "ahmed_dev",
+      "email": "ahmed@example.com",
+      "phone": "01012345678",
+      "role": "User",
+      "isActive": true,
+      "createdAt": "2026-10-09T18:00:00.000Z"
+    }
+  ]
+}
+```
 
-### GET, POST /auth/logout
+##### Response 401
 
-Clear the refresh-token cookie and end the session. Both methods are supported.
+Unauthorized. No token provided or token invalid.
 
-### GET /auth/google and GET /auth/google/callback
+```json
+{
+  "success": false,
+  "message": "Unauthorized"
+}
+```
 
-Start and complete Google OAuth. The first route redirects the browser to Google. The callback validates state, authenticates/creates the account, sets the refresh cookie, and redirects to the frontend auth result page.
+---
 
-#### Google OAuth Configuration
 
-| Setting | Required value |
-| :--- | :--- |
-| Redirect URI | http://localhost:5000/auth/google/callback (or GOOGLE_CALLBACK_URL) |
-| Authorized JavaScript origin | Frontend origin, for example http://localhost:3000 |
-| Backend variables | GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, FRONTEND_URL |
-
-The callback URL is the Google redirect URI. /auth/google starts sign-in and should not be registered as a redirect URI.
-
-### DELETE /users/:userId/profile-picture
-
-Delete the profile image. The user must be the account owner or an authorized administrator.
-
-#### Path Parameters
-
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| userId | string | ✅ | MongoDB user ID |
-
-### PUT /users/:userId/change-password
-
-Change the account password using the current password. The controller sends the account security email after a successful change.
-
-#### Path Parameters
-
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| userId | string | ✅ | MongoDB user ID |
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| oldPassword | string | ✅ | Current password |
-| newPassword | string | ✅ | New password with uppercase, lowercase, and a digit |
 
 ### PATCH /admin/users/:userId/toggle-admin
 
@@ -5902,10 +5553,14 @@ Alias for PATCH /admin/orders/:orderId. Updates the order fulfillment/payment st
 | note | string | ❌ | Optional status-history note |
 | isPaid | boolean | ❌ | Payment state |
 
-### Rate-limit responses
+### Coupon route aliases
 
-Auth endpoints listed in Rate Limiting & Security allow 10 requests per IP per minute in addition to the general API quota. Other API routes allow 500 requests per IP per 15 minutes. Exceeding a limit returns **429 Too Many Requests** with standard RateLimit headers.
+The coupon router also exposes these Admin-only aliases for the coupon CRUD endpoints documented above.
 
+| Method | Endpoint | Access | Request |
+| :--- | :--- | :--- | :--- |
+| PUT | /coupons/:couponId | Admin | Coupon update fields documented under Admin Coupons |
+| DELETE | /coupons/:couponId | Admin | Path couponId |
 
 ## Common HTTP Status Codes
 
