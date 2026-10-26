@@ -33,7 +33,24 @@ const LoginSchema = z.object({
   password: passwordSchema,
 });
 
+const ForgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email address").trim(),
+});
+
+const ResetPasswordSchema = z.object({
+  email: z.string().email("Invalid email address").trim(),
+  newPassword: passwordSchema,
+  token: z.string().min(1, "Token is required"),
+});
+
 export type IRegisterSchema = z.infer<typeof RegisterSchema>;
 export type ILoginSchema = z.infer<typeof LoginSchema>;
+export type IForgotPasswordSchema = z.infer<typeof ForgotPasswordSchema>;
+export type IResetPasswordSchema = z.infer<typeof ResetPasswordSchema>;
 
-export { RegisterSchema, LoginSchema };
+export {
+  RegisterSchema,
+  LoginSchema,
+  ForgotPasswordSchema,
+  ResetPasswordSchema,
+};

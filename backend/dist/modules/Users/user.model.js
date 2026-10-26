@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
-import { CreateAddressSchema, UpdateAdressSchema, } from "./user.schema.js";
+import { ChangePasswordSchema, CreateAddressSchema, ResendOtpSchema, UpdateAdressSchema, VerifyOtpSchema, } from "./user.schema.js";
 import jwt from "jsonwebtoken";
-import { LoginSchema, RegisterSchema, } from "../Auth/auth.schema.js";
+import { ForgotPasswordSchema, LoginSchema, RegisterSchema, ResetPasswordSchema, } from "../Auth/auth.schema.js";
 const UserSchema = new Schema({
     username: {
         type: String,
@@ -70,6 +70,26 @@ const UserSchema = new Schema({
         type: Boolean,
         default: true,
     },
+    isBanned: {
+        type: Boolean,
+        default: false,
+    },
+    banExpires: {
+        type: Date,
+        default: null,
+    },
+    refreshToken: {
+        type: String,
+        select: false,
+    },
+    otp: {
+        type: String,
+        select: false,
+    },
+    otpExpired: {
+        type: Date,
+        select: false,
+    },
 }, { timestamps: true });
 UserSchema.methods.generateAccessToken = function () {
     return jwt.sign({
@@ -77,8 +97,11 @@ UserSchema.methods.generateAccessToken = function () {
         role: this.role,
         username: this.username,
     }, process.env.JWT_SECRET_KEY, {
-        expiresIn: "7d",
+        expiresIn: "15m",
     });
+};
+UserSchema.methods.generateRefreshToken = function () {
+    return jwt.sign({ id: this._id }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: "7d" });
 };
 export const User = model("User", UserSchema);
 const validateRegister = (user) => {
@@ -93,5 +116,20 @@ const validateCreateAddress = (address) => {
 const validateUpdateAddress = (address) => {
     return UpdateAdressSchema.safeParse(address);
 };
-export { validateRegister, validateLogin, validateCreateAddress, validateUpdateAddress, };
+const validateForgotPassword = (user) => {
+    return ForgotPasswordSchema.safeParse(user);
+};
+const validateResetPassword = (user) => {
+    return ResetPasswordSchema.safeParse(user);
+};
+const validateVerifyOtp = (user) => {
+    return VerifyOtpSchema.safeParse(user);
+};
+const validateChangePassword = (password) => {
+    return ChangePasswordSchema.safeParse(password);
+};
+const validateResendOtp = (data) => {
+    return ResendOtpSchema.safeParse(data);
+};
+export { validateRegister, validateLogin, validateCreateAddress, validateUpdateAddress, validateForgotPassword, validateResetPassword, validateVerifyOtp, validateChangePassword, validateResendOtp, };
 //# sourceMappingURL=user.model.js.map

@@ -3,6 +3,7 @@ import { sendError, successMsg } from "../../../middlewares/errors.js";
 import { Review, validateCreateReview, validateUpdateReview, } from "./review.model.js";
 import { Product } from "../product.model.js";
 import { updateProductRatingStats } from "./calculateProductRating.js";
+import { createNotification } from "../../Notification/notification.controller.js";
 // GET PRODUCT REVIEWS
 const getProductReviews = asyncHandler(async (req, res) => {
     const productId = req.params.productId;
@@ -61,6 +62,20 @@ const createReview = asyncHandler(async (req, res) => {
     }
     const stats = await updateProductRatingStats(productId);
     await review.populate("user", "fullName username profilePicture email role");
+    const productOwner = product.userId || product.user;
+    if (productOwner && productOwner.toString() !== req.user?.id) {
+        const reviewerName = review.user?.fullName ||
+            review.user?.username ||
+            req.user?.username ||
+            "Someone";
+        await createNotification({
+            user: productOwner,
+            title: "New review on your product",
+            message: `${reviewerName} gave a ${review.ratings}★ review on "${product.title}"`,
+            type: "review",
+            relatedId: product._id,
+        });
+    }
     successMsg(res, isNewReview ? 201 : 200, isNewReview
         ? "Review created successfully"
         : "Review updated successfully", {

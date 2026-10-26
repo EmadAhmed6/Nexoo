@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,6 +13,7 @@ import {
   CreditCard,
   Percent,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface PanelItem {
   id: string;
@@ -28,125 +29,120 @@ interface PanelItem {
   imageAlt: string;
 }
 
-const PANELS: PanelItem[] = [
-  {
-    id: "panel-super-deals",
-    tag: "Super Deals",
-    tagIcon: Flame,
-    tagColor: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-    title: "Today's Top Deals",
-    description: "Save big on trending headphones, smart gear & high-tech devices.",
-    promoCallout: "Up to 55% OFF",
-    actionText: "Shop Deals",
-    href: "/#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700&auto=format&fit=crop&q=80",
-    imageAlt: "Audio and electronics deals",
-  },
-  {
-    id: "panel-watches",
-    tag: "Luxury Timepieces",
-    tagIcon: Sparkles,
-    tagColor: "bg-primary/20 text-primary border-primary/30",
-    title: "Watches & Accessories",
-    description: "Precision chronographs, hybrid smartwatches and classic leather bands.",
-    promoCallout: "From 2,499 EGP",
-    actionText: "Explore Collection",
-    href: "/?category=Watches%20%26%20Accessories#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=700&auto=format&fit=crop&q=80",
-    imageAlt: "Luxury watches and accessories",
-  },
-  {
-    id: "panel-fragrances",
-    tag: "Original Scents",
-    tagIcon: Tag,
-    tagColor: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    title: "Luxury Fragrances",
-    description: "Exclusive French and Arabian scents for distinguished presence.",
-    promoCallout: "Save EGP 800",
-    actionText: "Shop Scents",
-    href: "/?category=Luxury%20Fragrances#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=700&auto=format&fit=crop&q=80",
-    imageAlt: "Luxury perfumes and fragrances",
-  },
-  {
-    id: "panel-fashion",
-    tag: "Trending Apparel",
-    tagIcon: Sparkles,
-    tagColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-    title: "Modern Clothes & Jackets",
-    description: "Curated collection of streetwear, outerwear and premium casuals.",
-    promoCallout: "Extra 20% OFF",
-    actionText: "View Fashion",
-    href: "/?category=Clothes#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=700&auto=format&fit=crop&q=80",
-    imageAlt: "Modern clothes and fashion",
-  },
-  {
-    id: "panel-installments",
-    tag: "Easy Financing",
-    tagIcon: CreditCard,
-    tagColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    title: "0% Interest Installments",
-    description: "Buy whatever you love and pay later in up to 12 flexible monthly terms.",
-    promoCallout: "0% Interest • 0 Admin Fees",
-    actionText: "Learn More",
-    href: "/#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=700&auto=format&fit=crop&q=80",
-    imageAlt: "Installment plans for electronics",
-  },
-  {
-    id: "panel-shoes",
-    tag: "Footwear & Kicks",
-    tagIcon: Flame,
-    tagColor: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    title: "Sneakers & Shoes",
-    description: "Collector sneakers, running footwear and handcrafted Italian shoes.",
-    promoCallout: "Limited Stock",
-    actionText: "Shop Shoes",
-    href: "/?category=Shoes#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&auto=format&fit=crop&q=80",
-    imageAlt: "Sneakers and designer shoes",
-  },
-  {
-    id: "panel-leather",
-    tag: "Genuine Leather",
-    tagIcon: Tag,
-    tagColor: "bg-yellow-600/20 text-yellow-400 border-yellow-600/30",
-    title: "Leather Goods & Bags",
-    description: "Handcrafted full-grain leather bags, wallets and laptop sleeves.",
-    promoCallout: "Handcrafted Milan",
-    actionText: "Explore Leather",
-    href: "/?category=Leather%20Goods#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=700&auto=format&fit=crop&q=80",
-    imageAlt: "Leather goods and luxury bags",
-  },
-  {
-    id: "panel-electronics",
-    tag: "Tech Gadgets",
-    tagIcon: Percent,
-    tagColor: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-    title: "Flagship Electronics",
-    description: "Next-gen laptops, accessories, fast chargers and wireless peripherals.",
-    promoCallout: "Up to 40% OFF",
-    actionText: "Shop Electronics",
-    href: "/?category=Electronics#products",
-    imageUrl:
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=700&auto=format&fit=crop&q=80",
-    imageAlt: "Electronics and laptops",
-  },
-];
+
 
 export function MultiPanelBanner() {
+  const t = useTranslations("home");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const PANELS: PanelItem[] = [
+    {
+      id: "panel-super-deals",
+      tag: t("panelDealsTag"),
+      tagIcon: Flame,
+      tagColor: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+      title: t("panelDealsTitle"),
+      description: t("panelDealsDesc"),
+      promoCallout: t("panelDealsPromo"),
+      actionText: t("panelDealsAction"),
+      href: "/#products",
+      imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700&auto=format&fit=crop&q=80",
+      imageAlt: "Audio and electronics deals",
+    },
+    {
+      id: "panel-watches",
+      tag: t("panelWatchesTag"),
+      tagIcon: Sparkles,
+      tagColor: "bg-primary/20 text-primary border-primary/30",
+      title: t("panelWatchesTitle"),
+      description: t("panelWatchesDesc"),
+      promoCallout: t("panelWatchesPromo"),
+      actionText: t("panelWatchesAction"),
+      href: "/?category=Watches%20%26%20Accessories#products",
+      imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=700&auto=format&fit=crop&q=80",
+      imageAlt: "Luxury watches and accessories",
+    },
+    {
+      id: "panel-fragrances",
+      tag: t("panelFragrancesTag"),
+      tagIcon: Tag,
+      tagColor: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+      title: t("panelFragrancesTitle"),
+      description: t("panelFragrancesDesc"),
+      promoCallout: t("panelFragrancesPromo"),
+      actionText: t("panelFragrancesAction"),
+      href: "/?category=Luxury%20Fragrances#products",
+      imageUrl: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=700&auto=format&fit=crop&q=80",
+      imageAlt: "Luxury perfumes and fragrances",
+    },
+    {
+      id: "panel-fashion",
+      tag: t("panelFashionTag"),
+      tagIcon: Sparkles,
+      tagColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+      title: t("panelFashionTitle"),
+      description: t("panelFashionDesc"),
+      promoCallout: t("panelFashionPromo"),
+      actionText: t("panelFashionAction"),
+      href: "/?category=Clothes#products",
+      imageUrl: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=700&auto=format&fit=crop&q=80",
+      imageAlt: "Modern clothes and fashion",
+    },
+    {
+      id: "panel-installments",
+      tag: t("panelInstallmentsTag"),
+      tagIcon: CreditCard,
+      tagColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+      title: t("panelInstallmentsTitle"),
+      description: t("panelInstallmentsDesc"),
+      promoCallout: t("panelInstallmentsPromo"),
+      actionText: t("panelInstallmentsAction"),
+      href: "/#products",
+      imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=700&auto=format&fit=crop&q=80",
+      imageAlt: "Installment plans for electronics",
+    },
+    {
+      id: "panel-shoes",
+      tag: t("panelShoesTag"),
+      tagIcon: Flame,
+      tagColor: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+      title: t("panelShoesTitle"),
+      description: t("panelShoesDesc"),
+      promoCallout: t("panelShoesPromo"),
+      actionText: t("panelShoesAction"),
+      href: "/?category=Shoes#products",
+      imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&auto=format&fit=crop&q=80",
+      imageAlt: "Sneakers and designer shoes",
+    },
+    {
+      id: "panel-leather",
+      tag: t("panelLeatherTag"),
+      tagIcon: Tag,
+      tagColor: "bg-yellow-600/20 text-yellow-400 border-yellow-600/30",
+      title: t("panelLeatherTitle"),
+      description: t("panelLeatherDesc"),
+      promoCallout: t("panelLeatherPromo"),
+      actionText: t("panelLeatherAction"),
+      href: "/?category=Leather%20Goods#products",
+      imageUrl: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=700&auto=format&fit=crop&q=80",
+      imageAlt: "Leather goods and luxury bags",
+    },
+    {
+      id: "panel-electronics",
+      tag: t("panelElectronicsTag"),
+      tagIcon: Percent,
+      tagColor: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+      title: t("panelElectronicsTitle"),
+      description: t("panelElectronicsDesc"),
+      promoCallout: t("panelElectronicsPromo"),
+      actionText: t("panelElectronicsAction"),
+      href: "/?category=Electronics#products",
+      imageUrl: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=700&auto=format&fit=crop&q=80",
+      imageAlt: "Electronics and laptops",
+    },
+  ];
 
   const checkScroll = () => {
     if (!scrollRef.current) return;
@@ -185,14 +181,14 @@ export function MultiPanelBanner() {
           <div className="flex items-center gap-2 mb-1">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/25 text-primary text-[11px] font-bold">
               <Sparkles className="w-3 h-3" />
-              SPOTLIGHT OFFERS
+              {t("spotlightOffers")}
             </span>
             <span className="text-xs text-textSecondary hidden sm:inline">
-              Daily curated collections & deals
+              {t("spotlightSubtitle")}
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-textPrimary tracking-tight">
-            Explore Categories & Special Offers
+            {t("spotlightHeading")}
           </h2>
         </div>
 
@@ -206,7 +202,7 @@ export function MultiPanelBanner() {
                 ? "border-borderPrimary bg-bgSecondary text-textPrimary hover:border-primary hover:text-primary cursor-pointer shadow-sm"
                 : "border-borderPrimary/40 bg-bgSecondary/40 text-textSecondary/30 cursor-not-allowed"
             }`}
-            aria-label="Scroll left"
+            aria-label={t("scrollLeft")}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -218,7 +214,7 @@ export function MultiPanelBanner() {
                 ? "border-borderPrimary bg-bgSecondary text-textPrimary hover:border-primary hover:text-primary cursor-pointer shadow-sm"
                 : "border-borderPrimary/40 bg-bgSecondary/40 text-textSecondary/30 cursor-not-allowed"
             }`}
-            aria-label="Scroll right"
+            aria-label={t("scrollRight")}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -250,7 +246,7 @@ export function MultiPanelBanner() {
 
                 {/* Promotional Call-out Badge */}
                 <div className="absolute top-2.5 right-2.5 z-10">
-                  <span className="px-2.5 py-1 rounded-full bg-primary text-black font-black text-[11px] shadow-md tracking-tight">
+                  <span className="px-2.5 py-1 rounded-full bg-primary text-white dark:text-black font-black text-[11px] shadow-md tracking-tight">
                     {panel.promoCallout}
                   </span>
                 </div>
@@ -280,7 +276,7 @@ export function MultiPanelBanner() {
                 {/* Action Link Footer */}
                 <div className="pt-3 border-t border-borderPrimary flex items-center justify-between text-xs font-bold text-primary mt-auto">
                   <span>{panel.actionText}</span>
-                  <div className="w-7 h-7 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all">
+                  <div className="w-7 h-7 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:text-white dark:group-hover:text-black transition-all">
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </div>

@@ -15,6 +15,10 @@ export interface User {
   email: string;
   phone?: string;
   role: "User" | "Admin" | "SuperAdmin";
+  profilePicture?: {
+    url: string;
+    publicId: string;
+  } | null;
   profileImage?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -41,4 +45,19 @@ export interface RegisterCredentials {
   email: string;
   password: string;
   phone: string;
+}
+
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  token: string;
+  newPassword: string;
+}
+
+export interface VerifyOtpPayload {
+  email: string;
+  otp: string;
 }

@@ -1,4 +1,4 @@
-import { apiGet, apiPut, apiPost, apiDelete } from "@/lib/axios-client";
+import { apiGet, apiPut, apiPost, apiDelete, apiPatch, axiosClient } from "@/lib/axios-client";
 import { User, UserAddress } from "@/features/auth/types/auth.types";
 
 export interface UpdateUserPayload {
@@ -17,6 +17,11 @@ export interface AddressPayload {
   postalCode?: string;
   phone: string;
   isDefault?: boolean;
+}
+
+export interface ChangePasswordPayload {
+  oldPassword: string;
+  newPassword: string;
 }
 
 export const userApi = {
@@ -63,5 +68,41 @@ export const userApi = {
 
   unbanUser: async (userId: string) => {
     return apiPut<User>(`/admin/users/${userId}/unban`);
+  },
+
+  toggleAdminStatus: async (userId: string) => {
+    return apiPatch<User>(`/admin/users/${userId}/toggle-admin`);
+  },
+
+  /**
+   * Change password for authenticated user
+   * PUT /users/:userId/change-password
+   */
+  changePassword: async (userId: string, payload: ChangePasswordPayload) => {
+    return apiPut<null, ChangePasswordPayload>(
+      `/users/${userId}/change-password`,
+      payload
+    );
+  },
+
+  /**
+   * Upload or replace profile picture
+   * PUT /users/:userId  (multipart/form-data with field "profilePicture")
+   */
+  uploadProfilePicture: async (userId: string, file: File) => {
+    const formData = new FormData();
+    formData.append("profilePicture", file);
+    const response = await axiosClient.put<{ data: User }>(`/users/${userId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  },
+
+  /**
+   * Delete profile picture from Cloudinary and unset on user
+   * DELETE /users/:userId/profile-picture
+   */
+  deleteProfilePicture: async (userId: string) => {
+    return apiDelete<null>(`/users/${userId}/profile-picture`);
   },
 };

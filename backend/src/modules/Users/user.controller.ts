@@ -3,12 +3,14 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import {
   User,
+  validateChangePassword,
   validateCreateAddress,
   validateUpdateAddress,
 } from "./user.model.js";
 import { sendError, successMsg } from "../../middlewares/errors.js";
 import cloudinary from "../../config/cloudinary.js";
-import { rmSync } from "node:fs";
+import fs from "fs";
+import { generateVerifyOtpEmailHtml, sendEmail } from "../../config/Email.js";
 
 // GET ALL USERS
 const getUsers = asyncHandler(
@@ -47,14 +49,27 @@ const updateUser = asyncHandler(
     }
 
     const updateData: Record<string, any> = { ...req.body };
-    if (updateData.password && updateData.password.trim().length > 0) {
-      const genSalt = await bcrypt.genSalt(10);
-      updateData.password = await bcrypt.hash(updateData.password, genSalt);
-    } else {
-      delete updateData.password;
+
+    if (req.file) {
+      if (user.profilePicture && user.profilePicture.publicId) {
+        await cloudinary.uploader.destroy(user.profilePicture.publicId);
+      }
+
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "users",
+        resource_type: "image",
+      });
+
+      if (req.file.path) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      updateData.profilePicture = {
+        publicId: result.public_id,
+        url: result.secure_url,
+      };
     }
 
-    // Prevent non-admin users from escalating their role
     if (req.user?.role !== "SuperAdmin" && req.user?.role !== "Admin") {
       delete updateData.role;
     }
@@ -66,6 +81,24 @@ const updateUser = asyncHandler(
     ).select("-password");
 
     successMsg(res, 200, "User updated successfully", updatedUser);
+  },
+);
+
+// DELETE USER PROFILE
+const deleteUserProfile = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const userId = req.params.userId;
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      sendError(res, 404, "User not found");
+      return;
+    }
+    if (user.profilePicture && user.profilePicture.publicId) {
+      await cloudinary.uploader.destroy(user.profilePicture.publicId);
+    }
+    user.profilePicture = null;
+    await user.save();
+    successMsg(res, 200, "Profile picture deleted successfully", null);
   },
 );
 
@@ -82,6 +115,43 @@ const deleteUser = asyncHandler(
     successMsg(res, 200, "User deleted successfully", null);
   },
 );
+
+const changePassword = asyncHandler(async (req: Request, res: Response) => {
+  const { success, error } = validateChangePassword(req.body);
+  if (!success) {
+    sendError(res, 400, error.message);
+    return;
+  }
+  const userId = req.params.userId;
+  const user = await User.findById(userId);
+  if (!user) {
+    sendError(res, 404, "User not found");
+    return;
+  }
+  const isPasswordMatch = await bcrypt.compare(
+    req.body.oldPassword,
+    user.password,
+  );
+  if (!isPasswordMatch) {
+    sendError(res, 400, "Incorrect old password");
+    return;
+  }
+
+  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
+  user.otp = generatedOtp;
+  user.otpExpired = otpExpired;
+  
+  await sendEmail(
+    user.email,
+    "Password Changed - Security Code - Nexoo",
+    generateVerifyOtpEmailHtml(user.username, generatedOtp),
+  );
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(req.body.newPassword, salt);
+  await user.save();
+  successMsg(res, 200, "Password changed successfully. A security code has been sent to your email.", null);
+});
 
 // ============== USER ADDRESSES ==============
 
@@ -218,8 +288,10 @@ export {
   GetUserById,
   updateUser,
   deleteUser,
+  changePassword,
   getUserAddress,
   addUserAddress,
   updateUserAddress,
   deleteUserAddress,
+  deleteUserProfile,
 };

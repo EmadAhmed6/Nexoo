@@ -3,6 +3,41 @@ import jwt from "jsonwebtoken";
 import { Product } from "../modules/Product/product.model.js";
 import { Cart } from "../modules/Cart/cart.model.js";
 import { Order } from "../modules/Order/order.model.js";
+import { Ticket } from "../modules/Ticket/ticket.model.js";
+import { User } from "../modules/Users/user.model.js";
+const checkUserBan = async (req, res, next) => {
+    try {
+        const userId = req.user?.id || req.user?.userId;
+        if (!userId) {
+            return next();
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            sendError(res, 404, "User was not found");
+            return;
+        }
+        if (user.isBanned) {
+            if (user.banExpires && user.banExpires < new Date()) {
+                user.isBanned = false;
+                user.banExpires = undefined;
+                await user.save();
+                return next();
+            }
+            else {
+                const banExpiryMsg = user.banExpires
+                    ? ` until ${new Date(user.banExpires).toLocaleDateString()}`
+                    : "";
+                sendError(res, 403, `User is banned${banExpiryMsg}`);
+                return;
+            }
+        }
+        return next();
+    }
+    catch (err) {
+        sendError(res, 500, "Internal Server Error");
+        return;
+    }
+};
 const verifyToken = async (req, res, next) => {
     let token = req.headers.authorization;
     if (!token) {
@@ -18,7 +53,7 @@ const verifyToken = async (req, res, next) => {
     try {
         const decode = jwt.verify(token, secret);
         req.user = decode;
-        next();
+        await checkUserBan(req, res, next);
     }
     catch (err) {
         sendError(res, 403, "Invalid or expired token");
@@ -141,5 +176,31 @@ const verifyOrderOwner = async (req, res, next) => {
         }
     });
 };
-export { verifyToken, verifyAuthorizedToken, verifyAdminToken, verifyProductOwner, verifyCartOwner, verifyOrderOwner, };
+const verifyTicketOwner = async (req, res, next) => {
+    verifyToken(req, res, async () => {
+        try {
+            const userId = req.user?.id;
+            const ticketId = req.params.ticketId;
+            const ticket = await Ticket.findById(ticketId);
+            if (!ticket) {
+                sendError(res, 404, "Ticket was not found");
+                return;
+            }
+            if (ticket.user.toString() === userId?.toString() ||
+                req.user?.role === "Admin" ||
+                req.user?.role === "SuperAdmin") {
+                next();
+            }
+            else {
+                sendError(res, 403, "Not Authorized");
+                return;
+            }
+        }
+        catch (err) {
+            sendError(res, 500, "Internal Server Error");
+            return;
+        }
+    });
+};
+export { verifyToken, verifyAuthorizedToken, verifyAdminToken, verifyProductOwner, verifyCartOwner, verifyOrderOwner, verifyTicketOwner, checkUserBan, };
 //# sourceMappingURL=verifyToken.js.map

@@ -48,16 +48,44 @@ const options = {
                 description: "Order processing and Paymob checkout APIs",
             },
             {
-                name: "Admin Orders",
-                description: "Admin order management and fulfillment APIs",
-            },
-            {
                 name: "Coupons",
                 description: "Coupons and discount management APIs",
             },
             {
                 name: "Reviews",
                 description: "Product reviews and ratings management APIs",
+            },
+            {
+                name: "Notifications",
+                description: "User notifications management APIs",
+            },
+            {
+                name: "Tickets",
+                description: "Support tickets and user assistance APIs",
+            },
+            {
+                name: "Admin Orders",
+                description: "Admin order management and fulfillment APIs",
+            },
+            {
+                name: "Admin Tickets",
+                description: "Admin support ticket management and status resolution APIs",
+            },
+            {
+                name: "Banners",
+                description: "Public promotional and hero banners APIs",
+            },
+            {
+                name: "Admin Banners",
+                description: "Admin banner management, upload, and scheduling APIs",
+            },
+            {
+                name: "Admin Users",
+                description: "Admin user moderation, banning, and account control APIs",
+            },
+            {
+                name: "Admin Coupons",
+                description: "Admin coupon management and discount campaign APIs",
             },
         ],
         components: {

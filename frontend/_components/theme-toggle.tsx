@@ -4,13 +4,21 @@ import * as React from "react";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 export function ThemeToggle() {
+  const t = useTranslations("common");
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  const transitionTimeoutRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     setMounted(true);
+    return () => {
+      if (transitionTimeoutRef.current !== null) {
+        window.clearTimeout(transitionTimeoutRef.current);
+      }
+    };
   }, []);
 
   if (!mounted) {
@@ -21,13 +29,25 @@ export function ThemeToggle() {
 
   const isDark = resolvedTheme === "dark";
 
-  const toggle = () => setTheme(isDark ? "light" : "dark");
+  const toggle = () => {
+    const root = document.documentElement;
+    root.classList.add("theme-transitioning");
+    setTheme(isDark ? "light" : "dark");
+
+    if (transitionTimeoutRef.current !== null) {
+      window.clearTimeout(transitionTimeoutRef.current);
+    }
+    transitionTimeoutRef.current = window.setTimeout(() => {
+      root.classList.remove("theme-transitioning");
+      transitionTimeoutRef.current = null;
+    }, 350);
+  };
 
   return (
     <button
       type="button"
       onClick={toggle}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? t("switchToLightMode") : t("switchToDarkMode")}
       className={`relative inline-flex items-center w-14 h-7 rounded-full border transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--ring-primary)] ${
         isDark ? "bg-primary border-primary" : "bg-bgSecondary border-borderPrimary"
       }`}

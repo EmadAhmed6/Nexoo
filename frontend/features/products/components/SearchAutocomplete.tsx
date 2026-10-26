@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useId } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -246,8 +246,8 @@ export function SearchAutocomplete({
             type="submit"
             className={
               isMobile
-                ? "px-3 py-1 rounded-xl bg-primary text-black text-xs font-bold hover:bg-primaryHover transition-colors shadow-sm"
-                : "px-3.5 py-1.5 rounded-xl bg-primary text-black text-xs font-bold hover:bg-primaryHover transition-colors shadow-sm"
+                ? "px-3 py-1 rounded-xl bg-primary text-white dark:text-black text-xs font-bold hover:bg-primaryHover transition-colors shadow-sm"
+                : "px-3.5 py-1.5 rounded-xl bg-primary text-white dark:text-black text-xs font-bold hover:bg-primaryHover transition-colors shadow-sm"
             }
           >
             {isMobile ? "Go" : "Search"}
@@ -288,7 +288,7 @@ export function SearchAutocomplete({
                           onMouseEnter={() => setSelectedIndex(catIdx)}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
                             isItemActive
-                              ? "bg-primary text-black border-primary font-semibold shadow-sm"
+                              ? "bg-primary text-white dark:text-black border-primary font-semibold shadow-sm"
                               : "bg-bgPrimary/70 hover:bg-primary/15 text-textPrimary hover:text-primary border-borderPrimary hover:border-primary/40"
                           }`}
                         >
@@ -445,7 +445,7 @@ export function SearchAutocomplete({
                 className={`flex-1 flex items-center justify-between py-2 px-3 rounded-xl transition-all ${
                   selectedIndex ===
                   suggestionItems.findIndex((it) => it.type === "search_all")
-                    ? "bg-primary text-black font-semibold shadow-sm"
+                    ? "bg-primary text-white dark:text-black font-semibold shadow-sm"
                     : "text-textPrimary hover:bg-bgSecondary hover:text-primary"
                 }`}
               >

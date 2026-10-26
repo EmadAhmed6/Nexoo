@@ -42,18 +42,18 @@
 
 @layer base {
   :root {
-    --bg-primary: #fff;
-    --bg-secondary: #161920;
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
 
-    --text-primary: #f3f4f6;
-    --text-secondary: #9ca3af;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
     --text-muted: #6b7280;
 
-    --primary: #d4af37;
-    --primary-hover: #b8972b;
-    --primary-light: rgba(212, 175, 55, 0.15);
+    --primary: #8a6a0a;
+    --primary-hover: #725608;
+    --primary-light: rgba(138, 106, 10, 0.12);
 
-    --border-primary: #272a33;
+    --border-primary: #e5e7eb;
     --text-error: #ef4444;
     --success: #10b981;
 
@@ -150,4 +150,31 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans);
+}
+
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    outline-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    text-decoration-color !important;
+  transition-duration: 300ms !important;
+  transition-timing-function: ease-in-out !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning,
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition-duration: 0ms !important;
+  }
 }

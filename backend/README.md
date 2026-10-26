@@ -1,170 +1,65 @@
-# Nexo Backend API
+# Nexo Backend
 
-A high-performance, robust, and scalable e-commerce RESTful API built with **Express 5**, **TypeScript**, **MongoDB (Mongoose)**, and **Cloudinary**.
+Express 5 REST API using TypeScript, MongoDB/Mongoose, JWT, Passport Google OAuth, Cloudinary, Nodemailer, Paymob and Swagger UI.
 
-[![Node.js](https://img.shields.io/badge/Node.js-18+-68a063?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-5.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47a248?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongoosejs.com/)
-[![Cloudinary](https://img.shields.io/badge/Cloudinary-Media-3448c5?style=for-the-badge&logo=cloudinary&logoColor=white)](https://cloudinary.com/)
-[![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203.0-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](http://localhost:5000/api-docs)
+## Capabilities
 
----
+- Email/password signup with OTP verification, login, password reset, refresh-token cookies and Google OAuth.
+- Customer profiles, profile images, addresses and password management.
+- Product catalogue/search, owner-authorized product management, reviews, cart and wishlist.
+- Coupons, orders, Paymob checkout/webhook, notifications and customer support tickets.
+- Admin order/ticket/banner/coupon/user-management endpoints and dashboard overviews.
+- Centralized JSON responses and Zod validation.
 
-## 🚀 Overview
+## Run locally
 
-The Nexo Backend powers a modern luxury e-commerce platform. It provides end-to-end management for authentication, user profiles, product catalogs, rich filtering, media storage, and role-based permissions.
+Requirements: Node.js 18+, pnpm, MongoDB. Configure backend/.env:
 
-### 🌟 Key Highlights
+| Variable | Purpose |
+|---|---|
+| PORT | API port; defaults to 5000 |
+| TRUST_PROXY_HOPS | Optional trusted proxy hop count; configure to match the known reverse-proxy chain in production |
+| FRONTEND_URL | Frontend origin, e.g. http://localhost:3000 |
+| MONGO_URI | MongoDB connection |
+| JWT_SECRET_KEY | Access JWT signing/verification |
+| JWT_REFRESH_SECRET_KEY | Refresh JWT signing/verification |
+| GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET | Google OAuth credentials |
+| GOOGLE_CALLBACK_URL | Callback; defaults to http://localhost:5000/auth/google/callback |
+| USER_EMAIL, USER_PASS | SMTP account for OTP and reset email |
+| CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET | Upload storage |
+| PAYMOB_SECRET_KEY, PAYMOB_PUBLIC_KEY, PAYMOB_INTEGRATION_ID | Paymob payment flow |
+| PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_MODE | Optional PayPal SDK configuration |
 
-- **Authentication & Authorization**: Secure JWT authentication with bcrypt password hashing and 3-tier Role-Based Access Control (`User`, `Admin`, `SuperAdmin`).
-- **Product Ownership Architecture**: Every product tracks its creator (`userId`). Modifying or deleting products is strictly guarded by `verifyProductOwner` middleware (allowed only for the owner, Admin, or SuperAdmin).
-- **Flexible Cloudinary Media Management**: Upload up to 5 images per product. Supports independent image editing: keep existing images via `existingImages` JSON or replace individual images without re-uploading the entire gallery.
-- **Advanced Query Engine**: Comprehensive filtering on `/products` by search keyword (regex across title, description, category), minimum/maximum price, in-stock status, rating range, and active discount flags.
-- **Interactive API Documentation**: Live Swagger OpenAPI 3.0 documentation served at `/api-docs` and standalone Markdown guide in [`API-Docs.md`](./API-Docs.md).
-- **Type Safety & Validation**: Full TypeScript end-to-end integration with strict Zod runtime request schemas.
+Never commit real environment credentials. Configure the exact Google callback URL in Google Cloud Console and use the frontend origin for CORS/OAuth redirects.
 
----
+    pnpm install
+    pnpm dev
 
-## 🛠️ Tech Stack
+Build with pnpm build. The API listens on port 5000 by default. Swagger UI is served from http://localhost:5000/api-docs.
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Runtime & Language** | Node.js, TypeScript (ES Modules) |
-| **Web Framework** | Express 5 |
-| **Database & ODM** | MongoDB, Mongoose 9 |
-| **Validation** | Zod (Runtime schema validation) |
-| **Security & Auth** | JSON Web Tokens (`jsonwebtoken`), `bcrypt`, `helmet`, `cors` |
-| **File Uploads & CDN** | Multer, Cloudinary SDK v2 |
-| **Documentation** | Swagger-JSDoc, Swagger-UI-Express |
-| **Developer Tools** | `tsx` (Watch mode runner), `typescript` compiler |
+## API conventions
 
----
+- API paths are mounted at the root (for example /auth/login and /products); there is no /api/v1 prefix.
+- Bearer access token is required on authenticated routes. Refresh token is stored in an HTTP-only cookie.
+- General API requests are limited to 500 per IP per 15 minutes; sensitive auth endpoints also share a 10-per-minute limit. Rate-limited responses return HTTP 429 with standard RateLimit headers. Swagger UI and the Paymob webhook bypass the global limit.
+- The default rate-limit counters are in memory per process. Use a shared store if deploying multiple backend instances; configure Express proxy trust to match the actual proxy chain so client IPs are identified correctly.
+- Success responses generally use { success, message, data }; errors use { success: false, message }.
+- Product and banner image uploads are multipart/form-data.
+- Roles include User, Admin, and SuperAdmin. Product ownership and ticket ownership are also enforced.
 
-## 📁 Directory Structure
+## Route groups
 
-```text
-backend/
-├── src/
-│   ├── config/
-│   │   ├── config.ts          # MongoDB connection handler
-│   │   ├── cloudinary.ts      # Cloudinary v2 setup
-│   │   └── swagger.ts         # Swagger-JSDoc OpenAPI config
-│   ├── docs/
-│   │   ├── auth.docs.ts       # Swagger annotations for /auth
-│   │   ├── user.docs.ts       # Swagger annotations for /users
-│   │   └── product.docs.ts    # Swagger annotations for /products
-│   ├── middlewares/
-│   │   ├── errors.ts          # Centralized error & 404 handlers
-│   │   ├── multer.ts          # Multipart file upload storage
-│   │   └── verifyToken.ts     # JWT verification & ownership guard
-│   ├── modules/
-│   │   ├── auth/              # Registration, Login, Token generation
-│   │   ├── Product/           # Controller, Model, Zod schema, Routes
-│   │   └── Users/             # User management, Roles, Routes
-│   └── app.ts                 # Express server bootstrap & routes mounting
-├── API-Docs.md                # Comprehensive Markdown API documentation
-├── package.json
-└── tsconfig.json
-```
+| Group | Prefix | Scope |
+|---|---|---|
+| Authentication | /auth | OTP, password reset, session refresh/logout, Google OAuth |
+| Users | /users | Profiles, addresses, account management |
+| Products and reviews | /products, /reviews | Catalogue, suggestions, product CRUD, likes, reviews |
+| Cart and wishlist | /cart, /wishlist | Customer shopping state |
+| Coupons | /coupons, /admin/coupons | Apply/remove and admin campaign management |
+| Orders | /orders, /admin/orders | Customer orders, Paymob and admin fulfillment |
+| Notifications | /notifications | List, read and delete |
+| Tickets | /tickets, /admin/tickets | Customer conversations and admin status |
+| Banners | /banners, /admin/banners | Public active banners and admin management |
+| Admin users | /admin/users | Ban/unban and role toggles |
 
----
-
-## ⚙️ Environment Configuration
-
-Create a `.env` file in the `backend/` directory with the following variables:
-
-```env
-PORT=5000
-FRONTEND_URL=http://localhost:3000
-
-# MongoDB Connection String
-MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/nexo?retryWrites=true&w=majority
-
-# JWT Authentication Secret
-JWT_SECRET=your_super_secret_jwt_key_here
-
-# Cloudinary Credentials
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-```
-
----
-
-## 🚦 Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or higher)
-- `pnpm` (recommended) or `npm` / `yarn`
-- MongoDB database instance (Atlas or local)
-- Cloudinary account
-
-### Installation & Run
-
-1. **Install Dependencies**:
-   ```bash
-   pnpm install
-   ```
-
-2. **Start Development Server** (with live reload via `tsx`):
-   ```bash
-   pnpm dev
-   ```
-   Server will start on `http://localhost:5000`.
-
-3. **Build for Production**:
-   ```bash
-   pnpm build
-   ```
-
-4. **Access Interactive Documentation**:
-   Visit [http://localhost:5000/api-docs](http://localhost:5000/api-docs) in your browser.
-
----
-
-## 📡 API Endpoints Overview
-
-For detailed request/response examples and schemas, see [`API-Docs.md`](./API-Docs.md).
-
-### 🔐 Authentication
-| Method | Endpoint | Description | Access |
-| :--- | :--- | :--- | :---: |
-| `POST` | `/auth/register` | Register new user account | Public |
-| `POST` | `/auth/login` | Authenticate user & receive JWT | Public |
-
-### 👤 Users
-| Method | Endpoint | Description | Access |
-| :--- | :--- | :--- | :---: |
-| `GET` | `/users` | Get all users list | User/Admin |
-| `GET` | `/users/:userId` | Get single user profile | User/Admin |
-| `PUT` | `/users/:userId` | Update profile information | Owner/Admin |
-| `DELETE` | `/users/:userId` | Delete user account permanently | Owner/Admin |
-
-### 🛍️ Products
-| Method | Endpoint | Description | Access |
-| :--- | :--- | :--- | :---: |
-| `GET` | `/products` | Query products with filters, search, and pagination | User/Admin |
-| `POST` | `/products` | Create product with up to 5 Cloudinary images | Authenticated User |
-| `GET` | `/products/:productId` | Retrieve single product details by ID | User/Admin |
-| `PUT` | `/products/:productId` | Update product, details, and optional images | Product Owner / Admin |
-| `DELETE` | `/products/:productId` | Delete a product permanently | Product Owner / Admin |
-
----
-
-## 🛡️ Security Implementation
-
-- **Helmet**: Secures HTTP headers against common vulnerabilities.
-- **CORS**: Configured to restrict requests strictly to the frontend origin.
-- **Bcrypt**: Passwords hashed with secure 10 salt rounds before database persistence.
-- **Role Verification**: Middleware ensures regular users cannot escalate privileges or delete other users' products.
-- **Granular Ownership Guard (`verifyProductOwner`)**: Ensures that products can only be modified or deleted by the user who created them (or system administrators).
-
----
-
-## 👨‍💻 Author
-
-- **Emad Ahmed** — Full Stack Developer
-- Portfolio: [https://emad-site.vercel.app/](https://emad-site.vercel.app/)
-- Email: [emadahmeddev@gmail.com](mailto:emadahmeddev@gmail.com)
+The endpoint list, request fields, permissions, optional postal code behavior and integrations are documented in [API-Docs.md](./API-Docs.md). Swagger annotations are maintained in src/docs/ and loaded by src/config/swagger.ts.

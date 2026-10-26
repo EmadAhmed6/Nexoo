@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -36,6 +37,8 @@ export function TicketDetailModal({
   onClose,
   isAdminView = false,
 }: TicketDetailModalProps) {
+  const locale = useLocale();
+  const t = useTranslations("admin");
   const { data: ticket, isLoading } = useTicketDetails(ticketId);
   const addMessageMutation = useAddTicketMessage();
   const updateTicketMutation = useUpdateTicket();
@@ -75,7 +78,7 @@ export function TicketDetailModal({
 
   const handleDelete = async () => {
     if (!ticketId) return;
-    if (confirm("Are you sure you want to delete this ticket?")) {
+    if (confirm(t("deleteTicketQuestion"))) {
       await deleteTicketMutation.mutateAsync(ticketId);
       onClose();
     }
@@ -110,6 +113,16 @@ export function TicketDetailModal({
         return "text-textSecondary bg-bgPrimary";
     }
   };
+  const priorityLabels: Record<string, string> = {
+    Urgent: t("priorityUrgent"),
+    High: t("priorityHigh"),
+    Medium: t("priorityMedium"),
+    Low: t("priorityLow"),
+  };
+  const priorityLabel = (priority: string) => priorityLabels[priority] || priority;
+  const categoryLabel = (category?: string) => category
+    ? t(`ticketCategory${category[0].toUpperCase()}${category.slice(1)}` as any)
+    : "";
 
   return (
     <AnimatePresence>
@@ -129,26 +142,31 @@ export function TicketDetailModal({
                     ticket?.status || "open"
                   )}`}
                 >
-                  {ticket?.status?.replace("_", " ")}
+                  {ticket?.status ? ({
+                    open: t("ticketOpen"),
+                    in_progress: t("ticketInProgress"),
+                    resolved: t("ticketResolved"),
+                    closed: t("ticketClosed"),
+                  } as Record<string, string>)[ticket.status] : t("ticketOpen")}
                 </span>
                 <span
                   className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${getPriorityBadge(
                     ticket?.priority || "Medium"
                   )}`}
                 >
-                  {ticket?.priority} Priority
+                  {t("priorityLabel", { priority: priorityLabel(ticket?.priority || "Medium") })}
                 </span>
                 <span className="text-[10px] font-medium text-textSecondary uppercase px-2 py-0.5 rounded-full bg-bgPrimary border border-borderPrimary">
-                  {ticket?.category}
+                  {categoryLabel(ticket?.category)}
                 </span>
               </div>
               <h2 className="text-base font-bold text-textPrimary truncate">
-                {ticket?.subject || "Loading Ticket..."}
+                {ticket?.subject || t("loadingTicket")}
               </h2>
               {ticket?.order && (
                 <p className="text-[11px] text-textSecondary flex items-center gap-1.5">
                   <Package className="w-3.5 h-3.5 text-primary" />
-                  Order: <span className="font-mono text-textPrimary">{ticket.order}</span>
+                  {t("orderLabel")} <span className="font-mono text-textPrimary">{ticket.order}</span>
                 </p>
               )}
             </div>
@@ -156,7 +174,7 @@ export function TicketDetailModal({
             <div className="flex items-center gap-2">
               <button
                 onClick={handleDelete}
-                title="Delete Ticket"
+                title={t("deleteTicket")}
                 className="p-1.5 rounded-lg text-textSecondary hover:text-red-500 hover:bg-red-500/10 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
@@ -175,9 +193,9 @@ export function TicketDetailModal({
             <div className="flex items-center gap-2 text-textSecondary">
               <Clock className="w-3.5 h-3.5" />
               <span>
-                Opened:{" "}
+                {t("openedLabel")}{" "}
                 {ticket?.createdAt
-                  ? new Date(ticket.createdAt).toLocaleDateString(undefined, {
+                  ? new Date(ticket.createdAt).toLocaleDateString(locale, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
@@ -190,16 +208,16 @@ export function TicketDetailModal({
 
             {/* Change status control */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-textSecondary">Status:</span>
+              <span className="text-[11px] text-textSecondary">{t("statusLabel")}</span>
               <select
                 value={ticket?.status || "open"}
                 onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
                 className="text-[11px] font-semibold bg-bgPrimary border border-borderPrimary rounded-lg px-2 py-1 text-textPrimary focus:outline-none focus:border-primary"
               >
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
+                <option value="open">{t("ticketOpen")}</option>
+                <option value="in_progress">{t("ticketInProgress")}</option>
+                <option value="resolved">{t("ticketResolved")}</option>
+                <option value="closed">{t("ticketClosed")}</option>
               </select>
             </div>
           </div>
@@ -209,7 +227,7 @@ export function TicketDetailModal({
             {isLoading ? (
               <div className="py-12 flex flex-col items-center justify-center gap-2 text-textSecondary">
                 <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <p className="text-xs">Loading conversation...</p>
+                <p className="text-xs">{t("loadingConversation")}</p>
               </div>
             ) : ticket?.messages && ticket.messages.length > 0 ? (
               ticket.messages.map((msg: any, idx: number) => {
@@ -223,8 +241,8 @@ export function TicketDetailModal({
 
                 const senderName = isMsgObject
                   ? `${senderObj?.firstName || ""} ${senderObj?.lastName || ""}`.trim() ||
-                    (isStaff ? "Support Staff" : "User")
-                  : "Message";
+                    (isStaff ? t("supportStaff") : t("user"))
+                  : t("messageLabel");
 
                 return (
                   <div
@@ -235,7 +253,7 @@ export function TicketDetailModal({
                       {isStaff ? (
                         <span className="flex items-center gap-1 font-semibold text-primary">
                           <ShieldCheck className="w-3 h-3" />
-                          {senderName} (Support)
+                          {senderName} ({t("supportRole")})
                         </span>
                       ) : (
                         <span className="flex items-center gap-1 font-semibold text-textPrimary">
@@ -246,7 +264,7 @@ export function TicketDetailModal({
                       <span>•</span>
                       <span>
                         {isMsgObject && msg.createdAt
-                          ? new Date(msg.createdAt).toLocaleTimeString([], {
+                          ? new Date(msg.createdAt).toLocaleTimeString(locale, {
                               hour: "2-digit",
                               minute: "2-digit",
                             })
@@ -272,7 +290,7 @@ export function TicketDetailModal({
               })
             ) : (
               <div className="py-8 text-center text-textSecondary text-xs">
-                No messages recorded in this ticket yet.
+                {t("noTicketMessages")}
               </div>
             )}
           </div>
@@ -289,8 +307,8 @@ export function TicketDetailModal({
               onChange={(e) => setReplyText(e.target.value)}
               placeholder={
                 ticket?.status === "closed"
-                  ? "This ticket is closed. Sending a message will notify support."
-                  : "Write your reply or inquiry..."
+                  ? t("closedTicketNotice")
+                  : t("replyPlaceholder")
               }
               className="flex-1 px-4 py-2.5 rounded-xl border border-borderPrimary bg-bgPrimary text-xs text-textPrimary placeholder:text-textSecondary/50 focus:outline-none focus:border-primary transition-colors"
             />
@@ -300,7 +318,7 @@ export function TicketDetailModal({
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-primary/20"
             >
               <Send className="w-3.5 h-3.5" />
-              <span>{addMessageMutation.isPending ? "Sending..." : "Send"}</span>
+              <span>{addMessageMutation.isPending ? t("sending") : t("send")}</span>
             </button>
           </form>
         </motion.div>

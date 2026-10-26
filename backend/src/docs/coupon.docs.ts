@@ -1,5 +1,5 @@
-// GET    /coupons
-// POST   /coupons
+// GET    /admin/coupons
+// POST   /admin/coupons
 // POST   /coupons/apply
 // DELETE /coupons/remove
 // PUT    /coupons/{couponId}
@@ -8,19 +8,30 @@
 /**
  * @swagger
  * tags:
- *   name: Coupons
+ *   name: Admin Coupons
  *   description: Coupons and discount management APIs
  */
 
-// GET    /coupons
+// GET    /admin/coupons
 /**
  * @swagger
- * /coupons:
+ * /admin/coupons:
  *   get:
  *     summary: Get all coupons (Admin only)
  *     description: Retrieve list of all coupons sorted by newest first. Requires Admin or SuperAdmin authentication.
  *     tags:
- *       - Coupons
+ *       - Admin Coupons
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Case-insensitive search by coupon code.
+ *       - in: query
+ *         name: isActive
+ *         schema: { type: boolean }
+ *       - in: query
+ *         name: discountType
+ *         schema: { type: string, enum: [percentage, fixed] }
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -78,15 +89,15 @@
  *         description: Forbidden - Requires Admin role
  */
 
-// POST   /coupons
+// POST   /admin/coupons
 /**
  * @swagger
- * /coupons:
+ * /admin/coupons:
  *   post:
  *     summary: Create a new coupon (Admin only)
  *     description: Create a discount coupon with percentage or fixed amount. Requires Admin or SuperAdmin authentication.
  *     tags:
- *       - Coupons
+ *       - Admin Coupons
  *     security:
  *       - bearerAuth: []
  *     requestBody:

@@ -24,4 +24,14 @@ export const getAuthToken = (): string | undefined => cookieStorage.get(AUTH_TOK
 export const setAuthToken = (token: string, days = 7): void => {
   cookieStorage.set(AUTH_TOKEN_KEY, token, { expires: days });
 };
-export const removeAuthToken = (): void => cookieStorage.remove(AUTH_TOKEN_KEY);
+export const removeAuthToken = (): void => {
+  cookieStorage.remove(AUTH_TOKEN_KEY);
+  cookieStorage.remove(AUTH_TOKEN_KEY, { path: "" });
+  if (typeof document !== "undefined") {
+    const paths = ["/", ""];
+    paths.forEach((p) => {
+      document.cookie = `${AUTH_TOKEN_KEY}=; path=${p}; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax`;
+      document.cookie = `${AUTH_TOKEN_KEY}=; path=${p}; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0;`;
+    });
+  }
+};

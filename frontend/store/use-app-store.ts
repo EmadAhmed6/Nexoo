@@ -3,6 +3,8 @@ import { devtools, persist } from "zustand/middleware";
 import { User } from "@/features/auth/types/auth.types";
 import { removeAuthToken } from "@/lib/cookies";
 
+import { authApi } from "@/features/auth/api/auth.api";
+
 interface AppState {
   user: User | null;
   isAuthenticated: boolean;
@@ -46,6 +48,7 @@ export const useAppStore = create<AppState>()(
           }),
 
         logout: () => {
+          authApi.logout().catch(() => {});
           removeAuthToken();
           set({
             user: null,

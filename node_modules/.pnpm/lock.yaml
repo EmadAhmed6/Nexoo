@@ -1,0 +1,22 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      js-cookies:
+        specifier: ^1.0.4
+        version: 1.0.4
+
+packages:
+
+  js-cookies@1.0.4:
+    resolution: {integrity: sha512-cO1SHDH7zJsi8FihHmDtcWx90mWmrfGOrcLKPeaEX6tLyuTK2wnzgdmNa34Q6rNAd6VhQUgjDt5Eyl90VI/Fpg==}
+
+snapshots:
+
+  js-cookies@1.0.4: {}

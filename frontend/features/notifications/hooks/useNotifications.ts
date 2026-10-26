@@ -5,6 +5,7 @@ import { notificationApi } from "../api/notification.api";
 import { NotificationItem } from "../types/notification.types";
 import { useAppStore } from "@/store/use-app-store";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export const NOTIFICATIONS_QUERY_KEY = ["notifications"] as const;
 
@@ -34,6 +35,7 @@ export function useNotifications() {
 }
 
 export function useMarkAsRead() {
+  const t = useTranslations("notifications");
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -55,7 +57,7 @@ export function useMarkAsRead() {
       if (context?.previous) {
         queryClient.setQueryData(NOTIFICATIONS_QUERY_KEY, context.previous);
       }
-      toast.error("Failed to mark notification as read");
+      toast.error(t("operationFailed"));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
@@ -64,6 +66,7 @@ export function useMarkAsRead() {
 }
 
 export function useMarkAllAsRead() {
+  const t = useTranslations("notifications");
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -82,13 +85,13 @@ export function useMarkAllAsRead() {
       return { previous };
     },
     onSuccess: () => {
-      toast.success("All notifications marked as read");
+      toast.success(t("markedAllRead"));
     },
     onError: (_err, _vars, context) => {
       if (context?.previous) {
         queryClient.setQueryData(NOTIFICATIONS_QUERY_KEY, context.previous);
       }
-      toast.error("Failed to mark all as read");
+      toast.error(t("operationFailed"));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
@@ -97,6 +100,7 @@ export function useMarkAllAsRead() {
 }
 
 export function useDeleteNotification() {
+  const t = useTranslations("notifications");
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -115,13 +119,13 @@ export function useDeleteNotification() {
       return { previous };
     },
     onSuccess: () => {
-      toast.success("Notification deleted");
+      toast.success(t("deleted"));
     },
     onError: (_err, _id, context) => {
       if (context?.previous) {
         queryClient.setQueryData(NOTIFICATIONS_QUERY_KEY, context.previous);
       }
-      toast.error("Failed to delete notification");
+      toast.error(t("operationFailed"));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
@@ -130,6 +134,7 @@ export function useDeleteNotification() {
 }
 
 export function useDeleteAllNotifications() {
+  const t = useTranslations("notifications");
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -143,13 +148,13 @@ export function useDeleteAllNotifications() {
       return { previous };
     },
     onSuccess: () => {
-      toast.success("All notifications cleared");
+      toast.success(t("cleared"));
     },
     onError: (_err, _vars, context) => {
       if (context?.previous) {
         queryClient.setQueryData(NOTIFICATIONS_QUERY_KEY, context.previous);
       }
-      toast.error("Failed to clear notifications");
+      toast.error(t("operationFailed"));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });

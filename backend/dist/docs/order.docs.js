@@ -112,7 +112,35 @@ export {};
  *                       properties:
  *                         status:
  *                           type: string
+ *                           enum: [Pending, Processing, Shipped, Delivered, Cancelled]
  *                           example: Pending
+ *                         updatedAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: 2026-10-21T18:00:00.000Z
+ *                         isDelivered:
+ *                           type: boolean
+ *                           example: false
+ *                         deliveredAt:
+ *                           type: string
+ *                           format: date-time
+ *                     statusHistory:
+ *                       type: array
+ *                       description: Historical timeline of order status updates
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           status:
+ *                             type: string
+ *                             enum: [Pending, Processing, Shipped, Delivered, Cancelled]
+ *                             example: Pending
+ *                           timestamp:
+ *                             type: string
+ *                             format: date-time
+ *                             example: 2026-10-21T18:00:00.000Z
+ *                           note:
+ *                             type: string
+ *                             example: Order placed successfully
  *       400:
  *         description: Invalid input data
  *       401:

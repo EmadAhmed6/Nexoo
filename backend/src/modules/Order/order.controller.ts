@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
+import { Types } from "mongoose";
 import { sendError, successMsg } from "../../middlewares/errors.js";
 import { createPaymobIntention } from "../../config/paymob.js";
 import { User } from "../Users/user.model.js";
@@ -56,6 +57,10 @@ const createOrder = asyncHandler(
     }
 
     const userId = req.user?.id;
+    if (!userId) {
+      sendError(res, 401, "Unauthorized");
+      return;
+    }
     const { shippingAddress, paymentMethod } = req.body;
 
     const cart = await Cart.findOne({ userId }).populate("cartItems.product");
@@ -131,7 +136,7 @@ const createOrder = asyncHandler(
         if (userIndex > -1) {
           coupon.usedBy[userIndex]!.count += 1;
         } else {
-          coupon.usedBy.push({ user: userId, count: 1 });
+          coupon.usedBy.push({ user: new Types.ObjectId(userId), count: 1 });
         }
 
         await coupon.save();

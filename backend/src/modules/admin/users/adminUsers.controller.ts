@@ -57,4 +57,31 @@ const unbanUser = asyncHandler(
   },
 );
 
-export { banUser, unbanUser };
+// SET USER AS ADMIN
+const toggleAdminStatus = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      sendError(res, 404, "User was not found");
+      return;
+    }
+    if (user.role === "SuperAdmin") {
+      sendError(res, 403, "Cannot modify SuperAdmin role");
+      return;
+    }
+    const newRole = user.role === "Admin" ? "User" : "Admin";
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { role: newRole },
+      { new: true },
+    ).select("-password");
+
+    successMsg(res, 200, `User is now ${newRole}`, updatedUser);
+  },
+);
+
+
+
+export { banUser, unbanUser, toggleAdminStatus };

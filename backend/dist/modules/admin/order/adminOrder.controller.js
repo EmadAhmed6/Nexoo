@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import { sendError, successMsg } from "../../../middlewares/errors.js";
 import { Order } from "../../Order/order.model.js";
 import { User } from "../../Users/user.model.js";
+import { Notification } from "../../Notification/notification.model.js";
 // GET ALL USER ORDERS
 const getOrders = asyncHandler(async (req, res) => {
     const { orderStatus, orderId, customerName, email, phone, minPrice, maxPrice, page, limit, isPaid, } = req.query;
@@ -67,7 +68,7 @@ const getOrderById = asyncHandler(async (req, res) => {
 // UPDATE ORDER STATUS
 const updateOrderStatus = asyncHandler(async (req, res) => {
     const orderId = req.params.orderId;
-    const orderStatus = req.body.orderStatus;
+    const { orderStatus, note } = req.body;
     if (!orderStatus) {
         sendError(res, 400, "Order status is required");
         return;
@@ -89,6 +90,15 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
         return;
     }
     order.orderStatus.status = orderStatus;
+    order.orderStatus.updatedAt = new Date();
+    if (!order.statusHistory) {
+        order.statusHistory = [];
+    }
+    order.statusHistory.push({
+        status: orderStatus,
+        timestamp: new Date(),
+        note,
+    });
     if (order.orderStatus.status === "Delivered") {
         order.orderStatus.isDelivered = true;
         order.orderStatus.deliveredAt = new Date();
@@ -103,6 +113,18 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
         }
     }
     await order.save();
+    try {
+        await Notification.create({
+            user: order.user,
+            title: `Order Status: ${orderStatus}`,
+            message: `Your order #${order._id.toString().slice(-6)} status has been updated to "${orderStatus}".`,
+            type: "order",
+            relatedId: order._id,
+        });
+    }
+    catch (notifErr) {
+        console.error("Failed to create order status notification:", notifErr);
+    }
     successMsg(res, 200, "Order status updated successfully", order);
 });
 // GET ORDER STATS

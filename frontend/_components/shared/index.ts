@@ -14,3 +14,4 @@ export { Sidebar } from "./Sidebar";
 export { HeroBanner } from "./HeroBanner";
 export { HeroSection } from "./HeroSection";
 export { MultiPanelBanner } from "./MultiPanelBanner";
+export { LanguageSwitcher } from "./LanguageSwitcher";

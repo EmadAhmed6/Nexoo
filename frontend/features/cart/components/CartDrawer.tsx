@@ -19,6 +19,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useCartStore } from "../store/useCartStore";
 import {
   useCart,
@@ -87,6 +88,7 @@ function Stepper({ value, isLoading, onDecrement, onIncrement }: StepperProps) {
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
 function EmptyCart({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("cart");
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -106,22 +108,22 @@ function EmptyCart({ onClose }: { onClose: () => void }) {
       </div>
 
       <Text font="bold" size="lg" className="mb-2">
-        Your cart is empty
+        {t("emptyTitle")}
       </Text>
       <Text
         size="xs"
         color="secondary"
         className="max-w-[220px] leading-relaxed mb-8"
       >
-        Discover our exclusive collection and add your favourite luxury pieces.
+        {t("emptySubtitle")}
       </Text>
 
       <motion.button
         whileTap={{ scale: 0.96 }}
         onClick={onClose}
-        className="px-6 py-3 rounded-xl text-xs font-bold text-black bg-primary hover:bg-primaryHover shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_28px_rgba(212,175,55,0.4)] transition-all duration-200"
+        className="px-6 py-3 rounded-xl text-xs font-bold text-white dark:text-black bg-primary hover:bg-primaryHover shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_28px_rgba(212,175,55,0.4)] transition-all duration-200"
       >
-        Explore Collection
+        {t("exploreCollection")}
       </motion.button>
     </motion.div>
   );
@@ -281,6 +283,7 @@ function SummaryFooter({
   onRemoveCoupon,
   onClose,
 }: SummaryFooterProps) {
+  const t = useTranslations("cart");
   const hasCoupon = !!couponCode;
   const displayTotal = discountedTotal !== undefined ? discountedTotal : subtotal;
   const discount = hasCoupon && discountedTotal !== undefined ? subtotal - discountedTotal : 0;
@@ -299,7 +302,7 @@ function SummaryFooter({
             onClick={onRemoveCoupon}
             disabled={isRemoving}
             className="p-1 rounded-lg text-textSecondary hover:text-red-400 transition-colors"
-            title="Remove coupon"
+            title={t("removeCoupon")}
           >
             {isRemoving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
           </button>
@@ -311,16 +314,16 @@ function SummaryFooter({
             value={couponInput}
             onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
             onKeyDown={(e) => e.key === "Enter" && couponInput.trim() && onApplyCoupon()}
-            placeholder="Coupon code"
+            placeholder={t("couponCode")}
             className="flex-1 px-3 py-2 rounded-xl border border-borderPrimary bg-bgPrimary text-xs text-textPrimary placeholder:text-textSecondary focus:outline-none focus:border-primary transition-colors"
           />
           <button
             onClick={onApplyCoupon}
             disabled={isApplying || !couponInput.trim()}
-            className="px-3 py-2 rounded-xl bg-primary hover:bg-primaryHover text-black text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+            className="px-3 py-2 rounded-xl bg-primary hover:bg-primaryHover text-white dark:text-black text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
           >
             {isApplying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Tag className="w-3.5 h-3.5" />}
-            Apply
+            {t("apply")}
           </button>
         </div>
       )}
@@ -329,7 +332,7 @@ function SummaryFooter({
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <Text size="xs" color="secondary">
-            Subtotal
+            {t("subtotal")}
           </Text>
           <Text font="semiBold" size="xs">
             {subtotal.toFixed(2)} EGP
@@ -337,16 +340,16 @@ function SummaryFooter({
         </div>
         {hasCoupon && discount > 0 && (
           <div className="flex items-center justify-between">
-            <Text size="xs" color="secondary">Discount</Text>
+            <Text size="xs" color="secondary">{t("discount")}</Text>
             <span className="text-xs font-bold text-emerald-400">-{discount.toFixed(2)} EGP</span>
           </div>
         )}
         <div className="flex items-center justify-between">
           <Text size="xs" color="secondary">
-            Shipping
+            {t("shipping")}
           </Text>
           <span className="text-[11px] font-bold text-primary">
-            Free · Nexo Exclusive
+            {t("exclusiveShipping")}
           </span>
         </div>
       </div>
@@ -356,7 +359,7 @@ function SummaryFooter({
       {/* Total */}
       <div className="flex items-center justify-between">
         <Text font="bold" size="sm">
-          Total Amount
+          {t("totalAmount")}
         </Text>
         <Text font="black" size="xl" color="accent">
           {displayTotal.toFixed(2)} EGP
@@ -367,15 +370,15 @@ function SummaryFooter({
       <Link
         href="/checkout"
         onClick={onClose}
-        className="group flex w-full items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl bg-primary hover:bg-primaryHover text-black text-sm font-bold shadow-[0_4px_24px_rgba(212,175,55,0.3)] hover:shadow-[0_6px_32px_rgba(212,175,55,0.5)] transition-all duration-200"
+        className="group flex w-full items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl bg-primary hover:bg-primaryHover text-white dark:text-black text-sm font-bold shadow-[0_4px_24px_rgba(212,175,55,0.3)] hover:shadow-[0_6px_32px_rgba(212,175,55,0.5)] transition-all duration-200"
       >
-        <span>Proceed to Checkout</span>
+        <span>{t("checkout")}</span>
         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
       </Link>
 
       {/* Reassurance */}
       <p className="text-center text-[10px] text-textSecondary leading-relaxed">
-        🔒 Secure checkout &nbsp;·&nbsp; Free returns &nbsp;·&nbsp; Nexo Promise
+        {t("reassurance")}
       </p>
     </div>
   );
@@ -384,6 +387,7 @@ function SummaryFooter({
 // ─── Main CartDrawer ──────────────────────────────────────────────────────────
 
 export function CartDrawer() {
+  const t = useTranslations("cart");
   const { isOpen, closeCart } = useCartStore();
   const { data: cart, isLoading } = useCart();
   const updateItem = useUpdateCartItem();
@@ -462,7 +466,7 @@ export function CartDrawer() {
                     strokeWidth={2}
                   />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-primary text-black text-[9px] font-black flex items-center justify-center px-1 leading-none">
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-primary text-white dark:text-black text-[9px] font-black flex items-center justify-center px-1 leading-none">
                       {totalItems}
                     </span>
                   )}
@@ -470,7 +474,7 @@ export function CartDrawer() {
 
                 <div>
                   <Text font="bold" size="base" className="leading-tight">
-                    Shopping Cart
+                    {t("shoppingCart")}
                   </Text>
                   <Text
                     size="xs"
@@ -478,8 +482,8 @@ export function CartDrawer() {
                     className="leading-tight mt-0.5"
                   >
                     {totalItems === 0
-                      ? "No items yet"
-                      : `${totalItems} item${totalItems !== 1 ? "s" : ""} selected`}
+                      ? t("noItems")
+                      : t("itemsSelected", { count: totalItems })}
                   </Text>
                 </div>
               </div>
@@ -488,7 +492,7 @@ export function CartDrawer() {
                 {cartItems.length > 0 && (
                   <button
                     onClick={() => {
-                      if (confirm("Clear all items from your cart?")) {
+                      if (confirm(t("confirmClear"))) {
                         clearCart.mutate();
                       }
                     }}
@@ -496,7 +500,7 @@ export function CartDrawer() {
                     title="Clear entire cart"
                     className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-textSecondary hover:text-red-500 hover:bg-red-500/10 transition-colors"
                   >
-                    {clearCart.isPending ? "Clearing..." : "Clear"}
+                    {clearCart.isPending ? t("clearing") : t("clearCart")}
                   </button>
                 )}
                 <button
@@ -515,7 +519,7 @@ export function CartDrawer() {
                 <div className="h-full flex flex-col items-center justify-center gap-3 py-20">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   <Text size="xs" color="secondary">
-                    Loading your cart…
+                    {t("loadingCart")}
                   </Text>
                 </div>
               ) : cartItems.length === 0 ? (

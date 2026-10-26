@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
 import {
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Banner } from "@/features/banners/types/banner.types";
 import { useActiveBanners } from "@/features/banners/hooks/useBanners";
+import { useTranslations } from "next-intl";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
@@ -40,29 +41,32 @@ function buildCtaHref(banner: Banner): string {
   }
 }
 
-function buildCtaLabel(banner: Banner): string {
-  switch (banner.linkType) {
-    case "category":
-      return banner.linkValue ? `Shop ${banner.linkValue}` : "Shop Now";
-    case "product":
-      return "View Product";
-    case "external":
-      return "Learn More";
-    default:
-      return "Explore Now";
-  }
-}
 
-const FEATURE_BADGES = [
-  "Official Warranty",
-  "Express Shipping in Egypt",
-  "Secure Checkout",
-];
 
 /* ── Component ───────────────────────────────────────────────── */
 
 export function HeroSection() {
+  const t = useTranslations("home");
   const { data: banners, isLoading } = useActiveBanners("hero_home");
+
+  const FEATURE_BADGES = [
+    t("officialWarranty"),
+    t("expressShipping"),
+    t("secureCheckout"),
+  ];
+
+  function buildCtaLabel(banner: Banner): string {
+    switch (banner.linkType) {
+      case "category":
+        return banner.linkValue ? t("shopCategory", { category: banner.linkValue }) : t("shopNow");
+      case "product":
+        return t("viewProduct");
+      case "external":
+        return t("learnMore");
+      default:
+        return t("exploreNow");
+    }
+  }
 
   /* Loading skeleton */
   if (isLoading) {
@@ -98,7 +102,13 @@ export function HeroSection() {
       >
         {banners.map((banner) => (
           <SwiperSlide key={banner._id}>
-            <HeroSlide banner={banner} />
+            <HeroSlide
+              banner={banner}
+              ctaLabel={buildCtaLabel(banner)}
+              featuredBadge={t("featuredSelection")}
+              featureBadges={FEATURE_BADGES}
+              curatedForYou={t("curatedForYou")}
+            />
           </SwiperSlide>
         ))}
       </Swiper>
@@ -130,15 +140,15 @@ export function HeroSection() {
       <div className="relative z-10 border-t border-white/[0.06] bg-black/30 backdrop-blur-sm px-6 sm:px-12 py-3.5 hidden md:grid grid-cols-3 gap-4 text-xs font-semibold text-white/50">
         <div className="flex items-center gap-2.5 justify-center">
           <Truck className="w-4 h-4 text-[#fbbf24]" />
-          <span>Free Express Shipping across Egypt</span>
+          <span>{t("expressShipping")}</span>
         </div>
         <div className="flex items-center gap-2.5 justify-center border-x border-white/[0.06]">
           <ShieldCheck className="w-4 h-4 text-[#fbbf24]" />
-          <span>100% Genuine &amp; Official Warranty</span>
+          <span>{t("officialWarranty")}</span>
         </div>
         <div className="flex items-center gap-2.5 justify-center">
           <RotateCcw className="w-4 h-4 text-[#fbbf24]" />
-          <span>14-Day Hassle-Free Returns</span>
+          <span>{t("returnsPolicy")}</span>
         </div>
       </div>
 
@@ -168,9 +178,20 @@ export function HeroSection() {
 
 /* ── Single Slide ────────────────────────────────────────────── */
 
-function HeroSlide({ banner }: { banner: Banner }) {
+function HeroSlide({
+  banner,
+  ctaLabel,
+  featuredBadge,
+  featureBadges,
+  curatedForYou,
+}: {
+  banner: Banner;
+  ctaLabel: string;
+  featuredBadge: string;
+  featureBadges: string[];
+  curatedForYou: string;
+}) {
   const ctaHref = buildCtaHref(banner);
-  const ctaLabel = buildCtaLabel(banner);
 
   return (
     <div className="relative w-full min-h-[400px] lg:min-h-[460px]">
@@ -185,7 +206,7 @@ function HeroSlide({ banner }: { banner: Banner }) {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#fbbf24]/25 bg-[#fbbf24]/[0.08] text-[#fbbf24] text-xs font-bold shadow-sm backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>✨ Featured Selection</span>
+            <span>{featuredBadge}</span>
           </div>
 
           {/* Title */}
@@ -202,7 +223,7 @@ function HeroSlide({ banner }: { banner: Banner }) {
 
           {/* Feature Badges */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            {FEATURE_BADGES.map((feat) => (
+            {featureBadges.map((feat) => (
               <span
                 key={feat}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-white/[0.04] border border-white/[0.08] text-white/75 backdrop-blur-sm shadow-sm"
@@ -216,7 +237,7 @@ function HeroSlide({ banner }: { banner: Banner }) {
           {/* CTA Button */}
           <Link
             href={ctaHref}
-            className="group/cta inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-[#fbbf24] hover:bg-[#f59e0b] text-black font-extrabold text-sm shadow-lg shadow-[#fbbf24]/20 hover:shadow-[#fbbf24]/35 transition-all duration-300 hover:-translate-y-0.5"
+            className="group/cta inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl bg-primary hover:bg-primaryHover text-white dark:text-black font-extrabold text-sm shadow-lg shadow-primary/20 hover:shadow-primary/35 transition-all duration-300 hover:-translate-y-0.5"
           >
             <span>{ctaLabel}</span>
             <ArrowRight className="w-4 h-4 group-hover/cta:translate-x-1 transition-transform duration-300" />
@@ -252,7 +273,7 @@ function HeroSlide({ banner }: { banner: Banner }) {
                     {banner.title}
                   </p>
                   <p className="text-[11px] text-white/50">
-                    {banner.subtitle ? banner.subtitle.slice(0, 40) + "…" : "Curated for You"}
+                    {banner.subtitle ? banner.subtitle.slice(0, 40) + "…" : curatedForYou}
                   </p>
                 </div>
               </div>

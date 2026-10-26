@@ -1,8 +1,9 @@
 import express from "express";
-import { getCoupons, createCoupon, deleteCoupon, updateCoupon, applyCoupon, removeCoupon, } from "../Coupon/coupon.controller.js";
-import { verifyAdminToken, verifyToken } from "../../middlewares/verifyToken.js";
+import { applyCoupon, removeCoupon } from "./coupon.controller.js";
+import { updateCoupon, deleteCoupon, } from "../admin/coupons/adminCoupons.controller.js";
+import { verifyAdminToken, verifyToken, } from "../../middlewares/verifyToken.js";
 const router = express.Router();
-router.route("/").get(verifyAdminToken, getCoupons).post(verifyAdminToken, createCoupon);
+// Public / User routes
 router.post("/apply", verifyToken, applyCoupon);
 router.delete("/remove", verifyToken, removeCoupon);
 router

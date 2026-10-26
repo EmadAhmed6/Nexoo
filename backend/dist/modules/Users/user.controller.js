@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcrypt";
-import { User, validateCreateAddress, validateUpdateAddress, } from "./user.model.js";
+import { User, validateChangePassword, validateCreateAddress, validateUpdateAddress, } from "./user.model.js";
 import { sendError, successMsg } from "../../middlewares/errors.js";
 // GET ALL USERS
 const getUsers = asyncHandler(async (req, res) => {
@@ -30,14 +30,10 @@ const updateUser = asyncHandler(async (req, res) => {
         return;
     }
     const updateData = { ...req.body };
-    if (updateData.password && updateData.password.trim().length > 0) {
-        const genSalt = await bcrypt.genSalt(10);
-        updateData.password = await bcrypt.hash(updateData.password, genSalt);
+    if (!req.file) {
+        sendError(res, 400, "Please upload a file");
+        return;
     }
-    else {
-        delete updateData.password;
-    }
-    // Prevent non-admin users from escalating their role
     if (req.user?.role !== "SuperAdmin" && req.user?.role !== "Admin") {
         delete updateData.role;
     }
@@ -54,6 +50,28 @@ const deleteUser = asyncHandler(async (req, res) => {
     }
     await user.deleteOne();
     successMsg(res, 200, "User deleted successfully", null);
+});
+const changePassword = asyncHandler(async (req, res) => {
+    const { success, error } = validateChangePassword(req.body);
+    if (!success) {
+        sendError(res, 400, error.message);
+        return;
+    }
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+        sendError(res, 404, "User not found");
+        return;
+    }
+    const isPasswordMatch = await bcrypt.compare(req.body.oldPassword, user.password);
+    if (!isPasswordMatch) {
+        sendError(res, 400, "Incorrect old password");
+        return;
+    }
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.body.newPassword, salt);
+    await user.save();
+    successMsg(res, 200, "Password changed successfully", null);
 });
 // ============== USER ADDRESSES ==============
 // GET USER ADDRESSES
@@ -167,5 +185,5 @@ const deleteUserAddress = asyncHandler(async (req, res) => {
     await user.save();
     successMsg(res, 200, "Address deleted successfully", user.addresses);
 });
-export { getUsers, GetUserById, updateUser, deleteUser, getUserAddress, addUserAddress, updateUserAddress, deleteUserAddress, };
+export { getUsers, GetUserById, updateUser, deleteUser, changePassword, getUserAddress, addUserAddress, updateUserAddress, deleteUserAddress, };
 //# sourceMappingURL=user.controller.js.map

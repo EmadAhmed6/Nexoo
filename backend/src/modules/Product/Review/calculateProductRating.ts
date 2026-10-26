@@ -5,16 +5,30 @@ import { Product } from "../product.model.js";
 export const updateProductRatingStats = async (
   productId: string | Types.ObjectId,
 ) => {
-  const allReviews = await Review.find({ product: productId });
-  const totalSum = allReviews.reduce((sum, item) => sum + item.ratings, 0);
-  const avg =
-    allReviews.length > 0 ? +(totalSum / allReviews.length).toFixed(2) : 0;
+  const stats = await Review.aggregate([
+    { $match: { product: new Types.ObjectId(productId) } },
+    {
+      $group: {
+        _id: "$product",
+        ratingQuantity: { $sum: 1 },
+        avgRating: { $avg: "$ratings" },
+      },
+    },
+  ]);
+
+  let avg = 0;
+  let quantity = 0;
+
+  if (stats.length > 0) {
+    quantity = stats[0].ratingQuantity;
+    avg = +stats[0].avgRating.toFixed(2);
+  }
 
   await Product.findByIdAndUpdate(productId, {
     ratings: avg,
     ratingAverage: avg,
-    ratingQuantity: allReviews.length,
+    ratingQuantity: quantity,
   });
 
-  return { ratingAverage: avg, ratingQuantity: allReviews.length };
+  return { ratingAverage: avg, ratingQuantity: quantity };
 };

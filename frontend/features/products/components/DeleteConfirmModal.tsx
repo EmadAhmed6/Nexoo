@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, X, AlertTriangle, Loader2 } from "lucide-react";
 import { Text } from "@/_components/shared/Text";
+import { useTranslations } from "next-intl";
 
 export interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -26,10 +27,11 @@ export function DeleteConfirmModal({
   itemName,
   productTitle,
   description,
-  noticeText = "This action cannot be undone.",
+  noticeText,
 }: DeleteConfirmModalProps) {
+  const t = useTranslations("common");
   const displayName = itemName || productTitle;
-  const modalTitle = title || (productTitle ? "Delete Product" : "Confirm Deletion");
+  const modalTitle = title || (productTitle ? `${t("delete")} ${t("product")}` : t("confirmDelete"));
   // Close on Escape key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -76,7 +78,7 @@ export function DeleteConfirmModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              aria-label="Close"
+              aria-label={t("close")}
               className="absolute top-4 right-4 p-2 rounded-xl text-textSecondary hover:text-textPrimary hover:bg-bgPrimary/60 transition-colors disabled:opacity-50 cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -99,15 +101,9 @@ export function DeleteConfirmModal({
                   description
                 ) : (
                   <>
-                    Are you sure you want to delete{" "}
-                    {displayName ? (
-                      <span className="font-semibold text-textPrimary">
-                        &quot;{displayName}&quot;
-                      </span>
-                    ) : (
-                      "this item"
-                    )}
-                    ? This action cannot be undone and will permanently remove this item from the system.
+                    {t("confirmDeleteItem", {
+                      item: displayName ? `“${displayName}”` : t("item"),
+                    })}
                   </>
                 )}
               </p>
@@ -116,7 +112,7 @@ export function DeleteConfirmModal({
               <div className="mt-4 w-full p-3 rounded-xl bg-textError/5 border border-textError/20 flex items-center gap-2.5 text-left">
                 <AlertTriangle className="w-4 h-4 text-textError flex-shrink-0" />
                 <span className="text-xs text-textError font-medium">
-                  {noticeText}
+                  {noticeText || t("deleteWarning")}
                 </span>
               </div>
 
@@ -128,7 +124,7 @@ export function DeleteConfirmModal({
                   disabled={isPending}
                   className="w-full py-2.5 px-4 rounded-xl border border-borderPrimary bg-bgPrimary hover:bg-bgPrimary/80 text-textSecondary hover:text-textPrimary text-sm font-semibold transition-all disabled:opacity-50 cursor-pointer"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   type="button"
@@ -139,12 +135,12 @@ export function DeleteConfirmModal({
                   {isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Deleting...</span>
+                      <span>{t("deleting")}</span>
                     </>
                   ) : (
                     <>
                       <Trash2 className="w-4 h-4" />
-                      <span>Delete</span>
+                      <span>{t("delete")}</span>
                     </>
                   )}
                 </button>

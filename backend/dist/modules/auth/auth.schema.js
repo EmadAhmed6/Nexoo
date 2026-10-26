@@ -24,5 +24,13 @@ const LoginSchema = z.object({
     email: z.string().email("Invalid email address").trim(),
     password: passwordSchema,
 });
-export { RegisterSchema, LoginSchema };
+const ForgotPasswordSchema = z.object({
+    email: z.string().email("Invalid email address").trim(),
+});
+const ResetPasswordSchema = z.object({
+    email: z.string().email("Invalid email address").trim(),
+    newPassword: passwordSchema,
+    token: z.string().min(1, "Token is required"),
+});
+export { RegisterSchema, LoginSchema, ForgotPasswordSchema, ResetPasswordSchema, };
 //# sourceMappingURL=auth.schema.js.map

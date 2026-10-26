@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { userApi, UpdateUserPayload, AddressPayload } from "../api/user.api";
+import { userApi, UpdateUserPayload, AddressPayload, ChangePasswordPayload } from "../api/user.api";
 import { useAppStore } from "@/store/use-app-store";
 
 export const USER_QUERY_KEY = ["user", "current"] as const;
@@ -27,7 +27,8 @@ export function useUpdateUser() {
     mutationFn: ({ userId, payload }: { userId: string; payload: UpdateUserPayload }) =>
       userApi.updateUser(userId, payload),
     onSuccess: (res, variables) => {
-      if (res.data && authUser?._id === variables.userId) {
+      const authId = authUser?._id || (authUser as any)?.id;
+      if (res.data && authId === variables.userId) {
         setUser(res.data);
       }
       queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
@@ -124,6 +125,73 @@ export function useUnbanUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}
+
+export function useToggleAdminStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => userApi.toggleAdminStatus(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+    },
+  });
+}
+
+/**
+ * Mutation hook to change the authenticated user's password
+ * PUT /users/:userId/change-password
+ */
+export function useChangePassword(userId: string) {
+  return useMutation({
+    mutationFn: (payload: ChangePasswordPayload) =>
+      userApi.changePassword(userId, payload),
+  });
+}
+
+/**
+ * Mutation hook to upload or replace a user's profile picture
+ * Sends file as multipart/form-data
+ */
+export function useUploadProfilePicture() {
+  const queryClient = useQueryClient();
+  const { user: authUser, setUser } = useAppStore();
+
+  return useMutation({
+    mutationFn: ({ userId, file }: { userId: string; file: File }) =>
+      userApi.uploadProfilePicture(userId, file),
+    onSuccess: (res, variables) => {
+      const updatedUser = (res as any)?.data;
+      const authId = authUser?._id || (authUser as any)?.id;
+      if (updatedUser && authId === variables.userId) {
+        setUser(updatedUser);
+      }
+      queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["authMe"] });
+    },
+  });
+}
+
+/**
+ * Mutation hook to delete the user's profile picture from Cloudinary
+ * DELETE /users/:userId/profile-picture
+ */
+export function useDeleteProfilePicture() {
+  const queryClient = useQueryClient();
+  const { user: authUser, setUser } = useAppStore();
+
+  return useMutation({
+    mutationFn: (userId: string) => userApi.deleteProfilePicture(userId),
+    onSuccess: (_, userId) => {
+      const authId = authUser?._id || (authUser as any)?.id;
+      if (authUser && authId === userId) {
+        setUser({ ...authUser, profilePicture: null });
+      }
+      queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["authMe"] });
     },
   });
 }

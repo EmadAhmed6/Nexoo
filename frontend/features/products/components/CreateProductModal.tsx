@@ -14,6 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { PRODUCT_CATEGORIES } from "@/features/products/types/categories";
 import { useCreateProduct } from "../hooks/useProducts";
 import { Input, Button, Text } from "@/_components/shared";
@@ -38,6 +39,9 @@ export function CreateProductModal({
   isOpen,
   onClose,
 }: CreateProductModalProps) {
+  const t = useTranslations("admin");
+  const tCommon = useTranslations("common");
+  const tCat = useTranslations("categories");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -66,7 +70,7 @@ export function CreateProductModal({
 
     const files = Array.from(e.target.files);
     if (files.length > 5) {
-      setFileError("You can upload a maximum of 5 images.");
+      setFileError(t("maxFiveImagesError"));
       return;
     }
 
@@ -94,7 +98,7 @@ export function CreateProductModal({
 
   const onSubmit = (data: ProductFormData) => {
     if (selectedFiles.length === 0) {
-      setFileError("Please upload at least one product image.");
+      setFileError(t("oneImageRequiredError"));
       return;
     }
 
@@ -116,14 +120,14 @@ export function CreateProductModal({
 
     createProduct(formData, {
       onSuccess: () => {
-        toast.success("Product created successfully!", {
-          description: `"${data.title}" is now available in the store.`,
+        toast.success(t("productCreatedSuccess"), {
+          description: t("productNowAvailable", { title: data.title }),
         });
         handleModalClose();
       },
       onError: (err) => {
-        toast.error("Failed to create product", {
-          description: err.message || "An unexpected error occurred",
+        toast.error(t("productCreateFailed"), {
+          description: err.message || t("unexpectedError"),
         });
       },
     });
@@ -159,17 +163,17 @@ export function CreateProductModal({
                   font="black"
                   className="tracking-tight"
                 >
-                  Add New Product
+                  {t("createProductTitle")}
                 </Text>
                 <Text size="xs" color="secondary" className="mt-1">
-                  Upload images and configure specifications for Nexo catalog.
+                  {t("createProductSubtitle")}
                 </Text>
               </div>
 
               <button
                 onClick={handleModalClose}
                 className="p-2.5 rounded-xl border border-borderPrimary text-textSecondary hover:text-textPrimary hover:bg-bgPrimary transition-colors"
-                aria-label="Close modal"
+                aria-label={tCommon("close")}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -183,35 +187,35 @@ export function CreateProductModal({
             >
               {/* Product Title */}
               <Input
-                label="Product Title *"
+                label={`${t("product")} *`}
                 type="text"
-                placeholder="e.g. Nexo Chrono Gold Watch"
+                placeholder={t("productNameExample")}
                 icon={<Layers className="w-4 h-4" />}
                 error={errors.title?.message}
                 {...register("title", {
-                  required: "Product title is required",
+                  required: t("productTitleRequired"),
                   minLength: {
                     value: 4,
-                    message: "Title must be at least 4 characters",
+                    message: t("titleFourCharacters"),
                   },
                 })}
               />
 
               {/* Description */}
               <div className="w-full">
-                <label className="block text-xs font-semibold text-textPrimary2 mb-1.5 select-none">
-                  Description *
+                  <label className="block text-xs font-semibold text-textPrimary2 mb-1.5 select-none">
+                  {t("description")} *
                 </label>
                 <div className="relative">
                   <textarea
                     rows={3}
-                    placeholder="Describe the luxury specifications, materials, and features..."
+                    placeholder={t("descriptionPlaceholder")}
                     className="w-full p-3.5 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-ringPrimary placeholder:text-textSecondary/60 transition-all resize-none"
                     {...register("description", {
-                      required: "Product description is required",
+                      required: t("descriptionRequired"),
                       minLength: {
                         value: 10,
-                        message: "Description must be at least 10 characters",
+                        message: t("minTenCharacters"),
                       },
                     })}
                   />
@@ -227,21 +231,21 @@ export function CreateProductModal({
               {/* Pricing & Stock Row */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Input
-                  label="Price (EGP) *"
+                  label={`${t("priceEgp")} *`}
                   type="number"
                   step="any"
                   placeholder="2500"
                   icon={<DollarSign className="w-4 h-4" />}
                   error={errors.price?.message}
                   {...register("price", {
-                    required: "Price is required",
+                    required: t("priceRequired"),
                     valueAsNumber: true,
-                    min: { value: 0, message: "Price must be >= 0" },
+                    min: { value: 0, message: t("nonNegative") },
                   })}
                 />
 
                 <Input
-                  label="Price After Discount (EGP)"
+                  label={t("discountPriceEgp")}
                   type="number"
                   step="any"
                   placeholder="1999"
@@ -251,20 +255,20 @@ export function CreateProductModal({
                     valueAsNumber: true,
                     min: {
                       value: 0,
-                      message: "Price After Discount must be >= 0",
+                      message: t("nonNegative"),
                     },
                   })}
                 />
 
                 <Input
-                  label="Initial Stock *"
+                  label={`${t("initialStock")} *`}
                   type="number"
                   placeholder="10"
                   icon={<Package className="w-4 h-4" />}
                   error={errors.stock?.message}
                   {...register("stock", {
                     valueAsNumber: true,
-                    min: { value: 0, message: "Stock must be >= 0" },
+                    min: { value: 0, message: t("nonNegative") },
                   })}
                 />
               </div>
@@ -272,17 +276,17 @@ export function CreateProductModal({
               {/* Category Select */}
               <div className="w-full">
                 <label className="block text-xs font-semibold text-textPrimary2 mb-1.5 select-none">
-                  Category *
+                  {t("categoryRequired")}
                 </label>
                 <select
                   className="w-full py-2.5 px-3.5 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-ringPrimary transition-all cursor-pointer"
                   {...register("category", {
-                    required: "Category is required",
+                    required: t("categoryRequiredError"),
                   })}
                 >
                   {CATEGORY_OPTIONS.map((cat) => (
                     <option key={cat} value={cat}>
-                      {cat}
+                      {tCat.has(cat.toLowerCase() as any) ? tCat(cat.toLowerCase() as any) : cat}
                     </option>
                   ))}
                 </select>
@@ -291,7 +295,7 @@ export function CreateProductModal({
               {/* Image Upload Area */}
               <div>
                 <label className="block text-xs font-semibold text-textPrimary2 mb-1.5 select-none">
-                  Product Images (Max 5 files) *
+                  {t("productImagesMax")}
                 </label>
                 <div className="relative border-2 border-dashed border-borderPrimary hover:border-primary/60 rounded-2xl p-6 text-center bg-bgPrimary transition-colors cursor-pointer group">
                   <input
@@ -306,10 +310,10 @@ export function CreateProductModal({
                       <Upload className="w-6 h-6" />
                     </div>
                     <Text size="xs" font="bold" className="text-textPrimary">
-                      Click to upload or drag & drop images
+                      {t("clickUpload")}
                     </Text>
                     <Text size="xs" color="secondary" className="mt-1">
-                      PNG, JPG, WEBP up to 5 files
+                      {t("fileTypes")}
                     </Text>
                   </div>
                 </div>
@@ -356,17 +360,17 @@ export function CreateProductModal({
                   onClick={handleModalClose}
                   disabled={isPending}
                 >
-                  Cancel
+                  {tCommon("cancel")}
                 </Button>
                 <Button
                   type="submit"
                   variant="primary"
                   size="md"
                   isLoading={isPending}
-                  loadingText="Creating Product..."
+                  loadingText={t("creatingProduct")}
                   leftIcon={<Plus className="w-4 h-4" />}
                 >
-                  Create Product
+                  {t("createProduct")}
                 </Button>
               </div>
             </form>

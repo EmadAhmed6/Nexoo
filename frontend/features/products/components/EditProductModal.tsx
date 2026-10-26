@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { Input } from "@/_components/shared/Input";
 import { Text } from "@/_components/shared/Text";
 import { Button } from "@/_components/shared/Button";
@@ -52,6 +53,9 @@ export function EditProductModal({
   onClose,
   product,
 }: EditProductModalProps) {
+  const t = useTranslations("admin");
+  const tCommon = useTranslations("common");
+  const tCat = useTranslations("categories");
   const [images, setImages] = useState<ImageSlot[]>([]);
   const replacingIndexRef = useRef<number | null>(null);
   const replaceFileInputRef = useRef<HTMLInputElement>(null);
@@ -139,7 +143,7 @@ export function EditProductModal({
   // Handle deleting an image slot
   const handleDeleteImage = (index: number) => {
     if (images.length <= 1) {
-      toast.error("Product must have at least one image.");
+      toast.error(t("atLeastOneImage"));
       return;
     }
 
@@ -159,13 +163,13 @@ export function EditProductModal({
     const availableSlots = 5 - images.length;
 
     if (availableSlots <= 0) {
-      toast.error("Maximum 5 images allowed.");
+      toast.error(t("maxImagesError"));
       return;
     }
 
     const filesToAdd = selectedFiles.slice(0, availableSlots);
     if (selectedFiles.length > availableSlots) {
-      toast.info(`Only ${availableSlots} image(s) were added (maximum 5).`);
+      toast.info(t("imagesAddedOfMaximum", { count: availableSlots }));
     }
 
     const newSlots: ImageSlot[] = filesToAdd.map((file, idx) => ({
@@ -203,7 +207,7 @@ export function EditProductModal({
           }));
 
     if (currentImages.length === 0) {
-      toast.error("Please keep or upload at least one product image.");
+      toast.error(t("keepOneImage"));
       return;
     }
 
@@ -244,15 +248,15 @@ export function EditProductModal({
 
     updateProduct(formData, {
       onSuccess: () => {
-        toast.success("Product updated successfully!", {
-          description: `"${data.title}" has been updated.`,
+        toast.success(t("productUpdatedSuccess"), {
+          description: t("productUpdatedDescription", { title: data.title }),
         });
         handleModalClose();
       },
       onError: (err: unknown) => {
         const message =
-          err instanceof Error ? err.message : "Please try again.";
-        toast.error("Failed to update product", { description: message });
+          err instanceof Error ? err.message : tCommon("tryAgain");
+        toast.error(t("productUpdateFailed"), { description: message });
       },
     });
   };
@@ -293,11 +297,11 @@ export function EditProductModal({
                       font="black"
                       className="tracking-tight"
                     >
-                      Edit Product
+                      {t("editProductHeading")}
                     </Text>
                   </div>
                   <Text size="xs" color="secondary" className="mt-1">
-                    Updating:{" "}
+                    {t("updatingProduct")}{" "}
                     <span className="text-primary font-semibold">
                       {product.title}
                     </span>
@@ -317,13 +321,13 @@ export function EditProductModal({
                 {/* Product Title */}
                 <div>
                   <Input
-                    label="Product Title *"
-                    placeholder="e.g. Royal Chronograph Watch"
+                    label={`${t("product")} *`}
+                    placeholder={t("productNameExample")}
                     error={errors.title?.message}
                     {...register("title", {
-                      required: "Product title is required",
-                      minLength: { value: 4, message: "Min 4 characters" },
-                      maxLength: { value: 100, message: "Max 100 characters" },
+                      required: t("productTitleRequired"),
+                      minLength: { value: 4, message: t("minFourCharacters") },
+                      maxLength: { value: 100, message: t("maxHundredCharacters") },
                     })}
                   />
                 </div>
@@ -331,18 +335,18 @@ export function EditProductModal({
                 {/* Description */}
                 <div>
                   <label className="block text-xs font-semibold text-textPrimary2 mb-1.5">
-                    Description *
+                    {t("description")} *
                   </label>
                   <textarea
                     rows={4}
-                    placeholder="Describe the luxury details, materials, and features..."
+                    placeholder={t("descriptionPlaceholder")}
                     className="w-full py-2.5 px-3.5 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary placeholder:text-textSecondary/50 text-sm focus:outline-none focus:ring-2 focus:ring-ringPrimary transition-all resize-none"
                     {...register("description", {
-                      required: "Description is required",
-                      minLength: { value: 10, message: "Min 10 characters" },
+                      required: t("descriptionRequired"),
+                      minLength: { value: 10, message: t("minTenCharacters") },
                       maxLength: {
                         value: 1000,
-                        message: "Max 1000 characters",
+                        message: t("maxThousandCharacters"),
                       },
                     })}
                   />
@@ -356,24 +360,24 @@ export function EditProductModal({
                 {/* Price, Price After Discount & Stock */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <Input
-                    label="Original Price (EGP) *"
+                    label={`${t("originalPriceEgp")} *`}
                     type="number"
                     step="0.01"
                     placeholder="0.00"
                     icon={<DollarSign className="w-4 h-4 text-textSecondary" />}
                     error={errors.price?.message}
                     {...register("price", {
-                      required: "Price is required",
+                      required: t("priceRequired"),
                       valueAsNumber: true,
                       min: {
                         value: 0.01,
-                        message: "Price must be greater than 0",
+                        message: t("positivePrice"),
                       },
                     })}
                   />
 
                   <Input
-                    label="Price After Discount (Optional)"
+                    label={t("optionalDiscountPrice")}
                     type="number"
                     step="0.01"
                     placeholder="0.00"
@@ -384,7 +388,7 @@ export function EditProductModal({
                       validate: (val, formVals) => {
                         if (!val) return true;
                         if (val >= formVals.price) {
-                          return "Discount price must be less than original";
+                          return t("discountLessThanPrice");
                         }
                         return true;
                       },
@@ -392,15 +396,15 @@ export function EditProductModal({
                   />
 
                   <Input
-                    label="Stock Quantity *"
+                    label={`${t("stockQuantity")} *`}
                     type="number"
                     placeholder="0"
                     icon={<Package className="w-4 h-4 text-textSecondary" />}
                     error={errors.stock?.message}
                     {...register("stock", {
-                      required: "Stock is required",
+                      required: t("stockRequired"),
                       valueAsNumber: true,
-                      min: { value: 0, message: "Stock cannot be negative" },
+                      min: { value: 0, message: t("nonNegative") },
                     })}
                   />
                 </div>
@@ -408,17 +412,17 @@ export function EditProductModal({
                 {/* Category Selection */}
                 <div className="w-full">
                   <label className="block text-xs font-semibold text-textPrimary2 mb-1.5">
-                    Category *
+                    {t("categoryRequired")}
                   </label>
                   <select
                     className="w-full py-2.5 px-3.5 rounded-xl border border-borderPrimary bg-bgPrimary text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-ringPrimary transition-all cursor-pointer"
                     {...register("category", {
-                      required: "Category is required",
+                      required: t("categoryRequiredError"),
                     })}
                   >
                     {CATEGORY_OPTIONS.map((cat) => (
                       <option key={cat} value={cat}>
-                        {cat}
+                        {tCat.has(cat.toLowerCase() as any) ? tCat(cat.toLowerCase() as any) : cat}
                       </option>
                     ))}
                   </select>
@@ -429,11 +433,10 @@ export function EditProductModal({
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <label className="block text-xs font-bold text-textPrimary">
-                        Product Images ({images.length}/5)
+                        {t("productImagesCount", { count: images.length })}
                       </label>
                       <p className="text-[11px] text-textSecondary">
-                        Editing images is optional. You can replace any
-                        individual image, delete it, or add new ones.
+                        {t("editingImagesOptional")}
                       </p>
                     </div>
                     {images.length < 5 && (
@@ -443,7 +446,7 @@ export function EditProductModal({
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-all cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        Add Image
+                        {t("addImage")}
                       </button>
                     )}
                   </div>
@@ -484,11 +487,11 @@ export function EditProductModal({
                         {/* Top Badges */}
                         <div className="relative z-10 flex items-center justify-between p-1.5 w-full">
                           <span className="px-1.5 py-0.5 rounded-md bg-black/70 backdrop-blur-sm text-[10px] font-bold text-white shadow">
-                            {idx === 0 ? "Cover" : `#${idx + 1}`}
+                            {idx === 0 ? t("cover") : `#${idx + 1}`}
                           </span>
                           {img.source === "new" && (
                             <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white text-[9px] font-extrabold shadow">
-                              New
+                              {t("new")}
                             </span>
                           )}
                         </div>
@@ -498,12 +501,12 @@ export function EditProductModal({
                           {/* Replace Button */}
                           <button
                             type="button"
-                            title="Replace this image"
+                            title={t("replaceImage")}
                             onClick={() => handleReplaceClick(idx)}
-                            className="flex-1 py-1 px-1.5 rounded-lg bg-white/20 hover:bg-primary hover:text-black text-white text-[10px] font-bold backdrop-blur-md flex items-center justify-center gap-1 transition-all cursor-pointer"
+                            className="flex-1 py-1 px-1.5 rounded-lg bg-white/20 hover:bg-primary hover:text-white dark:hover:text-black text-white text-[10px] font-bold backdrop-blur-md flex items-center justify-center gap-1 transition-all cursor-pointer"
                           >
                             <RefreshCw className="w-3 h-3" />
-                            <span>Replace</span>
+                            <span>{t("replaceImage")}</span>
                           </button>
 
                           {/* Delete Button */}
@@ -511,8 +514,8 @@ export function EditProductModal({
                             type="button"
                             title={
                               images.length > 1
-                                ? "Remove image"
-                                : "At least 1 image is required"
+                                ? t("removeImage")
+                                : t("atLeastOneImage")
                             }
                             disabled={images.length <= 1}
                             onClick={() => handleDeleteImage(idx)}
@@ -535,7 +538,7 @@ export function EditProductModal({
                           <ImagePlus className="w-4 h-4" />
                         </div>
                         <span className="text-[11px] font-semibold">
-                          Add Image
+                          {t("addImage")}
                         </span>
                       </button>
                     )}
@@ -551,7 +554,7 @@ export function EditProductModal({
                     onClick={handleModalClose}
                     disabled={isPending}
                   >
-                    Cancel
+                    {tCommon("cancel")}
                   </Button>
                   <Button
                     type="submit"
@@ -560,7 +563,7 @@ export function EditProductModal({
                     isLoading={isPending}
                     leftIcon={<Pencil className="w-4 h-4" />}
                   >
-                    {isPending ? "Saving..." : "Save Changes"}
+                    {isPending ? t("saving") : tCommon("saveChanges")}
                   </Button>
                 </div>
               </form>

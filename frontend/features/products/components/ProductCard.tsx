@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/routing";
 import { motion } from "framer-motion";
 import { Star, ShoppingBag, Check, Heart, Bookmark, Loader2 } from "lucide-react";
 import { Product } from "../types/product.types";
@@ -10,15 +10,16 @@ import { useAddToCart } from "@/features/cart/hooks/useCart";
 import { useToggleLikeProduct } from "../hooks/useProducts";
 import { useIsInWishlist, useToggleWishlist } from "@/features/wishlist/hooks/useWishlist";
 import { useAppStore } from "@/store/use-app-store";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Text } from "@/_components/shared";
+import { useTranslations } from "next-intl";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const t = useTranslations("products");
   const [added, setAdded] = React.useState(false);
   const inWishlist = useIsInWishlist(product._id);
   const { toggleWishlist, isPending: isWishlistPending } = useToggleWishlist();
@@ -60,7 +61,7 @@ export function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error("Please sign in to like products");
+      toast.error(t("signInToLike"));
       router.push("/auth/login");
       return;
     }
@@ -68,13 +69,13 @@ export function ProductCard({ product }: ProductCardProps) {
     toggleLike.mutate(product._id, {
       onSuccess: () => {
         if (!isLiked) {
-          toast.success("Added to liked products ❤️");
+          toast.success(t("addedToLiked"));
         } else {
-          toast.info("Removed from liked products");
+          toast.info(t("removedFromLiked"));
         }
       },
       onError: (err) => {
-        toast.error((err as Error)?.message || "Failed to update like");
+        toast.error((err as Error)?.message || t("failedLike"));
       },
     });
   };
@@ -92,12 +93,12 @@ export function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
 
     if (isOutOfStock) {
-      toast.error("This product is currently out of stock");
+      toast.error(t("outOfStock"));
       return;
     }
 
     if (!isAuthenticated) {
-      toast.error("Please sign in first");
+      toast.error(t("signInFirst"));
       router.push("/auth/login");
       return;
     }
@@ -107,11 +108,11 @@ export function ProductCard({ product }: ProductCardProps) {
       {
         onSuccess: () => {
           setAdded(true);
-          toast.success("Added to cart");
+          toast.success(t("addedToCart"));
           setTimeout(() => setAdded(false), 1500);
         },
         onError: () => {
-          toast.error("Failed to add to cart");
+          toast.error(t("failedAddToCart"));
         },
       },
     );
@@ -139,17 +140,17 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Badges */}
           <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10 pointer-events-none">
             {discountPercentage > 0 && (
-              <span className="px-3.5 py-1.5 rounded-full bg-primary text-black font-black text-xs shadow-md tracking-tight">
+              <span className="px-3.5 py-1.5 rounded-full bg-primary text-white dark:text-black font-black text-xs shadow-md tracking-tight">
                 {discountPercentage}% OFF
               </span>
             )}
             {isOutOfStock ? (
               <span className="px-3 py-1.5 rounded-full bg-textError/95 text-white font-bold text-xs text-center shadow-sm">
-                Out of Stock
+                {t("outOfStock")}
               </span>
             ) : product.stock <= 5 && product.stock > 0 ? (
               <span className="px-3 py-1.5 rounded-full bg-amber-500/95 text-white font-bold text-xs text-center shadow-sm">
-                Only {product.stock} left
+                {t("onlyLeft", { count: product.stock })}
               </span>
             ) : null}
           </div>
@@ -172,8 +173,8 @@ export function ProductCard({ product }: ProductCardProps) {
                   ? "opacity-100 translate-x-0 bg-rose-500 text-white border-rose-400 shadow-rose-500/30"
                   : "opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 bg-bgSecondary/95 text-textPrimary hover:text-rose-500 border-borderPrimary hover:border-rose-500/40 shadow-black/20"
               }`}
-              title={isLiked ? "Unlike" : "Like"}
-              aria-label={isLiked ? "Unlike product" : "Like product"}
+              title={isLiked ? t("unlike") : t("like")}
+              aria-label={isLiked ? t("unlike") : t("like")}
             >
               {toggleLike.isPending ? (
                 <Loader2 className="w-4.5 h-4.5 animate-spin" />
@@ -195,18 +196,18 @@ export function ProductCard({ product }: ProductCardProps) {
               disabled={isWishlistPending}
               className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md border transition-all duration-300 delay-75 cursor-pointer ${
                 inWishlist
-                  ? "opacity-100 translate-x-0 bg-primary text-black border-primary shadow-primary/30"
+                  ? "opacity-100 translate-x-0 bg-primary text-white dark:text-black border-primary shadow-primary/30"
                   : "opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 bg-bgSecondary/95 text-textPrimary hover:text-primary border-borderPrimary hover:border-primary/40 shadow-black/20"
               }`}
-              title={inWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-              aria-label={inWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+              title={inWishlist ? t("removeFromWishlist") : t("addToWishlist")}
+              aria-label={inWishlist ? t("removeFromWishlist") : t("addToWishlist")}
             >
               {isWishlistPending ? (
                 <Loader2 className="w-4.5 h-4.5 animate-spin" />
               ) : (
                 <Bookmark
                   className={`w-5 h-5 transition-transform duration-200 ${
-                    inWishlist ? "fill-black text-black" : ""
+                    inWishlist ? "fill-black text-white dark:text-black" : ""
                   }`}
                 />
               )}
@@ -225,7 +226,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   {product.ratingAverage || 4.8}
                 </span>
                 <span className="text-xs text-textSecondary">
-                  ({product.ratingQuantity || 24} reviews)
+                  ({product.ratingQuantity || 24} {t("reviews")})
                 </span>
               </div>
 
@@ -261,7 +262,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   )}
               </div>
               <span className="text-[10px] text-textSecondary block mt-0.5">
-                Inclusive of all taxes
+                {t("inclusiveTaxes")}
               </span>
             </div>
 
@@ -276,7 +277,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   ? "bg-emerald-500 text-white border-emerald-500"
                   : "bg-bgPrimary border-borderPrimary hover:border-primary text-textPrimary hover:text-primary hover:bg-primary/10 cursor-pointer"
               }`}
-              title={isOutOfStock ? "Out of Stock" : "Add to cart"}
+              title={isOutOfStock ? t("outOfStock") : t("addToCart")}
             >
               {added ? (
                 <Check className="w-5 h-5 text-white" />

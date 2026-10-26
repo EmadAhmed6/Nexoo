@@ -128,6 +128,11 @@ const OrderSchema = new Schema({
             type: String,
             enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
             required: true,
+            default: "Pending",
+        },
+        updatedAt: {
+            type: Date,
+            default: Date.now,
         },
         isDelivered: {
             type: Boolean,
@@ -137,6 +142,22 @@ const OrderSchema = new Schema({
             type: Date,
         },
     },
+    statusHistory: [
+        {
+            status: {
+                type: String,
+                enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+                required: true,
+            },
+            timestamp: {
+                type: Date,
+                default: Date.now,
+            },
+            note: {
+                type: String,
+            },
+        },
+    ],
 }, { timestamps: true });
 const Order = model("Order", OrderSchema);
 const validateCreateOrder = (order) => {

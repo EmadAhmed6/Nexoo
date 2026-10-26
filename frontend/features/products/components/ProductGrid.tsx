@@ -6,6 +6,7 @@ import { ProductCard } from "./ProductCard";
 import { useProducts } from "../hooks/useProducts";
 import { Product, ProductFilters } from "../types/product.types";
 import { Text } from "@/_components/shared";
+import { useTranslations } from "next-intl";
 
 interface ProductGridProps {
   filters?: ProductFilters;
@@ -13,6 +14,7 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
+  const t = useTranslations("home");
   const { data, isLoading, isError, error, refetch } = useProducts(filters);
 
   const products: Product[] =
@@ -45,19 +47,19 @@ export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
       <div className="p-8 rounded-2xl border border-textError/20 bg-textError/5 text-center max-w-lg mx-auto">
         <AlertCircle className="w-8 h-8 text-textError mx-auto mb-2" />
         <Text as="h4" size="sm" font="bold" color="primary" className="mb-1">
-          Failed to load products
+          {t("failedLoadProducts")}
         </Text>
         <Text size="xs" color="secondary" className="mb-4">
           {error instanceof Error
             ? error.message
-            : "An error occurred while connecting to server"}
+            : t("failedLoadProducts")}
         </Text>
         <button
           onClick={() => refetch()}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-black text-xs font-bold hover:bg-primaryHover transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white dark:text-black text-xs font-bold hover:bg-primaryHover transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span>Retry</span>
+          <span>{t("retry")}</span>
         </button>
       </div>
     );
@@ -73,25 +75,25 @@ export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
             font="black"
             className="flex items-center gap-2"
           >
-            <span>Featured Collection</span>
+            <span>{t("featuredCollection")}</span>
             <Sparkles className="w-4 h-4 text-primary" />
           </Text>
           <Text size="xs" color="secondary" className="mt-0.5">
-            Meticulously curated luxury pieces for distinguished tastes
+            {t("featuredSubtitle")}
           </Text>
         </div>
         <span className="text-xs font-semibold px-3 py-1 rounded-full border border-borderPrimary bg-bgSecondary text-textSecondary">
-          {totalProducts} products
+          {t("productsCount", { count: totalProducts })}
         </span>
       </div>
 
       {products.length === 0 ? (
         <div className="py-16 text-center border border-dashed border-borderPrimary rounded-3xl p-8">
           <Text font="bold" size="lg" className="mb-1">
-            No products found
+            {t("noProductsFound")}
           </Text>
           <Text size="xs" color="secondary">
-            Try adjusting your search or filters to find what you are looking for.
+            {t("noProductsSubtitle")}
           </Text>
         </div>
       ) : (
@@ -106,8 +108,8 @@ export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
       {totalPages > 1 && onPageChange && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-borderPrimary">
           <Text size="xs" color="secondary">
-            Showing page <span className="font-bold text-textPrimary">{currentPage}</span> of{" "}
-            <span className="font-bold text-textPrimary">{totalPages}</span> ({totalProducts} total)
+            {t("showingPage")} <span className="font-bold text-textPrimary">{currentPage}</span> {t("ofPages")}{" "}
+            <span className="font-bold text-textPrimary">{totalPages}</span> ({totalProducts} {t("totalCount")})
           </Text>
 
           <div className="flex items-center gap-1.5">
@@ -115,7 +117,7 @@ export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage <= 1}
               className="p-2 rounded-xl border border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textPrimary hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              aria-label="Previous page"
+              aria-label={t("previousPage")}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -128,7 +130,7 @@ export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
                   onClick={() => onPageChange(p)}
                   className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${
                     isCurrent
-                      ? "bg-primary text-black shadow-md scale-105"
+                      ? "bg-primary text-white dark:text-black shadow-md scale-105"
                       : "border border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textPrimary hover:border-primary/40"
                   }`}
                 >
@@ -141,7 +143,7 @@ export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
               className="p-2 rounded-xl border border-borderPrimary bg-bgSecondary text-textSecondary hover:text-textPrimary hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              aria-label="Next page"
+              aria-label={t("nextPage")}
             >
               <ChevronRight className="w-4 h-4" />
             </button>

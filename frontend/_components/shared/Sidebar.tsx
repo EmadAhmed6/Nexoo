@@ -19,6 +19,7 @@ import {
   Bookmark,
   Bell,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAppStore } from "@/store/use-app-store";
 import { useWishlist } from "@/features/wishlist/hooks/useWishlist";
 import { useNotifications } from "@/features/notifications/hooks/useNotifications";
@@ -43,17 +44,19 @@ export function Sidebar({
   const { unreadCount } = useNotifications();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const wishlistCount = (wishlist?.products ?? []).length;
+  const t = useTranslations("nav");
+  const tCommon = useTranslations("common");
 
   const navLinks = [
     {
-      label: "Home",
+      label: t("home"),
       href: "/",
       icon: Home,
       isActive:
         pathname === "/" && (!selectedCategory || selectedCategory === "All"),
     },
     {
-      label: "Products",
+      label: t("products"),
       href: "/#products",
       icon: Sparkles,
       isActive:
@@ -62,20 +65,20 @@ export function Sidebar({
     ...(isAuthenticated
       ? [
           {
-            label: "Notifications",
+            label: t("notifications"),
             href: "/notifications",
             icon: Bell,
             isActive: pathname.startsWith("/notifications"),
             badge: unreadCount,
           },
           {
-            label: "My Orders",
+            label: t("orders"),
             href: "/orders",
             icon: Package,
             isActive: pathname.startsWith("/orders"),
           },
           {
-            label: "My Wishlist",
+            label: t("wishlist"),
             href: "/wishlist",
             icon: Bookmark,
             isActive: pathname.startsWith("/wishlist"),
@@ -111,7 +114,7 @@ export function Sidebar({
                     className={cn(
                       "group flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200",
                       isActive
-                        ? "bg-primary text-black shadow-[0_2px_16px_rgba(212,175,55,0.25)]"
+                        ? "bg-primary text-white dark:text-black shadow-[0_2px_16px_rgba(212,175,55,0.25)]"
                         : "text-textSecondary hover:text-textPrimary hover:bg-bgPrimary",
                     )}
                   >
@@ -119,7 +122,7 @@ export function Sidebar({
                       <Icon
                         className={cn(
                           "w-4 h-4 transition-transform group-hover:scale-110",
-                          isActive ? "text-black" : "text-primary",
+                          isActive ? "text-white dark:text-black" : "text-primary",
                         )}
                       />
                       <span>{link.label}</span>
@@ -127,7 +130,7 @@ export function Sidebar({
                         <span className={cn(
                           "text-[10px] px-1.5 py-0.5 rounded font-black",
                           isActive
-                            ? "bg-black/20 text-black"
+                            ? "bg-black/20 text-white dark:text-black"
                             : "bg-primary/20 text-primary",
                         )}>
                           {link.badge}
@@ -139,7 +142,7 @@ export function Sidebar({
                       className={cn(
                         "w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5",
                         isActive
-                          ? "text-black opacity-80"
+                          ? "text-white dark:text-black opacity-80"
                           : "opacity-0 group-hover:opacity-100",
                       )}
                     />
@@ -162,7 +165,7 @@ export function Sidebar({
               className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold text-textPrimary hover:bg-bgPrimary border border-borderPrimary hover:border-primary/40 transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="p-1 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-black transition-colors">
+                <div className="p-1 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white dark:group-hover:text-black transition-colors">
                   <Plus className="w-3.5 h-3.5" />
                 </div>
                 <span>New Product</span>
@@ -194,14 +197,14 @@ export function Sidebar({
                     href="/orders"
                     className="text-primary hover:underline font-semibold"
                   >
-                    Orders
+                    {t("orders")}
                   </Link>
                   <button
                     onClick={logout}
                     className="text-textSecondary hover:text-red-500 font-semibold flex items-center gap-1 transition-colors"
                   >
                     <LogOut className="w-3 h-3" />
-                    <span>Sign Out</span>
+                    <span>{tCommon("logout")}</span>
                   </button>
                 </div>
               </div>
@@ -211,13 +214,13 @@ export function Sidebar({
                   href="/auth/login"
                   className="py-2 px-2.5 rounded-xl border border-borderPrimary bg-bgPrimary hover:border-primary/40 text-textPrimary text-xs font-bold text-center transition-all"
                 >
-                  Sign In
+                  {t("signIn")}
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="py-2 px-2.5 rounded-xl bg-primary hover:bg-primaryHover text-black text-xs font-bold text-center shadow-sm transition-all"
+                  className="py-2 px-2.5 rounded-xl bg-primary hover:bg-primaryHover text-white dark:text-black text-xs font-bold text-center shadow-sm transition-all"
                 >
-                  Join
+                  {t("signUp")}
                 </Link>
               </div>
             )}

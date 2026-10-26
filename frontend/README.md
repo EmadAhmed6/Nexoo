@@ -1,149 +1,71 @@
-# Nexo Frontend Storefront
+# Nexo Frontend
 
-A luxury, high-performance modern e-commerce storefront built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **Tailwind CSS v4**, **Framer Motion**, and **TanStack Query**.
+Localized e-commerce storefront and admin dashboard built with Next.js App Router, React, TypeScript, Tailwind CSS, next-intl, TanStack Query, Zustand and next-themes.
 
-[![Next.js](https://img.shields.io/badge/Next.js-16.x-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.x-20232a?style=for-the-badge&logo=react&logoColor=61dafb)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Framer Motion](https://img.shields.io/badge/Framer_Motion-14.x-ff0055?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
-[![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-ff4154?style=for-the-badge&logo=react-query&logoColor=white)](https://tanstack.com/query)
-[![Zustand](https://img.shields.io/badge/Zustand-v5-443e38?style=for-the-badge&logo=zustand&logoColor=white)](https://zustand.docs.pmnd.rs/)
+## Features and routes
 
----
+All customer routes are localized under /en and /ar. Arabic uses right-to-left layout.
 
-## 💎 Design Aesthetics & Philosophy
+| Route | Description |
+|---|---|
+| /[locale] | Storefront home, category promotions, banners and product sections |
+| /[locale]/products/[id] | Product details, gallery, reviews and available product actions |
+| /[locale]/auth/login | Email/password and Google sign-in |
+| /[locale]/auth/register | Account creation and email verification flow |
+| /[locale]/auth/verify-otp | Email OTP verification/resend |
+| /[locale]/auth/forgot-password | Password reset request |
+| /[locale]/auth/reset-password and /[locale]/reset-password | Set a new password |
+| /[locale]/profile | Profile and account settings, saved addresses and password |
+| /[locale]/profile/[id] | Public/user profile view |
+| /[locale]/wishlist | Saved products |
+| /[locale]/checkout | Shipping details, coupon-aware totals and payment method |
+| /[locale]/checkout/success, /cancel | Payment result pages |
+| /[locale]/orders | Customer order history |
+| /[locale]/notifications | Notifications |
+| /[locale]/tickets | Customer support tickets |
+| /[locale]/admin | Admin dashboard |
+| /[locale]/admin/products, orders, users | Product, order and user administration |
+| /[locale]/admin/coupons, banners, tickets | Campaign, banner and support management |
 
-Nexo is designed as a **luxury e-commerce experience**:
-- **Tailored Color Palette**: Rich midnight obsidian (`#0f1115`), card elevation (`#161920`), and shimmering champagne gold (`#d4af37`) accents.
-- **Micro-Animations & Smooth Transitions**: Interactive button spring taps, hover scalings, and page transitions powered by `framer-motion`.
-- **Global Clickable Affordance**: Consistent pointer cursors (`cursor-pointer`) across all buttons and interactive controls.
-- **Typography & Layout**: Modern, clean typography with high readability and responsive spacing from mobile to ultra-wide displays.
+The shared navigation includes account, cart, notifications, wishlist, language and theme controls. Theme changes transition between light and dark modes. Forms provide localized validation and toast feedback.
 
----
+## Stack
 
-## ✨ Key Features
+- Next.js App Router and React
+- TypeScript and Tailwind CSS
+- next-intl for English/Arabic messages and locale routing
+- TanStack Query for server data and mutations
+- Zustand for client application state
+- Axios API client with access-token and refresh handling
+- React Hook Form and Zod for forms
+- next-themes, Framer Motion, Sonner, Lucide React and Swiper
 
-### 🛍️ Interactive Product Detail Page (`/products/[id]`)
-- **Sticky / Fixed Image Gallery**: On desktop screens, the entire product image gallery stays fixed in view (`sticky`) alongside the long description and specifications.
-- **Hover-to-Switch Gallery**: Hovering over any vertical thumbnail flips the large display image immediately with smooth spring animations.
-- **In-Place Image Editing**: Product owners and admins can click the edit pencil on any thumbnail or on the main image to replace that specific image right from the page without leaving.
-- **Delete Confirmation Modal**: Custom animated modal dialog with backdrop blur, item name confirmation, and loading indicators.
-- **Dynamic Discount & Savings Calculator**: Automatically computes discount percentages, displays strikethrough original prices, and shows total savings in EGP.
+## Local setup
 
-### 🏷️ Dedicated "Hot Deals / On Sale" Section
-- Dedicated `SaleGrid` component on the homepage highlighting products with active discounts.
-- Distinct gold badges, countdown aura, and instant "Add to Cart" triggers.
+Requirements: Node.js 18+, pnpm, and a running backend API.
 
-### 🛒 Real-Time Cart Management
-- Persistent client-side cart powered by **Zustand** with `localStorage` hydration.
-- Slide-over animated `CartDrawer` with quantity increment/decrement, item removal, and auto-calculated subtotals.
+Create frontend/.env.local:
 
-### 📝 Comprehensive Product Management
-- **Create Product Modal**: Multi-file drag & drop image uploads (up to 5 images), automatic preview generation, and Zod input validation.
-- **Edit Product Modal**: Flexible image management allowing the owner to replace individual images, delete images, or add new images without re-uploading everything. Image editing is fully optional.
+    NEXT_PUBLIC_API_URL=http://localhost:5000
 
----
+Install and start:
 
-## 🛠️ Tech Stack & Libraries
+    pnpm install
+    pnpm dev
 
-| Technology | Purpose |
-| :--- | :--- |
-| **Next.js 16 (App Router)** | Full-stack React framework, Server Components, SEO optimization |
-| **React 19** | Modern UI component rendering |
-| **TypeScript** | Strict compile-time type safety |
-| **Tailwind CSS v4** | Modern utility-first CSS styling system |
-| **Framer Motion 14** | Physics-based animations, layout transitions, modal enter/exit |
-| **TanStack Query v5** | Server state management, caching, optimistic mutations, refetching |
-| **Zustand 5** | Lightweight client state for cart, authentication, and theme |
-| **React Hook Form & Zod** | Controlled forms with schema validation |
-| **Axios** | HTTP client with automatic JWT token attachment |
-| **Sonner** | Toast notifications |
-| **Lucide React** | Modern iconography |
+Open http://localhost:3000/en or http://localhost:3000/ar. Production commands are pnpm build and pnpm start; pnpm lint runs ESLint.
 
----
+## Project structure
 
-## 📁 Directory Structure
+    app/[locale]/       Locale layouts and customer/admin routes
+    messages/           English and Arabic translation catalogs
+    i18n/               Locale routing and request configuration
+    features/           Feature APIs, components, hooks, schemas and types
+    _components/shared/ Reusable navigation, layout and UI components
+    providers/          Theme, query and authentication providers
+    lib/                API clients, cookies and shared utilities
+    store/              Zustand application state
 
-```text
-frontend/
-├── _components/
-│   ├── shared/                # Atomic reusable components (Button, Input, Text, Navbar)
-│   └── theme-toggle.tsx       # Theme toggler
-├── app/
-│   ├── layout.tsx             # Root layout with QueryClient & Theme providers
-│   ├── page.tsx               # Homepage with Hero, SaleGrid, and ProductGrid
-│   ├── globals.css            # Tailwind v4 theme tokens and global cursor rules
-│   └── products/
-│       └── [id]/              # Product detail page with interactive gallery & owner controls
-├── features/
-│   ├── cart/                  # Cart drawer, Zustand cart store, badge count
-│   └── products/
-│       ├── api/               # Product endpoints via Axios client
-│       ├── components/        # ProductCard, ProductGrid, SaleGrid, Modals
-│       │   ├── CreateProductModal.tsx
-│       │   ├── EditProductModal.tsx
-│       │   └── DeleteConfirmModal.tsx
-│       ├── hooks/             # TanStack Query custom hooks (useProducts, useProduct, etc.)
-│       └── types/             # Product TypeScript interfaces
-├── lib/
-│   ├── axios-client.ts        # Axios instance with interceptors & JWT injection
-│   ├── cookies.ts             # Cookie helpers for auth token persistence
-│   └── utils.ts               # Tailwind class merge helper (`cn`)
-├── store/
-│   └── use-app-store.ts       # Global app store (user session, authentication status)
-├── package.json
-└── tsconfig.json
-```
+## Backend documentation
 
----
-
-## ⚙️ Environment Configuration
-
-Create a `.env.local` file in the `frontend/` directory:
-
-```env
-# URL of the running backend API
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
-
----
-
-## 🚦 Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or higher)
-- `pnpm` (recommended) or `npm` / `yarn`
-- Running Nexo Backend API instance (`http://localhost:5000`)
-
-### Installation & Run
-
-1. **Install Dependencies**:
-   ```bash
-   pnpm install
-   ```
-
-2. **Start Development Server**:
-   ```bash
-   pnpm dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-3. **Build for Production**:
-   ```bash
-   pnpm build
-   ```
-
-4. **Run Production Server**:
-   ```bash
-   pnpm start
-   ```
-
----
-
-## 👨‍💻 Author
-
-- **Emad Ahmed** — Full Stack Developer
-- Portfolio: [https://emad-site.vercel.app/](https://emad-site.vercel.app/)
-- Email: [emadahmeddev@gmail.com](mailto:emadahmeddev@gmail.com)
+See [the API reference](../backend/API-Docs.md), [backend setup](../backend/README.md), and the root [project guide](../README.md).

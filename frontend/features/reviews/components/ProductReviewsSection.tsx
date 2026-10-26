@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLocale, useTranslations } from "next-intl";
 import {
   useProductReviews,
   useCreateReview,
@@ -37,6 +38,8 @@ export function ProductReviewsSection({
   ratingQuantity = 0,
 }: ProductReviewsSectionProps) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("reviews");
   const { user } = useAppStore();
 
   const { data: reviews = [], isLoading } = useProductReviews(productId);
@@ -58,7 +61,7 @@ export function ProductReviewsSection({
 
   const handleOpenForm = (reviewToEdit?: ReviewItem) => {
     if (!user) {
-      toast.error("Please sign in to write a review");
+      toast.error(t("signInToWrite"));
       router.push("/auth/login");
       return;
     }
@@ -90,13 +93,13 @@ export function ProductReviewsSection({
     e.preventDefault();
 
     if (!user) {
-      toast.error("Please sign in first");
+      toast.error(t("signInFirst"));
       router.push("/auth/login");
       return;
     }
 
     if (!reviewTextInput.trim()) {
-      toast.error("Please enter your review text");
+      toast.error(t("enterText"));
       return;
     }
 
@@ -108,12 +111,12 @@ export function ProductReviewsSection({
         },
         {
           onSuccess: () => {
-            toast.success("Review updated successfully");
+            toast.success(t("updated"));
             handleCloseForm();
           },
           onError: (err: unknown) => {
             const msg =
-              err instanceof Error ? err.message : "Failed to update review";
+              err instanceof Error ? err.message : t("updateFailed");
             toast.error(msg);
           },
         },
@@ -126,12 +129,12 @@ export function ProductReviewsSection({
         },
         {
           onSuccess: () => {
-            toast.success("Review submitted successfully");
+            toast.success(t("submitted"));
             handleCloseForm();
           },
           onError: (err: unknown) => {
             const msg =
-              err instanceof Error ? err.message : "Failed to submit review";
+              err instanceof Error ? err.message : t("submitFailed");
             toast.error(msg);
           },
         },
@@ -144,7 +147,7 @@ export function ProductReviewsSection({
 
     deleteReviewMutation.mutate(deleteTargetId, {
       onSuccess: () => {
-        toast.success("Review deleted successfully");
+        toast.success(t("deleted"));
         setDeleteTargetId(null);
         if (editingReviewId === deleteTargetId) {
           handleCloseForm();
@@ -152,7 +155,7 @@ export function ProductReviewsSection({
       },
       onError: (err: unknown) => {
         const msg =
-          err instanceof Error ? err.message : "Failed to delete review";
+          err instanceof Error ? err.message : t("deleteFailed");
         toast.error(msg);
         setDeleteTargetId(null);
       },
@@ -169,11 +172,11 @@ export function ProductReviewsSection({
   });
 
   const ratingLabels: Record<number, string> = {
-    1: "Poor",
-    2: "Fair",
-    3: "Good",
-    4: "Very Good",
-    5: "Excellent",
+    1: t("poor"),
+    2: t("fair"),
+    3: t("good"),
+    4: t("veryGood"),
+    5: t("excellent"),
   };
 
   const isSubmitting =
@@ -185,13 +188,13 @@ export function ProductReviewsSection({
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Customer Opinions</span>
+            <span>{t("customerOpinions")}</span>
           </div>
           <Text as="h2" size="2xl" font="black" className="tracking-tight text-textPrimary">
-            Reviews & Ratings
+            {t("title")}
           </Text>
           <Text size="sm" color="secondary" className="mt-1">
-            Real feedback from verified purchasers and users.
+            {t("subtitle")}
           </Text>
         </div>
 
@@ -201,7 +204,7 @@ export function ProductReviewsSection({
             onClick={() => handleOpenForm(existingUserReview || undefined)}
             leftIcon={<MessageSquare className="w-4 h-4" />}
           >
-            {existingUserReview ? "Edit Your Review" : "Write a Review"}
+            {existingUserReview ? t("editYourReview") : t("writeReview")}
           </Button>
         )}
       </div>
@@ -229,11 +232,11 @@ export function ProductReviewsSection({
             })}
           </div>
           <Text size="sm" color="secondary">
-            Based on{" "}
+            {t("basedOn")} {" "}
             <span className="font-bold text-textPrimary">
               {ratingQuantity || totalReviewsCount}
             </span>{" "}
-            verified ratings
+            {t("verifiedRatings")}
           </Text>
         </div>
 
@@ -270,10 +273,10 @@ export function ProductReviewsSection({
               </div>
               <div>
                 <Text font="bold" size="lg" className="text-textPrimary">
-                  {editingReviewId ? "Update Your Review" : "Share Your Experience"}
+                  {editingReviewId ? t("updateYourReview") : t("shareExperience")}
                 </Text>
                 <Text size="xs" color="secondary">
-                  Your review helps other shoppers make informed choices.
+                  {t("formSubtitle")}
                 </Text>
               </div>
             </div>
@@ -281,7 +284,7 @@ export function ProductReviewsSection({
               type="button"
               onClick={handleCloseForm}
               className="p-1.5 rounded-lg text-textSecondary hover:text-textPrimary hover:bg-borderPrimary/40 transition-colors"
-              aria-label="Close form"
+              aria-label={t("closeForm")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -291,7 +294,7 @@ export function ProductReviewsSection({
             {/* Star Rating Picker */}
             <div>
               <label className="block text-xs font-bold text-textPrimary mb-2">
-                Your Rating:
+                {t("yourRating")}
               </label>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
@@ -307,7 +310,7 @@ export function ProductReviewsSection({
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(null)}
                         className="p-1 cursor-pointer transition-transform hover:scale-125 focus:outline-hidden"
-                        title={`${star} Star${star > 1 ? "s" : ""}`}
+                        title={`${star} ${star > 1 ? t("stars") : t("star")}`}
                       >
                         <Star
                           className={`w-7 h-7 transition-colors ${
@@ -333,10 +336,10 @@ export function ProductReviewsSection({
                   htmlFor="reviewText"
                   className="text-xs font-bold text-textPrimary"
                 >
-                  Review Details:
+                  {t("reviewDetails")}
                 </label>
                 <span className="text-[11px] text-textSecondary">
-                  {reviewTextInput.length}/500 characters
+                  {t("characterCount", { count: reviewTextInput.length })}
                 </span>
               </div>
               <textarea
@@ -345,7 +348,7 @@ export function ProductReviewsSection({
                 maxLength={500}
                 value={reviewTextInput}
                 onChange={(e) => setReviewTextInput(e.target.value)}
-                placeholder="What did you like or dislike about this product? How is the quality, fit, or performance?"
+                placeholder={t("reviewPlaceholder")}
                 className="w-full px-4 py-3 rounded-2xl border border-borderPrimary bg-bgPrimary text-sm text-textPrimary placeholder:text-textSecondary/50 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20 transition-all resize-y"
                 required
               />
@@ -360,7 +363,7 @@ export function ProductReviewsSection({
                 onClick={handleCloseForm}
                 disabled={isSubmitting}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 type="submit"
@@ -376,10 +379,10 @@ export function ProductReviewsSection({
                 }
               >
                 {isSubmitting
-                  ? "Saving..."
+                  ? t("saving")
                   : editingReviewId
-                  ? "Update Review"
-                  : "Submit Review"}
+                  ? t("updateReview")
+                  : t("submitReview")}
               </Button>
             </div>
           </form>
@@ -392,7 +395,7 @@ export function ProductReviewsSection({
           <div className="p-12 text-center border border-borderPrimary bg-bgSecondary rounded-3xl">
             <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-3" />
             <Text size="sm" color="secondary">
-              Loading reviews...
+              {t("loading")}
             </Text>
           </div>
         ) : reviews.length === 0 ? (
@@ -401,17 +404,17 @@ export function ProductReviewsSection({
               <Star className="w-6 h-6" />
             </div>
             <Text font="bold" size="lg" className="text-textPrimary mb-1">
-              No Reviews Yet
+              {t("noneYet")}
             </Text>
             <Text size="sm" color="secondary" className="max-w-md mx-auto mb-6">
-              Be the first customer to share your thoughts on this product!
+              {t("firstReviewMessage")}
             </Text>
             <Button
               variant="primary"
               onClick={() => handleOpenForm()}
               leftIcon={<MessageSquare className="w-4 h-4" />}
             >
-              Write First Review
+              {t("writeFirst")}
             </Button>
           </div>
         ) : (
@@ -420,7 +423,7 @@ export function ProductReviewsSection({
             const canManage =
               isAuthor || user?.role === "Admin" || user?.role === "SuperAdmin";
             const reviewDate = new Date(rev.createdAt).toLocaleDateString(
-              undefined,
+              locale,
               {
                 year: "numeric",
                 month: "short",
@@ -444,7 +447,7 @@ export function ProductReviewsSection({
                       <div className="relative w-10 h-10 rounded-full overflow-hidden border border-borderPrimary flex-shrink-0">
                         <Image
                           src={rev.user.profilePicture.url}
-                          alt={rev.user.fullName || "User"}
+                          alt={rev.user.fullName || t("user")}
                           fill
                           className="object-cover"
                         />
@@ -458,16 +461,16 @@ export function ProductReviewsSection({
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-bold text-textPrimary">
-                          {rev.user?.fullName || "Verified Buyer"}
+                          {rev.user?.fullName || t("verifiedBuyer")}
                         </span>
                         {isAuthor && (
                           <span className="text-[10px] font-bold text-primary bg-primary/15 px-2 py-0.5 rounded-full border border-primary/20">
-                            Your Review
+                            {t("yourReview")}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-textSecondary mt-0.5">
-                        <span>@{rev.user?.username || "shopper"}</span>
+                        <span>@{rev.user?.username || t("shopper")}</span>
                         <span>•</span>
                         <span>{reviewDate}</span>
                       </div>
@@ -496,7 +499,7 @@ export function ProductReviewsSection({
                             type="button"
                             onClick={() => handleOpenForm(rev)}
                             className="p-1.5 rounded-lg text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors"
-                            title="Edit Review"
+                            title={t("editReview")}
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
@@ -505,7 +508,7 @@ export function ProductReviewsSection({
                           type="button"
                           onClick={() => setDeleteTargetId(rev._id)}
                           className="p-1.5 rounded-lg text-textSecondary hover:text-textError hover:bg-textError/10 transition-colors"
-                          title="Delete Review"
+                          title={t("deleteReview")}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -532,10 +535,10 @@ export function ProductReviewsSection({
               <AlertTriangle className="w-6 h-6" />
             </div>
             <Text as="h3" font="bold" size="lg" className="text-center text-textPrimary mb-2">
-              Delete Review?
+              {t("confirmDeleteTitle")}
             </Text>
             <Text size="sm" color="secondary" className="text-center mb-6">
-              Are you sure you want to delete this review? This action cannot be undone.
+              {t("confirmDeleteMessage")}
             </Text>
             <div className="flex gap-3">
               <Button
@@ -545,7 +548,7 @@ export function ProductReviewsSection({
                 onClick={() => setDeleteTargetId(null)}
                 disabled={deleteReviewMutation.isPending}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 variant="danger"
@@ -561,7 +564,7 @@ export function ProductReviewsSection({
                   )
                 }
               >
-                {deleteReviewMutation.isPending ? "Deleting..." : "Delete"}
+                {deleteReviewMutation.isPending ? t("deleting") : t("delete")}
               </Button>
             </div>
           </div>

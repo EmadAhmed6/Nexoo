@@ -7,8 +7,10 @@ import { ProductCard } from "./ProductCard";
 import { useProducts } from "../hooks/useProducts";
 import { Product } from "../types/product.types";
 import { Text } from "@/_components/shared";
+import { useTranslations } from "next-intl";
 
 export function SaleGrid() {
+  const t = useTranslations("home");
   const { data, isLoading, isError, error, refetch } = useProducts({
     hasDiscount: "true",
     limit: 8,
@@ -43,14 +45,14 @@ export function SaleGrid() {
       <div className="p-6 rounded-2xl border border-textError/20 bg-textError/5 text-center max-w-lg mx-auto">
         <AlertCircle className="w-7 h-7 text-textError mx-auto mb-2" />
         <Text size="sm" font="bold" color="primary" className="mb-1">
-          Failed to load sale products
+          {t("failedLoadSale")}
         </Text>
         <button
           onClick={() => refetch()}
-          className="inline-flex items-center gap-1.5 mt-3 px-4 py-2 rounded-xl bg-primary text-black text-xs font-bold hover:bg-primaryHover transition-colors"
+          className="inline-flex items-center gap-1.5 mt-3 px-4 py-2 rounded-xl bg-primary text-white dark:text-black text-xs font-bold hover:bg-primaryHover transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          Retry
+          {t("retry")}
         </button>
       </div>
     );
@@ -71,7 +73,7 @@ export function SaleGrid() {
           <div className="flex items-center gap-2 mb-0.5">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-textError/10 text-textError text-[11px] font-bold border border-textError/20">
               <Flame className="w-3 h-3" />
-              HOT DEALS
+              {t("hotDeals")}
             </span>
           </div>
           <Text
@@ -81,15 +83,15 @@ export function SaleGrid() {
             className="flex items-center gap-2 tracking-tight"
           >
             <Tag className="w-5 h-5 text-primary" />
-            On Sale
+            {t("onSale")}
           </Text>
           <Text size="xs" color="secondary" className="mt-0.5">
-            Exclusive discounts — limited time only
+            {t("onSaleSubtitle")}
           </Text>
         </div>
 
         <span className="text-xs font-semibold px-3 py-1 rounded-full border border-textError/20 bg-textError/5 text-textError">
-          {products.length} deals
+          {t("dealsCount", { count: products.length })}
         </span>
       </div>
 

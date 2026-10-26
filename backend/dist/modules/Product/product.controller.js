@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import { sendError, successMsg } from "../../middlewares/errors.js";
 import { Product, validateCreateProduct, validateUpdateProduct, } from "./product.model.js";
 import cloudinary from "../../config/cloudinary.js";
+import { createNotification } from "../Notification/notification.controller.js";
 // CREATE A NEW PRODUCT
 const createProduct = asyncHandler(async (req, res) => {
     const { error, success } = validateCreateProduct(req.body);
@@ -212,6 +213,22 @@ const toggleLikeProduct = asyncHandler(async (req, res) => {
         if (!updatedProduct) {
             sendError(res, 500, "Failed to Like Product");
             return;
+        }
+        const productOwner = product.userId || product.user;
+        if (productOwner && productOwner.toString() !== userId?.toString()) {
+            const likerName = req.user?.username || "Someone";
+            try {
+                await createNotification({
+                    user: productOwner,
+                    title: "New like on your product",
+                    message: `${likerName} liked your product "${product.title}"`,
+                    type: "other",
+                    relatedId: product._id,
+                });
+            }
+            catch (err) {
+                console.error("Failed to notify product owner about like:", err);
+            }
         }
         successMsg(res, 200, "Product liked successfully", updatedProduct);
     }

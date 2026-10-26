@@ -167,7 +167,7 @@ export function OrderStatusTimeline({
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-200 mb-2 shrink-0",
                       isCompleted &&
-                        "bg-primary border-primary text-black shadow-sm",
+                        "bg-primary border-primary text-white dark:text-black shadow-sm",
                       isCurrent &&
                         "bg-primary/20 border-primary text-primary ring-4 ring-primary/10 shadow-sm animate-pulse",
                       !isCompleted &&

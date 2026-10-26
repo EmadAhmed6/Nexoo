@@ -91,7 +91,7 @@ export interface CreateOrderPayload {
     city: string;
     state: string;
     country: string;
-    postalCode: string;
+    postalCode?: string;
     phone: string;
   };
   paymentMethod: "Paymob" | "COD" | "Stripe" | "Paypal";

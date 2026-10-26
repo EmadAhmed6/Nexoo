@@ -1,18 +1,28 @@
 import { Document, model, Schema, Types } from "mongoose";
 import {
+  ChangePasswordSchema,
   CreateAddressSchema,
+  IChangePasswordSchema,
   ICreateAddressSchema,
+  IResendOtpSchema,
   IUpdateAdressSchema,
   IUserSchema,
+  IVerifyOtpSchema,
+  ResendOtpSchema,
   UpdateAdressSchema,
+  VerifyOtpSchema,
 } from "./user.schema.js";
 import jwt from "jsonwebtoken";
 
 import {
+  ForgotPasswordSchema,
+  IForgotPasswordSchema,
   ILoginSchema,
   IRegisterSchema,
+  IResetPasswordSchema,
   LoginSchema,
   RegisterSchema,
+  ResetPasswordSchema,
 } from "../Auth/auth.schema.js";
 
 interface IAddress extends Document {
@@ -24,20 +34,23 @@ interface IAddress extends Document {
   isDefault: boolean;
 }
 
-interface IUser extends IUserSchema, Document {
+export interface IUser extends IUserSchema, Document {
   generateAccessToken(): string;
+  generateRefreshToken(): string;
   addresses: Types.DocumentArray<IAddress>;
   phone: string;
   provider: "local" | "google";
   role: "User" | "Admin" | "SuperAdmin";
-  profilePicture: {
-    url: string;
-    publicId: string | null;
-  };
+
   isVerified: boolean;
   isActive: boolean;
   isBanned: boolean;
   banExpires?: Date;
+  refreshToken: string | undefined;
+  profilePicture: {
+    publicId: string;
+    url: string;
+  } | null;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -66,6 +79,7 @@ const UserSchema = new Schema<IUser>(
       type: String,
       trim: true,
     },
+
     addresses: [
       {
         street: { type: String, required: true },
@@ -117,6 +131,18 @@ const UserSchema = new Schema<IUser>(
       type: Date,
       default: null,
     },
+    refreshToken: {
+      type: String,
+      select: false,
+    },
+    otp: {
+      type: String,
+      select: false,
+    },
+    otpExpired: {
+      type: Date,
+      select: false,
+    },
   },
   { timestamps: true },
 );
@@ -125,13 +151,22 @@ UserSchema.methods.generateAccessToken = function (this: IUser): string {
   return jwt.sign(
     {
       id: this._id,
+      userId: this._id,
       role: this.role,
       username: this.username,
     },
     process.env.JWT_SECRET_KEY as string,
     {
-      expiresIn: "7d",
+      expiresIn: "15m",
     },
+  );
+};
+
+UserSchema.methods.generateRefreshToken = function (this: IUser): string {
+  return jwt.sign(
+    { id: this._id },
+    process.env.JWT_REFRESH_SECRET_KEY as string,
+    { expiresIn: "7d" },
   );
 };
 
@@ -153,9 +188,34 @@ const validateUpdateAddress = (address: IUpdateAdressSchema) => {
   return UpdateAdressSchema.safeParse(address);
 };
 
+const validateForgotPassword = (user: IForgotPasswordSchema) => {
+  return ForgotPasswordSchema.safeParse(user);
+};
+
+const validateResetPassword = (user: IResetPasswordSchema) => {
+  return ResetPasswordSchema.safeParse(user);
+};
+
+const validateVerifyOtp = (user: IVerifyOtpSchema) => {
+  return VerifyOtpSchema.safeParse(user);
+};
+
+const validateChangePassword = (password: IChangePasswordSchema) => {
+  return ChangePasswordSchema.safeParse(password);
+};
+
+const validateResendOtp = (data: IResendOtpSchema) => {
+  return ResendOtpSchema.safeParse(data);
+};
+
 export {
   validateRegister,
   validateLogin,
   validateCreateAddress,
   validateUpdateAddress,
+  validateForgotPassword,
+  validateResetPassword,
+  validateVerifyOtp,
+  validateChangePassword,
+  validateResendOtp,
 };

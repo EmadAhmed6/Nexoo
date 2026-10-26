@@ -6,7 +6,10 @@ import type { Options } from "swagger-jsdoc";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const docsPath = path.resolve(__dirname, "../docs/**/*.ts").replace(/\\/g, "/");
+const docsExtension = path.extname(__filename) === ".ts" ? "ts" : "js";
+const docsPath = path
+  .resolve(__dirname, `../docs/**/*.${docsExtension}`)
+  .replace(/\\/g, "/");
 
 const options: Options = {
   definition: {
@@ -15,18 +18,19 @@ const options: Options = {
       title: "Nexo API",
       version: "1.0.0",
       description:
-        "A professional e-commerce API built with Express, TS, and MongoDB",
+        "Nexo e-commerce REST API. Routes are mounted at the root (no /api/v1 prefix). Authenticated endpoints use a bearer access token; refresh sessions use an HTTP-only refreshToken cookie. General traffic is limited to 500 requests per IP per 15 minutes, with a 10-per-minute limit on sensitive authentication endpoints. See endpoint descriptions for roles, request formats, and payment callbacks.",
       contact: {
         name: "Emad",
         url: "https://emad-site.vercel.app/",
         email: "emadahmeddev@gmail.com",
       },
-      servers: [
-        {
-          url: "http://localhost:5000/",
-        },
-      ],
     },
+    servers: [
+      {
+        url: "http://localhost:5000",
+        description: "Local development server",
+      },
+    ],
     tags: [
       {
         name: "Auth",
@@ -99,6 +103,13 @@ const options: Options = {
           type: "http",
           scheme: "bearer",
           bearerFormat: "JWT",
+        },
+        refreshCookie: {
+          type: "apiKey",
+          in: "cookie",
+          name: "refreshToken",
+          description:
+            "HTTP-only refresh cookie set by authentication endpoints. Browsers send it automatically when credentials are included.",
         },
       },
     },

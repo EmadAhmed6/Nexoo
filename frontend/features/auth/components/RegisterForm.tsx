@@ -16,12 +16,15 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { registerSchema, RegisterSchemaType } from "../schemas/auth.schema";
 import { useRegister } from "../hooks/useAuth";
 import { Input, Button, Text } from "@/_components/shared";
+import { GoogleLoginButton } from "./GoogleLoginButton";
 
 export function RegisterForm() {
   const router = useRouter();
+  const t = useTranslations("auth");
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -51,14 +54,13 @@ export function RegisterForm() {
 
     registerUser(data, {
       onSuccess: () => {
-        const msg = "Account created successfully! Redirecting...";
+        const msg = "Account created! Please verify your email.";
         setSuccessMessage(msg);
         toast.success("Account created successfully!", {
-          description: "Welcome to Nexo! Redirecting to home...",
+          description: "A verification code has been sent to your email.",
         });
         setTimeout(() => {
-          router.push("/");
-          router.refresh();
+          router.push(`/auth/verify-otp?email=${encodeURIComponent(data.email)}`);
         }, 1200);
       },
       onError: (err) => {
@@ -72,6 +74,7 @@ export function RegisterForm() {
     });
   };
 
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -82,10 +85,10 @@ export function RegisterForm() {
       {/* Header */}
       <div className="mb-6">
         <Text as="h1" size="3xl" font="black" className="tracking-tight">
-          Create Account
+          {t("createAccount")}
         </Text>
         <Text size="sm" color="secondary" className="mt-1.5">
-          Join the exclusive Nexo platform for premium products.
+          {t("signUpSubtitle")}
         </Text>
       </div>
 
@@ -129,7 +132,7 @@ export function RegisterForm() {
         noValidate
       >
         <Input
-          label="Full Name"
+          label={t("fullName")}
           type="text"
           autoComplete="name"
           placeholder="Alex Morgan"
@@ -141,7 +144,7 @@ export function RegisterForm() {
         />
 
         <Input
-          label="Username"
+          label={t("username")}
           type="text"
           autoComplete="username"
           placeholder="alex_nexo"
@@ -153,7 +156,7 @@ export function RegisterForm() {
         />
 
         <Input
-          label="Email Address"
+          label={t("email")}
           type="email"
           autoComplete="email"
           placeholder="alex@nexo.com"
@@ -165,7 +168,7 @@ export function RegisterForm() {
         />
 
         <Input
-          label="Phone Number"
+          label={t("phone")}
           type="tel"
           autoComplete="tel"
           placeholder="01012345678"
@@ -179,7 +182,7 @@ export function RegisterForm() {
 
         {/* type="password" auto-enables show/hide toggle */}
         <Input
-          label="Password"
+          label={t("password")}
           type="password"
           autoComplete="new-password"
           placeholder="Min 6 chars, 1 uppercase & 1 number"
@@ -200,19 +203,34 @@ export function RegisterForm() {
           rightIcon={<ArrowRight className="w-4 h-4" />}
           className="mt-3"
         >
-          Create Account
+          {t("signUp")}
         </Button>
       </form>
+
+      {/* Divider */}
+      <div className="relative my-6 text-center">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-borderPrimary" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-bgSecondary px-3 text-textSecondary font-medium">
+            {t("orContinueWith")}
+          </span>
+        </div>
+      </div>
+
+      {/* Google OAuth Button */}
+      <GoogleLoginButton text={t("signUpWithGoogle")} />
 
       {/* Switch to Login */}
       <div className="mt-6 pt-5 border-t border-borderPrimary text-center">
         <Text size="xs" color="secondary">
-          Already have an account?{" "}
+          {t("alreadyHaveAccount")}{" "}
           <Link
             href="/auth/login"
             className="text-primary hover:underline font-bold transition-colors"
           >
-            Sign In
+            {t("signIn")}
           </Link>
         </Text>
       </div>

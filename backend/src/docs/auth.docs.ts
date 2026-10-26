@@ -14,7 +14,7 @@
  * /auth/register:
  *   post:
  *     summary: Register a new user
- *     description: Creates a new user account and returns account details with access token
+ *     description: Creates an unverified account, emails a verification OTP, and returns account data plus an access token and refresh-token cookie. Verify the email before signing in.
  *     tags:
  *       - Auth
  *     requestBody:
@@ -106,7 +106,7 @@
  * /auth/login:
  *   post:
  *     summary: Login user
- *     description: Authenticates user credentials and returns an access token
+ *     description: Authenticates a local account. Unverified accounts receive a fresh verification OTP and must verify before sign-in completes. Google accounts must use the Google OAuth flow.
  *     tags:
  *       - Auth
  *     requestBody:
