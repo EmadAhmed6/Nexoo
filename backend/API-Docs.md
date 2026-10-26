@@ -159,7 +159,6 @@ Login, OTP verification, and Google sign-in issue an access token and set an HTT
 - [Notification Endpoints](#notification-endpoints)
 - [Ticket Endpoints](#ticket-endpoints)
 - [Banner Endpoints](#banner-endpoints)
-- [Authentication, Session & Account Endpoints](#authentication-session--account-endpoints)
 - [Admin Order Management Endpoints](#admin-order-management-endpoints)
 - [Admin Ticket Management Endpoints](#admin-ticket-management-endpoints)
 - [Admin Banner Management Endpoints](#admin-banner-management-endpoints)
@@ -306,6 +305,145 @@ Invalid credentials or user does not exist.
   "message": "Invalid email or password"
 }
 ```
+
+---
+
+These endpoints were added after the original reference. Protected account routes require the bearer access token unless identified as cookie/session-based.
+
+
+
+### POST /auth/forgot-password
+
+Request a password reset email for an account.
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| email | string | ✅ | Account email address |
+
+#### Responses
+
+- **200** — Reset email processed.
+- **400** — Invalid email.
+- **404** — Account was not found.
+
+---
+
+### POST /auth/reset-password
+
+Set a new password using the token sent by email.
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| email | string | ✅ | Account email address |
+| token | string | ✅ | Password reset token |
+| newPassword | string | ✅ | 6–72 characters, uppercase, lowercase, and a digit |
+
+#### Responses
+
+- **200** — Password updated.
+- **400** — Invalid/expired token or invalid password.
+- **404** — Account was not found.
+
+---
+
+### POST /auth/verify-otp
+
+Verify the email using the 6-digit OTP sent during registration.
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| email | string | ✅ | Registered email |
+| otp | string | ✅ | 6-digit verification code |
+
+#### Responses
+
+- **200** — Email verified; returns the account and access token, and sets the HTTP-only refreshToken cookie.
+- **400** — Invalid or expired OTP, or invalid input.
+- **404** — Account not found.
+
+---
+
+### POST /auth/resend-otp
+
+Send a new verification code to an unverified account.
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| email | string | ✅ | Account email address |
+
+#### Responses
+
+- **200** — Verification code sent.
+- **400** — Invalid input.
+- **404** — Account not found or already verified.
+
+---
+
+### GET /auth/me
+
+Retrieve the account associated with the access token.
+
+#### Request Headers
+
+| Header | Value | Required |
+| :--- | :--- | :---: |
+| Authorization | Bearer <accessToken> | ✅ |
+
+#### Responses
+
+- **200** — Authenticated account returned.
+- **401** — Missing or invalid access token.
+
+---
+
+### GET, POST /auth/logout
+
+Clear the refresh-token cookie and end the session. Both methods are supported by the current router.
+
+#### Responses
+
+- **200** — Logged out; refreshToken cookie cleared.
+
+---
+
+### GET, POST /auth/refresh
+
+Refresh the access token using the refreshToken cookie. Both methods are supported by the current router.
+
+#### Cookies
+
+| Cookie | Required | Description |
+| :--- | :---: | :--- |
+| refreshToken | ✅ | HTTP-only refresh token from a previous authentication flow |
+
+#### Responses
+
+- **200** — New access token returned.
+- **400/403** — Cookie missing, invalid, expired, or no longer matches the stored session.
+
+---
+
+### GET /auth/google and GET /auth/google/callback
+
+Start and complete Google OAuth. The first route redirects the browser to Google. The callback validates state, authenticates or creates the account, sets the refresh cookie, and redirects to the frontend auth result page.
+
+#### Google OAuth Configuration
+
+| Setting | Required value |
+| :--- | :--- |
+| Redirect URI | http://localhost:5000/auth/google/callback (or GOOGLE_CALLBACK_URL) |
+| Authorized JavaScript origin | Frontend origin, for example http://localhost:3000 |
+| Backend variables | GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, FRONTEND_URL |
+
+The callback URL is the Google redirect URI. /auth/google starts sign-in and should not be registered as a redirect URI.
 
 ---
 
@@ -891,6 +1029,52 @@ User does not exist.
   "message": "User not found"
 }
 ```
+
+---
+
+
+
+### DELETE /users/:userId/profile-picture
+
+Delete the user's profile image. The requester must own the account or be an authorized administrator.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| userId | string | ✅ | MongoDB user ID |
+
+#### Responses
+
+- **200** — Profile picture deleted.
+- **401/403** — Not authenticated or not authorized for this account.
+- **404** — User was not found.
+
+---
+
+### PUT /users/:userId/change-password
+
+Change the account password using the current password. The controller sends the account security email after a successful change.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| userId | string | ✅ | MongoDB user ID |
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| oldPassword | string | ✅ | Current password |
+| newPassword | string | ✅ | New password with uppercase, lowercase, and a digit |
+
+#### Responses
+
+- **200** — Password changed.
+- **400** — Invalid input or incorrect current password.
+- **401/403** — Not authenticated or not authorized.
+- **404** — User was not found.
 
 ---
 
@@ -4046,135 +4230,6 @@ Active banners fetched successfully.
 ```
 
 ---
-
-## Authentication, Session & Account Endpoints
-
-These endpoints were added after the original reference. Protected account routes require the bearer access token unless identified as cookie/session-based.
-
-### POST /auth/verify-otp
-
-Verify the email using the 6-digit OTP sent during registration.
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| email | string | ✅ | Registered email |
-| otp | string | ✅ | 6-digit verification code |
-
-#### Responses
-
-- **200** — Email verified; returns account and access token, and sets the HTTP-only refreshToken cookie.
-- **400** — Invalid or expired OTP, or invalid input.
-- **404** — Account not found.
-
-### POST /auth/resend-otp
-
-Send a new verification code to an unverified account.
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :---: | :---: | :--- |
-| email | string | ✅ | Account email |
-
-#### Responses
-
-- **200** — Verification code sent.
-- **400** — Invalid input.
-- **404** — Account not found or already verified.
-
-### POST /auth/forgot-password
-
-Request a password reset email.
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| email | string | ✅ | Account email |
-
-### POST /auth/reset-password
-
-Set a new password using the token sent by email.
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| email | string | ✅ | Account email |
-| token | string | ✅ | Password reset token |
-| newPassword | string | ✅ | 6–72 characters, uppercase, lowercase, and a digit |
-
-### GET /auth/me
-
-Retrieve the account associated with the access token.
-
-#### Request Headers
-
-| Header | Value | Required |
-| :--- | :--- | :---: |
-| Authorization | Bearer <accessToken> | ✅ |
-
-### GET, POST /auth/refresh
-
-Refresh the access token using the refreshToken cookie. Both methods are supported by the current router.
-
-#### Cookies
-
-| Cookie | Required | Description |
-| :--- | :---: | :--- |
-| refreshToken | ✅ | HTTP-only refresh token from a previous authentication flow |
-
-### GET, POST /auth/logout
-
-Clear the refresh-token cookie and end the session. Both methods are supported.
-
-### GET /auth/google and GET /auth/google/callback
-
-Start and complete Google OAuth. The first route redirects the browser to Google. The callback validates state, authenticates/creates the account, sets the refresh cookie, and redirects to the frontend auth result page.
-
-#### Google OAuth Configuration
-
-| Setting | Required value |
-| :--- | :--- |
-| Redirect URI | http://localhost:5000/auth/google/callback (or GOOGLE_CALLBACK_URL) |
-| Authorized JavaScript origin | Frontend origin, for example http://localhost:3000 |
-| Backend variables | GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, FRONTEND_URL |
-
-The callback URL is the Google redirect URI. /auth/google starts sign-in and should not be registered as a redirect URI.
-
-### DELETE /users/:userId/profile-picture
-
-Delete the profile image. The user must be the account owner or an authorized administrator.
-
-#### Path Parameters
-
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| userId | string | ✅ | MongoDB user ID |
-
-### PUT /users/:userId/change-password
-
-Change the account password using the current password. The controller sends the account security email after a successful change.
-
-#### Path Parameters
-
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| userId | string | ✅ | MongoDB user ID |
-
-#### Request Body
-
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| oldPassword | string | ✅ | Current password |
-| newPassword | string | ✅ | New password with uppercase, lowercase, and a digit |
-
-### Rate-limit responses
-
-Auth endpoints listed in Rate Limiting & Security allow 10 requests per IP per minute in addition to the general API quota. Other API routes allow 500 requests per IP per 15 minutes. Exceeding a limit returns **429 Too Many Requests** with standard RateLimit headers.
-
 
 ## Admin Order Management Endpoints
 
