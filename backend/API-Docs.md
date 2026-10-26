@@ -13,6 +13,89 @@ Reference for the Express API mounted by backend/src/app.ts. The API is rooted a
 - Swagger UI and the Paymob server webhook are excluded from the general API limit. The default limiter store is in-memory per backend process; use a shared store before running multiple API instances.
 - IDs shown as {id} are MongoDB ObjectIds.
 
+## Endpoint requirements table
+
+For JSON routes, send the listed fields in the request body. “Path ID” means the corresponding MongoDB ID in the URL. All authenticated requests require a bearer access token unless the route says refresh cookie or OAuth.
+
+| # | Method | Endpoint | Required input | Access |
+|---:|---|---|---|---|
+| 1 | POST | /auth/register | username, fullName, email, password, phone | Public |
+| 2 | POST | /auth/verify-otp | email, otp | Public |
+| 3 | POST | /auth/resend-otp | email | Public |
+| 4 | POST | /auth/login | email, password | Public |
+| 5 | POST | /auth/forgot-password | email | Public |
+| 6 | POST | /auth/reset-password | email, token, newPassword | Public |
+| 7 | GET | /auth/me | Bearer token | User |
+| 8 | GET, POST | /auth/refresh | refreshToken cookie | Refresh cookie |
+| 9 | GET, POST | /auth/logout | No body | Public/session |
+| 10 | GET | /auth/google | Browser redirect; optional origin, popup query | Public |
+| 11 | GET | /auth/google/callback | OAuth code/state query and OAuth cookies | Google OAuth |
+| 12 | GET | /users | No body | Admin |
+| 13 | GET | /users/{userId} | Path ID | Authenticated |
+| 14 | PUT | /users/{userId} | Profile fields; optional multipart profilePicture | Owner/Admin |
+| 15 | DELETE | /users/{userId} | Path ID | Owner/Admin |
+| 16 | DELETE | /users/{userId}/profile-picture | Path ID | Owner/Admin |
+| 17 | GET, POST | /users/{userId}/addresses | Path ID; create requires street, city, state, phone; postalCode optional | Authenticated/Owner |
+| 18 | PUT, DELETE | /users/{userId}/addresses/{addressId} | Path IDs; PUT accepts address fields | Owner/Admin |
+| 19 | PUT | /users/{userId}/change-password | oldPassword, newPassword | Owner/Admin |
+| 20 | GET | /products | Optional search/filter/pagination query parameters | Public |
+| 21 | POST | /products | Product fields and up to 5 productImages files (multipart) | User |
+| 22 | GET | /products/suggestions | Search query | Public |
+| 23 | GET | /products/{productId} | Path ID | Public |
+| 24 | PUT | /products/{productId} | Path ID and changed product fields; optional productImages | Owner/Admin |
+| 25 | PATCH | /products/{productId} | Path ID | User |
+| 26 | DELETE | /products/{productId} | Path ID | Owner/Admin |
+| 27 | GET, POST | /products/{productId}/reviews | Path ID; POST requires reviewText, ratings | Public/User |
+| 28 | GET, POST | /reviews/{productId} | Path ID; POST requires reviewText, ratings | Public/User |
+| 29 | PUT, DELETE | /reviews/{reviewId} | Path ID; PUT accepts reviewText and/or ratings | Review owner/Admin |
+| 30 | PUT, DELETE | /reviews/{productId}/{reviewId} | Path IDs; PUT accepts reviewText and/or ratings | Review owner/Admin |
+| 31 | GET | /cart | No body | User |
+| 32 | POST | /cart/{productId} | Path ID; optional quantity fields per cart schema | User |
+| 33 | PUT | /cart/{productId} | Path ID and quantity | User |
+| 34 | DELETE | /cart/{productId} | Path ID | User |
+| 35 | DELETE | /cart | No body | User |
+| 36 | GET | /wishlist | No body | User |
+| 37 | POST | /wishlist/{productId} | Path ID | User |
+| 38 | DELETE | /wishlist/{productId} | Path ID | User |
+| 39 | DELETE | /wishlist | No body | User |
+| 40 | POST | /coupons/apply | Coupon code | User |
+| 41 | DELETE | /coupons/remove | No body | User |
+| 42 | GET | /admin/coupons | Optional search, isActive, discountType query | Admin |
+| 43 | POST | /admin/coupons | couponCode, discountType, discountValue, startDate, expireDate | Admin |
+| 44 | PUT, DELETE | /admin/coupons/{couponId} | Path ID; PUT accepts coupon fields | Admin |
+| 45 | PUT, DELETE | /coupons/{couponId} | Path ID; PUT accepts coupon fields | Admin alias |
+| 46 | POST | /orders | shippingAddress (address, city, state, country, phone; postalCode optional), paymentMethod | User |
+| 47 | GET | /orders | No body | User |
+| 48 | GET, PUT, DELETE | /orders/{orderId} | Path ID; PUT accepts order update fields | Order owner |
+| 49 | POST | /orders/paymob/create | Order/payment data required by Paymob controller | User |
+| 50 | POST | /orders/paymob/verify | Paymob verification data required by controller | User |
+| 51 | POST | /orders/paymob/webhook | Paymob webhook payload | Paymob server |
+| 52 | GET | /admin/orders | Optional admin filters/query | Admin |
+| 53 | GET | /admin/orders/overview | No body | Admin |
+| 54 | GET | /admin/orders/{orderId} | Path ID | Admin |
+| 55 | PATCH, PUT | /admin/orders/{orderId} | orderStatus; optional note, isPaid | Admin |
+| 56 | GET, DELETE | /notifications | No body | User |
+| 57 | PATCH | /notifications/read-all | No body | User |
+| 58 | GET, PATCH, DELETE | /notifications/{notificationId} | Path ID | User |
+| 59 | PATCH | /notifications/{notificationId}/read | Path ID | User |
+| 60 | POST | /tickets | subject, category, priority, message | User |
+| 61 | GET | /tickets/my | No body | User |
+| 62 | GET, PUT, DELETE | /tickets/{ticketId} | Path ID; PUT accepts ticket update fields | Ticket owner |
+| 63 | POST | /tickets/{ticketId}/messages | Path ID and message content | Ticket owner |
+| 64 | GET | /admin/tickets | Optional status/search filters | Admin |
+| 65 | PUT | /admin/tickets/{ticketId} | Path ID and status fields | Admin |
+| 66 | GET | /admin/tickets/overview | No body | Admin |
+| 67 | GET | /banners | Optional position query | Public |
+| 68 | GET | /admin/banners | Optional admin filters/query | Admin |
+| 69 | POST | /admin/banners | Banner fields plus image file (multipart) | Admin |
+| 70 | GET | /admin/banners/overview | No body | Admin |
+| 71 | GET, PUT, DELETE | /admin/banners/{bannerId} | Path ID; PUT accepts banner fields and optional image | Admin |
+| 72 | PUT, PATCH | /admin/users/{userId}/ban | Path ID and banDuration (days) | Admin |
+| 73 | PUT, PATCH | /admin/users/{userId}/unban | Path ID | Admin |
+| 74 | PATCH | /admin/users/{userId}/toggle-admin | Path ID | Admin |
+
+Note: the root POST /wishlist route is registered but its current handler reads productId from the URL path. Use POST /wishlist/{productId}; this is the working add-to-wishlist route.
+
 ## Authentication and account lifecycle
 
 | Method | Path | Access | Purpose |
