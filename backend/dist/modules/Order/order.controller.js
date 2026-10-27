@@ -156,7 +156,7 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 // PAYMOB ORDER
 const createPaymobOrder = asyncHandler(async (req, res) => {
-    const { orderId } = req.body;
+    const { orderId } = req.params;
     const userId = req.user?.id;
     const order = await Order.findOne({ _id: orderId, user: userId });
     if (!order) {
@@ -204,8 +204,13 @@ const createPaymobOrder = asyncHandler(async (req, res) => {
 });
 // VERIFY PAYMOB PAYMENT
 const verifyPaymobPayment = asyncHandler(async (req, res) => {
-    const { orderId, success, transactionId } = req.body;
+    const { success, transactionId } = req.body;
+    const orderId = req.params.orderId;
     const userId = req.user?.id;
+    if (!orderId || !Types.ObjectId.isValid(orderId)) {
+        sendError(res, 400, "Invalid Order ID format");
+        return;
+    }
     const order = await Order.findOne({ _id: orderId, user: userId });
     if (!order) {
         sendError(res, 404, "Order not found");
@@ -233,7 +238,12 @@ const verifyPaymobPayment = asyncHandler(async (req, res) => {
             note: "Payment verified via Paymob",
         });
         await order.save();
-        await updateStockAfterPayment(order.orderItems);
+        try {
+            await updateStockAfterPayment(order.orderItems);
+        }
+        catch (stockErr) {
+            console.error("Failed to update stock after payment verification:", stockErr);
+        }
         try {
             await Notification.create({
                 user: order.user,

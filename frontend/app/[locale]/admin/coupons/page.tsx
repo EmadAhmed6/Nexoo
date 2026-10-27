@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Tag,
   Plus,
@@ -450,6 +451,12 @@ function CreateCouponModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations("admin");
+  const tCat = useTranslations("categories");
+  const categoryLabel = (category: string) => {
+    const key = category.toLowerCase() as any;
+    return tCat.has(key) ? tCat(key) : category;
+  };
   const createCoupon = useCreateCoupon();
 
   const [formData, setFormData] = useState({
@@ -477,7 +484,7 @@ function CreateCouponModal({
     }));
   }, []);
 
-  if (!isOpen) return null;
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -528,8 +535,26 @@ function CreateCouponModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="w-full max-w-lg rounded-2xl border border-borderPrimary bg-bgSecondary p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            key="create-coupon-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          <motion.div
+            key="create-coupon-dialog"
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative z-10 w-full max-w-lg rounded-2xl border border-borderPrimary bg-bgSecondary p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-3 border-b border-borderPrimary">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-primary/10 text-primary">
@@ -846,8 +871,10 @@ function CreateCouponModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -861,6 +888,12 @@ function EditCouponModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations("admin");
+  const tCat = useTranslations("categories");
+  const categoryLabel = (category: string) => {
+    const key = category.toLowerCase() as any;
+    return tCat.has(key) ? tCat(key) : category;
+  };
   const updateCoupon = useUpdateCoupon();
 
   const [formData, setFormData] = useState({
@@ -877,7 +910,7 @@ function EditCouponModal({
     isActive: coupon.isActive,
   });
 
-  if (!isOpen) return null;
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -924,8 +957,26 @@ function EditCouponModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="w-full max-w-lg rounded-2xl border border-borderPrimary bg-bgSecondary p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            key="edit-coupon-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          <motion.div
+            key="edit-coupon-dialog"
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative z-10 w-full max-w-lg rounded-2xl border border-borderPrimary bg-bgSecondary p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-3 border-b border-borderPrimary">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-primary/10 text-primary">
@@ -1244,7 +1295,9 @@ function EditCouponModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

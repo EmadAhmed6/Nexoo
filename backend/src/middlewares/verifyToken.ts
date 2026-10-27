@@ -104,6 +104,24 @@ const verifyAdminToken = (req: Request, res: Response, next: NextFunction) => {
     }
   });
 };
+const verifySuperAdminToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  verifyToken(req, res, () => {
+    if (!req.user) {
+      sendError(res, 401, "Unauthorized");
+      return;
+    }
+    if (req.user?.role === "SuperAdmin") {
+      next();
+    } else {
+      sendError(res, 403, "Not Authorized");
+      return;
+    }
+  });
+};
 
 const verifyProductOwner = async (
   req: Request,
@@ -241,5 +259,6 @@ export {
   verifyCartOwner,
   verifyOrderOwner,
   verifyTicketOwner,
+  verifySuperAdminToken,
   checkUserBan,
 };

@@ -1,5 +1,5 @@
+import "dotenv/config";
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import auth from "./modules/Auth/auth.routes.js";
@@ -25,19 +25,31 @@ import spacs from "./config/swagger.js";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import "./config/passport.js";
-dotenv.config();
+import { apiLimiter } from "./config/limiter.js";
 connectToDB();
 const app = express();
 const PORT = process.env.PORT || 5000;
+const trustedProxyHops = Number(process.env.TRUST_PROXY_HOPS || 0);
+if (Number.isInteger(trustedProxyHops) && trustedProxyHops > 0) {
+    app.set("trust proxy", trustedProxyHops);
+}
 // GLOBAL MIDDLEWARES
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+}));
+app.use(apiLimiter);
 app.use(cookieParser());
 app.use(express.json());
-app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 // ROUTES
 app.use("/api-docs", swaggerui.serve, swaggerui.setup(spacs));
+app.get("/api-docs.json", (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.send(spacs);
+});
 app.use("/auth", auth);
 app.use("/users", users);
 app.use("/products", products);

@@ -61,9 +61,10 @@ export function middleware(request: NextRequest) {
 
   const token = request.cookies.get(AUTH_TOKEN_KEY)?.value;
   const hasValidToken = isTokenValid(token);
+  const hasRefreshToken = Boolean(request.cookies.get("refreshToken")?.value);
 
-  // If trying to access protected route without valid token -> redirect to localized login
-  if (isProtectedRoute && !hasValidToken) {
+  // Let the client use the httpOnly refresh token when the access token expires.
+  if (isProtectedRoute && !hasValidToken && !hasRefreshToken) {
     const currentLocale = pathname.startsWith("/ar") ? "ar" : "en";
     const loginUrl = new URL(`/${currentLocale}/auth/login`, request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);

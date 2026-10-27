@@ -98,8 +98,8 @@ Login, OTP verification, and Google sign-in issue an access token and set an HTT
 | 45 | POST | /orders | Create new order from user's current cart | 🔒 | 500 req/15min |
 | 46 | GET | /orders | Retrieve list of all orders belonging to authenticated user | 🔒 | 500 req/15min |
 | 47 | GET | /orders/:orderId | Retrieve single order details by ID | 🔒 | 500 req/15min |
-| 48 | POST | /orders/paymob/create | Initiate Paymob Unified Checkout session and obtain `checkoutUrl` | 🔒 | 500 req/15min |
-| 49 | POST | /orders/paymob/verify | Verify Paymob payment after customer redirect and mark order as paid | 🔒 | 500 req/15min |
+| 48 | POST | /orders/:orderId/paymob/create | Initiate Paymob Unified Checkout session and obtain `checkoutUrl` | 🔒 | 500 req/15min |
+| 49 | POST | /orders/:orderId/paymob/verify | Verify Paymob payment after customer redirect and mark order as paid | 🔒 | 500 req/15min |
 | 50 | POST | /orders/paymob/webhook | Paymob server-to-server webhook to automatically confirm payment | ❌ | Exempt |
 | 51 | PUT | /orders/:orderId | Update shipping address or payment method of pending order | 🔒 | 500 req/15min |
 | 52 | DELETE | /orders/:orderId | Cancel and delete a pending order | 🔒 | 500 req/15min |
@@ -2494,7 +2494,7 @@ Order was not found.
 
 ---
 
-### POST /orders/paymob/create
+### POST /orders/:orderId/paymob/create
 
 Initiate a **Paymob Unified Checkout** session for an existing unpaid order. Returns a `checkoutUrl` to redirect the customer to Paymob's hosted payment page where they can pay by card or mobile wallet.
 
@@ -2507,17 +2507,13 @@ Initiate a **Paymob Unified Checkout** session for an existing unpaid order. Ret
 | `Authorization` | `Bearer <your_jwt_token>` |
 | `Content-Type`  | `application/json`        |
 
-#### Request Body
+#### Path Parameters
 
-| Field     | Type   | Required | Description                     |
+| Parameter | Type   | Required | Description                     |
 | :-------- | :----- | :------: | :------------------------------ |
 | `orderId` | string |    ✅    | The ID of the order to pay for. |
 
-```json
-{
-  "orderId": "67092147385a812bf0e54321"
-}
-```
+Example: `POST /orders/67092147385a812bf0e54321/paymob/create`
 
 #### Responses
 
@@ -2583,7 +2579,7 @@ Failed to initialize Paymob session (e.g. invalid credentials or Paymob API erro
 
 ---
 
-### POST /orders/paymob/verify
+### POST /orders/:orderId/paymob/verify
 
 Verify the outcome of a Paymob payment after the customer is redirected back to the frontend. If `success=true`, the order's `isPaid` is set to `true`, `paidAt` is recorded, and `orderStatus` transitions to `Processing`.
 
@@ -2594,17 +2590,23 @@ Verify the outcome of a Paymob payment after the customer is redirected back to 
 | `Authorization` | `Bearer <your_jwt_token>` |
 | `Content-Type`  | `application/json`        |
 
+#### Path Parameters
+
+| Parameter | Type   | Required | Description                  |
+| :-------- | :----- | :------: | :--------------------------- |
+| `orderId` | string |    ✅    | The Nexoo order ID to verify. |
+
+Example: `POST /orders/67092147385a812bf0e54321/paymob/verify`
+
 #### Request Body
 
 | Field           | Type            | Required | Description                                                      |
 | :-------------- | :-------------- | :------: | :--------------------------------------------------------------- |
-| `orderId`       | string          |    ✅    | The Nexoo order ID to verify.                                    |
-| `success`       | boolean\|string |    ❌    | `true` / `"true"` if Paymob reported payment success.            |
+| `success`       | boolean\|string |    ✅    | `true` / `"true"` if Paymob reported payment success.            |
 | `transactionId` | string          |    ❌    | The Paymob transaction ID returned in the redirect query string. |
 
 ```json
 {
-  "orderId": "67092147385a812bf0e54321",
   "success": "true",
   "transactionId": "12345678"
 }

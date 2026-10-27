@@ -24,6 +24,7 @@ import {
 } from "@/features/tickets/hooks/useTickets";
 import { TicketItem, TicketStatus } from "@/features/tickets/types/ticket.types";
 import { TicketDetailModal } from "@/features/tickets/components/TicketDetailModal";
+import { DeleteConfirmModal } from "@/features/products/components/DeleteConfirmModal";
 
 export default function AdminTicketsPage() {
   const locale = useLocale();
@@ -35,6 +36,7 @@ export default function AdminTicketsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | TicketStatus>("all");
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [ticketToDelete, setTicketToDelete] = useState<TicketItem | null>(null);
 
   const filteredTickets = tickets.filter((t) => {
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
@@ -82,11 +84,15 @@ export default function AdminTicketsPage() {
     });
   };
 
-  const handleDelete = async (e: React.MouseEvent, ticketId: string) => {
+  const handleDelete = (e: React.MouseEvent, ticket: TicketItem) => {
     e.stopPropagation();
-    if (confirm(t("deleteTicketConfirm"))) {
-      await deleteTicketMutation.mutateAsync(ticketId);
-    }
+    setTicketToDelete(ticket);
+  };
+
+  const confirmDelete = async () => {
+    if (!ticketToDelete) return;
+    await deleteTicketMutation.mutateAsync(ticketToDelete._id);
+    setTicketToDelete(null);
   };
 
   const getStatusBadge = (status: TicketStatus) => {
@@ -287,7 +293,7 @@ export default function AdminTicketsPage() {
                     </select>
 
                     <button
-                      onClick={(e) => handleDelete(e, ticket._id)}
+                      onClick={(e) => handleDelete(e, ticket)}
                       title={t("deleteTicket")}
                       className="p-2 rounded-xl text-textSecondary hover:text-red-500 hover:bg-red-500/10 transition-colors"
                     >
@@ -315,6 +321,17 @@ export default function AdminTicketsPage() {
         ticketId={selectedTicketId}
         onClose={() => setSelectedTicketId(null)}
         isAdminView={true}
+      />
+
+      {/* Delete Ticket Confirm Modal */}
+      <DeleteConfirmModal
+        isOpen={!!ticketToDelete}
+        onClose={() => setTicketToDelete(null)}
+        onConfirm={confirmDelete}
+        isPending={deleteTicketMutation.isPending}
+        title={t("deleteTicket")}
+        itemName={ticketToDelete?.subject}
+        description={t("deleteTicketConfirm")}
       />
     </div>
   );

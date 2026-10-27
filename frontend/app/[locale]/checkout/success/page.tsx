@@ -41,12 +41,17 @@ function SuccessContent() {
   useEffect(() => {
     // If redirected from Paymob with success or transaction id
     if (orderId && !isVerifying && !verifyError) {
-      if (paymobSuccess === "true" || transactionId) {
+      if (paymobSuccess === "false") {
+        setVerifyError(t("paymentDeclined"));
+        return;
+      }
+
+      if (paymobSuccess === "true" || (paymobSuccess !== "false" && !!transactionId)) {
         setIsVerifying(true);
         verifyMutation
           .mutateAsync({
             orderId,
-            success: paymobSuccess === "true" || true,
+            success: true,
             transactionId: transactionId || undefined,
           })
           .then(() => {
@@ -62,8 +67,6 @@ function SuccessContent() {
           .finally(() => {
             setIsVerifying(false);
           });
-      } else if (paymobSuccess === "false") {
-        setVerifyError(t("paymentDeclined"));
       }
     }
   }, [orderId, paymobSuccess, transactionId, t]);

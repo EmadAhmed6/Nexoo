@@ -1,6 +1,5 @@
 import express from "express";
 import passport from "passport";
-import crypto from "node:crypto";
 import {
   handleRefreshToken,
   login,
@@ -11,30 +10,11 @@ import {
   resetPassword,
   verifyOtp,
   resendOtp,
-  googleAuthCallback,
 } from "./auth.controller.js";
 import { verifyToken } from "../../middlewares/verifyToken.js";
-import {
-  isGoogleOAuthConfigured,
-  resolveOAuthFrontendUrl,
-} from "../../config/passport.js";
 import { authLimiter } from "../../config/limiter.js";
 
 const router = express.Router();
-const cookieOptions = {
-  httpOnly: true,
-  secure: process.env.ENV === "production",
-  sameSite: "lax" as const,
-  path: "/auth",
-};
-
-const clearOAuthFrontendCookie = (res: express.Response) => {
-  res.clearCookie("google_oauth_frontend", cookieOptions);
-};
-const clearOAuthCookies = (res: express.Response) => {
-  clearOAuthFrontendCookie(res);
-  res.clearCookie("google_oauth_state", cookieOptions);
-};
 router.post("/register", authLimiter, register);
 router.post("/login", authLimiter, login);
 router.post("/verify-otp", authLimiter, verifyOtp);
@@ -47,77 +27,62 @@ router.route("/logout").post(logout).get(logout);
 
 // Google OAuth
 router.get("/google", (req, res, next) => {
-  const frontendUrl = resolveOAuthFrontendUrl(req.query.origin);
-  if (!isGoogleOAuthConfigured) {
-    const popup = req.query.popup === "true" ? "&popup=true" : "";
-    res.redirect(`${frontendUrl}/auth/success?error=google_oauth_not_configured${popup}`);
-    return;
-  }
-
-  res.cookie("google_oauth_frontend", frontendUrl, {
-    ...cookieOptions,
-    maxAge: 10 * 60 * 1000,
-  });
-  const state = crypto.randomBytes(32).toString("hex");
-  res.cookie("google_oauth_state", state, {
-    ...cookieOptions,
-    maxAge: 10 * 60 * 1000,
-  });
-
+  const isPopup = req.query.popup === "true";
   passport.authenticate("google", {
     scope: ["profile", "email"],
-    state,
-    session: false,
+    state: isPopup ? "popup" : "redirect",
   })(req, res, next);
 });
 
 router.get(
   "/google/callback",
   (req, res, next) => {
-    const frontendUrl = resolveOAuthFrontendUrl(req.cookies?.google_oauth_frontend);
-    if (!isGoogleOAuthConfigured) {
-      clearOAuthCookies(res);
-      res.redirect(`${frontendUrl}/auth/success?error=google_oauth_not_configured&popup=true`);
-      return;
-    }
+    const isPopup = req.query.state === "popup";
+    const failureUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/auth/callback?error=google_failed${isPopup ? "&popup=true" : ""}`;
 
-    const expectedState = req.cookies?.google_oauth_state;
-    const receivedState = req.query.state;
-    const expectedStateBuffer = Buffer.from(
-      typeof expectedState === "string" ? expectedState : "",
-    );
-    const receivedStateBuffer = Buffer.from(
-      typeof receivedState === "string" ? receivedState : "",
-    );
-    const validState =
-      expectedStateBuffer.length > 0 &&
-      expectedStateBuffer.length === receivedStateBuffer.length &&
-      crypto.timingSafeEqual(expectedStateBuffer, receivedStateBuffer);
+    passport.authenticate("google", {
+      session: false,
+      failureRedirect: failureUrl,
+    })(req, res, next);
+  },
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const user = req.user as any;
+      const isPopup = req.query.state === "popup";
+      const popupParam = isPopup ? "&popup=true" : "";
 
-    if (!validState) {
-      clearOAuthCookies(res);
-      console.error("[Google OAuth] Callback rejected: missing or invalid state");
-      res.redirect(`${frontendUrl}/auth/success?error=google_oauth_failed&popup=true`);
-      return;
-    }
-
-    passport.authenticate("google", { session: false }, (error, user) => {
-      if (error || !user) {
-        clearOAuthCookies(res);
-        if (error) {
-          console.error("[Google OAuth] Authentication failed", {
-            name: error.name,
-            code: (error as NodeJS.ErrnoException).code,
-          });
-        }
-        res.redirect(`${frontendUrl}/auth/success?error=google_oauth_failed&popup=true`);
+      if (!user) {
+        res.redirect(
+          `${process.env.FRONTEND_URL || "http://localhost:3000"}/auth/callback?error=user_not_found${popupParam}`,
+        );
         return;
       }
+      const token = user.generateAccessToken
+        ? user.generateAccessToken()
+        : user.generateToken();
+      const refreshToken = user.generateRefreshToken();
+      user.refreshToken = refreshToken;
+      await user.save({ validateBeforeSave: false });
 
-      clearOAuthCookies(res);
-      req.user = user;
-      googleAuthCallback(req, res, next);
-    })(req, res, next);
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure:
+          process.env.NODE_ENV === "production" ||
+          process.env.ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      res.redirect(
+        `${process.env.FRONTEND_URL || "http://localhost:3000"}/auth/callback?token=${token}&provider=google${popupParam}`,
+      );
+    } catch (err) {
+      const isPopup = req.query.state === "popup";
+      const popupParam = isPopup ? "&popup=true" : "";
+      res.redirect(
+        `${process.env.FRONTEND_URL || "http://localhost:3000"}/auth/callback?error=auth_failed${popupParam}`,
+      );
+    }
   },
 );
 

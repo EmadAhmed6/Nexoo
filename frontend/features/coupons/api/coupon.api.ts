@@ -8,18 +8,18 @@ import {
 
 export const couponApi = {
   /** GET /coupons — Admin: list all coupons */
-  getCoupons: () => apiGet<Coupon[]>("/coupons"),
+  getCoupons: () => apiGet<Coupon[]>("/admin/coupons"),
 
   /** POST /coupons — Admin: create coupon */
   createCoupon: (payload: CreateCouponPayload) =>
-    apiPost<Coupon, CreateCouponPayload>("/coupons", payload),
+    apiPost<Coupon, CreateCouponPayload>("/admin/coupons", payload),
 
   /** PUT /coupons/:id — Admin: update coupon */
   updateCoupon: (couponId: string, payload: UpdateCouponPayload) =>
-    apiPut<Coupon, UpdateCouponPayload>(`/coupons/${couponId}`, payload),
+    apiPut<Coupon, UpdateCouponPayload>(`/admin/coupons/${couponId}`, payload),
 
   /** DELETE /coupons/:id — Admin: delete coupon */
-  deleteCoupon: (couponId: string) => apiDelete<null>(`/coupons/${couponId}`),
+  deleteCoupon: (couponId: string) => apiDelete<null>(`/admin/coupons/${couponId}`),
 
   /** POST /coupons/apply — User: apply coupon to cart */
   applyCoupon: (couponCode: string) =>

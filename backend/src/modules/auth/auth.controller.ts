@@ -18,7 +18,6 @@ import {
   generateResetPasswordEmailHtml,
   generateVerifyOtpEmailHtml,
 } from "../../config/Email.js";
-import { resolveOAuthFrontendUrl } from "../../config/passport.js";
 
 // HANDLE REFRESH TOKEN
 const handleRefreshToken = asyncHandler(async (req: Request, res: Response) => {
@@ -100,7 +99,7 @@ const register = asyncHandler(async (req: Request, res: Response) => {
     httpOnly: true,
     secure: process.env.ENV === "production",
     sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 
   const {
@@ -161,9 +160,7 @@ const login = asyncHandler(
       }
     }
 
-    const generatedOtp = Math.floor(
-      100000 + Math.random() * 900000,
-    ).toString();
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
     user.otp = generatedOtp;
     user.otpExpired = otpExpired;
@@ -175,7 +172,7 @@ const login = asyncHandler(
       generateVerifyOtpEmailHtml(user.username, generatedOtp),
     );
 
-    sendError(res, 400, "Please verify your email first");
+    successMsg(res, 200, "Check your email for verification.", null);
     return;
   },
 );
@@ -205,13 +202,14 @@ const verifyOtp = asyncHandler(
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
     user.refreshToken = refreshToken;
+
     await user.save();
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
     const { password, otp: _, otpExpired: __, ...others } = user.toObject();
@@ -383,59 +381,6 @@ const logout = asyncHandler(async (req: Request, res: Response) => {
   successMsg(res, 200, "User logged out successfully", null);
 });
 
-// GOOGLE AUTH CALLBACK
-const googleAuthCallback = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const user = req.user as IUser | undefined;
-    const frontendUrl = resolveOAuthFrontendUrl(req.cookies?.google_oauth_frontend);
-    const clearOAuthOriginCookie = () =>
-      res.clearCookie("google_oauth_frontend", {
-        httpOnly: true,
-        secure: process.env.ENV === "production",
-        sameSite: "lax",
-        path: "/auth",
-      });
-
-    if (!user) {
-      clearOAuthOriginCookie();
-      res.redirect(`${frontendUrl}/auth/success?error=authentication_failed&popup=true`);
-      return;
-    }
-
-    if (user.isBanned) {
-      clearOAuthOriginCookie();
-      res.redirect(`${frontendUrl}/auth/success?error=account_banned&popup=true`);
-      return;
-    }
-
-    try {
-      const accessToken = user.generateAccessToken();
-      const refreshToken = user.generateRefreshToken();
-
-      user.refreshToken = refreshToken;
-      await user.save();
-      clearOAuthOriginCookie();
-
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.ENV === "production",
-        sameSite: process.env.ENV === "production" ? "none" : "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      res.redirect(`${frontendUrl}/auth/success?token=${encodeURIComponent(accessToken)}&popup=true`);
-    } catch (error) {
-      clearOAuthOriginCookie();
-      const authError = error as NodeJS.ErrnoException;
-      console.error("[Google OAuth] Token or session persistence failed", {
-        name: authError.name,
-        code: authError.code,
-      });
-      res.redirect(`${frontendUrl}/auth/success?error=google_oauth_failed&popup=true`);
-    }
-  },
-);
-
 export {
   register,
   login,
@@ -446,5 +391,4 @@ export {
   getAuthMe,
   handleRefreshToken,
   logout,
-  googleAuthCallback,
 };

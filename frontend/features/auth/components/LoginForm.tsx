@@ -42,11 +42,12 @@ export function LoginForm() {
 
     login(data, {
       onSuccess: () => {
-        toast.success(t("loginSuccess"));
-        setTimeout(() => {
-          router.push("/");
-          router.refresh();
-        }, 1000);
+        toast.info(t("pleaseVerifyEmail"), {
+          description: t("verificationCodeSent"),
+        });
+        router.replace(
+          `/auth/verify-otp?email=${encodeURIComponent(data.email)}`
+        );
       },
       onError: (err: any) => {
         const msg =

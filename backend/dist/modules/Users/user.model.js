@@ -94,14 +94,16 @@ const UserSchema = new Schema({
 UserSchema.methods.generateAccessToken = function () {
     return jwt.sign({
         id: this._id,
+        userId: this._id,
         role: this.role,
         username: this.username,
     }, process.env.JWT_SECRET_KEY, {
         expiresIn: "15m",
     });
 };
+UserSchema.methods.generateToken = UserSchema.methods.generateAccessToken;
 UserSchema.methods.generateRefreshToken = function () {
-    return jwt.sign({ id: this._id }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: "7d" });
+    return jwt.sign({ id: this._id }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: "30d" });
 };
 export const User = model("User", UserSchema);
 const validateRegister = (user) => {

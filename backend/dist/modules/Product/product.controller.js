@@ -235,15 +235,30 @@ const toggleLikeProduct = asyncHandler(async (req, res) => {
 });
 // UPDATE PRODUCT STOCK
 const updateStockAfterPayment = async (orderItems) => {
+    if (!Array.isArray(orderItems))
+        return;
     for (const item of orderItems) {
-        const product = await Product.findById(item.product);
-        if (!product)
-            continue;
-        product.stock = Math.max(0, product.stock - item.quantity);
-        if (product.stock === 0) {
-            product.isOutOfStock = true;
+        try {
+            const productId = item.product?._id || item.product;
+            if (!productId)
+                continue;
+            const product = await Product.findById(productId);
+            if (!product)
+                continue;
+            const qty = Number(item.productQuantity ?? item.quantity ?? 1);
+            const safeQty = !isNaN(qty) && qty > 0 ? qty : 1;
+            const currentStock = typeof product.stock === "number" && !isNaN(product.stock)
+                ? product.stock
+                : 0;
+            product.stock = Math.max(0, currentStock - safeQty);
+            if (product.stock === 0) {
+                product.isOutOfStock = true;
+            }
+            await product.save();
         }
-        await product.save();
+        catch (err) {
+            console.error("Failed to update stock after payment for item:", item, err);
+        }
     }
 };
 // GET PRODUCT AUTOCOMPLETE SUGGESTIONS

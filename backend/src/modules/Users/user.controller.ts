@@ -41,10 +41,27 @@ const GetUserById = asyncHandler(
 const updateUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
+    const currentUser = req.user;
     const user = await User.findById(userId);
-
     if (!user) {
       sendError(res, 404, "User not found");
+      return;
+    }
+
+    if (
+      user?.role === "SuperAdmin" &&
+      !(currentUser?._id?.toString() !== user?._id?.toString())
+    ) {
+      sendError(res, 403, "Access denied: SuperAdmin cannot be updated");
+      return;
+    }
+
+    if (user?.role === "Admin" && currentUser?.role !== "SuperAdmin") {
+      sendError(
+        res,
+        403,
+        "Access denied: Only SuperAdmin can update other Admins",
+      );
       return;
     }
 
@@ -106,11 +123,29 @@ const deleteUserProfile = asyncHandler(
 const deleteUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
+    const currentUser = req.user;
     const user = await User.findById(userId);
+
     if (!user) {
       sendError(res, 400, "User not found");
       return;
     }
+
+    if (user.role === "SuperAdmin") {
+      sendError(res, 403, "SuperAdmin cannot be deleted");
+      return;
+    }
+
+    if (user.role === "Admin" && currentUser?.role !== "SuperAdmin") {
+      sendError(res, 403, "Only SuperAdmin can delete Admin");
+      return;
+    }
+
+    if (currentUser?._id?.toString() === user?._id?.toString()) {
+      sendError(res, 400, "You cannot delete yourself");
+      return;
+    }
+
     await user.deleteOne();
     successMsg(res, 200, "User deleted successfully", null);
   },
@@ -123,11 +158,13 @@ const changePassword = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
   const userId = req.params.userId;
-  const user = await User.findById(userId);
+  const user = await User.findById(userId).select("+password");
+
   if (!user) {
     sendError(res, 404, "User not found");
     return;
   }
+
   const isPasswordMatch = await bcrypt.compare(
     req.body.oldPassword,
     user.password,
@@ -141,7 +178,7 @@ const changePassword = asyncHandler(async (req: Request, res: Response) => {
   const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
   user.otp = generatedOtp;
   user.otpExpired = otpExpired;
-  
+
   await sendEmail(
     user.email,
     "Password Changed - Security Code - Nexoo",
@@ -150,7 +187,12 @@ const changePassword = asyncHandler(async (req: Request, res: Response) => {
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(req.body.newPassword, salt);
   await user.save();
-  successMsg(res, 200, "Password changed successfully. A security code has been sent to your email.", null);
+  successMsg(
+    res,
+    200,
+    "Password changed successfully. A security code has been sent to your email.",
+    null,
+  );
 });
 
 // ============== USER ADDRESSES ==============
@@ -220,6 +262,7 @@ const updateUserAddress = asyncHandler(
       return;
     }
     const userId = req.params.userId;
+    const currentUser = req.user;
     const addressId = req.params.addressId as string;
     const { street, city, state, postalCode, phone, isDefault } = req.body;
     if (!userId || !addressId) {
@@ -230,6 +273,11 @@ const updateUserAddress = asyncHandler(
     const user = await User.findById(userId);
     if (!user) {
       sendError(res, 404, "User was not found");
+      return;
+    }
+
+    if (user.role === "Admin" && currentUser?.role !== "SuperAdmin") {
+      sendError(res, 403, "Only SuperAdmin can update Admin");
       return;
     }
 
@@ -261,6 +309,7 @@ const updateUserAddress = asyncHandler(
 const deleteUserAddress = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
+    const currentUser = req.user;
     const addressId = req.params.addressId as string;
     if (!userId || !addressId) {
       sendError(res, 400, "User ID and Address ID is required");
@@ -273,7 +322,19 @@ const deleteUserAddress = asyncHandler(
     }
     const address = user.addresses.id(addressId);
     if (!address) {
-      sendError(res, 400, "Address not found");
+      sendError(res, 404, "Address not found");
+      return;
+    }
+    if (user.role === "SuperAdmin") {
+      sendError(res, 403, "Access denied: Cannot delete SuperAdmin Address");
+      return;
+    }
+    if (user.role === "Admin" && currentUser?.role !== "SuperAdmin") {
+      sendError(
+        res,
+        403,
+        "Access denied: Only SuperAdmin can delete other Admins",
+      );
       return;
     }
 

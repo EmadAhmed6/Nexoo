@@ -6,8 +6,8 @@ router
     .route("/")
     .post(verifyToken, createOrder)
     .get(verifyToken, getOrders);
-router.post("/paymob/create", verifyToken, createPaymobOrder);
-router.post("/paymob/verify", verifyToken, verifyPaymobPayment);
+router.post("/:orderId/paymob/create", verifyToken, createPaymobOrder);
+router.post("/:orderId/paymob/verify", verifyToken, verifyPaymobPayment);
 router.post("/paymob/webhook", paymobWebhook);
 router
     .route("/:orderId")

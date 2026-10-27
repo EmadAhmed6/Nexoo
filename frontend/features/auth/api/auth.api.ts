@@ -15,7 +15,7 @@ export interface ResendOtpPayload {
 
 export const authApi = {
   login: async (credentials: LoginCredentials) => {
-    return apiPost<AuthResponseData, LoginCredentials>("/auth/login", credentials);
+    return apiPost<null, LoginCredentials>("/auth/login", credentials);
   },
 
   register: async (credentials: RegisterCredentials) => {

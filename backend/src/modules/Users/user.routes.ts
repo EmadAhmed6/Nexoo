@@ -20,7 +20,7 @@ import upload from "../../middlewares/multer.js";
 
 const router = express.Router();
 
-router.route("/").get(verifyAdminToken, getUsers);
+router.route("/").get(verifyToken, getUsers);
 
 router
   .route("/:userId")

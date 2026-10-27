@@ -7,10 +7,20 @@ import { sendEmail, generateResetPasswordEmailHtml, generateVerifyOtpEmailHtml, 
 // HANDLE REFRESH TOKEN
 const handleRefreshToken = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies?.refreshToken;
-    const userId = req.user?.id;
     if (!refreshToken) {
         sendError(res, 400, "no token provided");
         return;
+    }
+    let userId = req.user?.id;
+    if (!userId) {
+        try {
+            const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
+            userId = decoded.id || decoded.userId;
+        }
+        catch {
+            sendError(res, 403, "Invalid Refresh Token");
+            return;
+        }
     }
     const user = await User.findById(userId).select("+refreshToken");
     if (!user || user.refreshToken !== refreshToken) {
@@ -57,7 +67,7 @@ const register = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: process.env.ENV === "production",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     const { password, otp: _otp, otpExpired: _otpExp, ...others } = finalUser.toObject();
     successMsg(res, 201, "User registered successfully", {
@@ -75,6 +85,10 @@ const login = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
         sendError(res, 400, "User is not exist");
+        return;
+    }
+    if (user.provider !== "local") {
+        sendError(res, 400, "User registered with Google. Please login with Google.");
         return;
     }
     const isPasswordMatch = await bcrypt.compare(req.body.password, user.password);
@@ -96,21 +110,14 @@ const login = asyncHandler(async (req, res) => {
             return;
         }
     }
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
-    user.refreshToken = refreshToken;
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
+    user.otp = generatedOtp;
+    user.otpExpired = otpExpired;
     await user.save();
-    const { password, ...others } = user.toObject();
-    successMsg(res, 200, "User logged in successfully", {
-        ...others,
-        accessToken,
-    });
+    await sendEmail(user.email, "Verify Your Email - Nexoo", generateVerifyOtpEmailHtml(user.username, generatedOtp));
+    successMsg(res, 200, "Check your email for verification.", null);
+    return;
 });
 // VERIFY OTP
 const verifyOtp = asyncHandler(async (req, res) => {
@@ -132,9 +139,21 @@ const verifyOtp = asyncHandler(async (req, res) => {
     user.isVerified = true;
     user.otp = undefined;
     user.otpExpired = undefined;
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+    user.refreshToken = refreshToken;
     await user.save();
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.ENV === "production",
+        sameSite: "strict",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
     const { password, otp: _, otpExpired: __, ...others } = user.toObject();
-    successMsg(res, 200, "OTP verified successfully", others);
+    successMsg(res, 200, "OTP verified successfully", {
+        ...others,
+        accessToken,
+    });
 });
 // RESEND OTP
 const resendOtp = asyncHandler(async (req, res) => {
@@ -234,7 +253,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 // GET AUTH ME
 const getAuthMe = asyncHandler(async (req, res) => {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     if (!userId) {
         sendError(res, 400, "User not found");
         return;
@@ -259,29 +278,5 @@ const logout = asyncHandler(async (req, res) => {
     });
     successMsg(res, 200, "User logged out successfully", null);
 });
-// GOOGLE AUTH CALLBACK
-const googleAuthCallback = asyncHandler(async (req, res) => {
-    const user = req.user;
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-    if (!user) {
-        res.redirect(`${frontendUrl}/auth/login?error=authentication_failed`);
-        return;
-    }
-    if (user.isBanned) {
-        res.redirect(`${frontendUrl}/auth/login?error=account_banned`);
-        return;
-    }
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
-    user.refreshToken = refreshToken;
-    await user.save();
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.ENV === "production",
-        sameSite: process.env.ENV === "production" ? "none" : "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    res.redirect(`${frontendUrl}/auth/success?token=${accessToken}`);
-});
-export { register, login, verifyOtp, resendOtp, forgotPassword, resetPassword, getAuthMe, handleRefreshToken, logout, googleAuthCallback, };
+export { register, login, verifyOtp, resendOtp, forgotPassword, resetPassword, getAuthMe, handleRefreshToken, logout, };
 //# sourceMappingURL=auth.controller.js.map

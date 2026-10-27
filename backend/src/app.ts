@@ -50,6 +50,11 @@ app.use(passport.initialize());
 
 // ROUTES
 app.use("/api-docs", swaggerui.serve, swaggerui.setup(spacs));
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(spacs);
+});
+
 app.use("/auth", auth);
 app.use("/users", users);
 app.use("/products", products);

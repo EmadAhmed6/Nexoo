@@ -31,31 +31,25 @@ export const orderApi = {
   },
 
   /**
-   * POST /orders/paymob/create — Generate Paymob transaction and checkout link
+   * POST /orders/:orderId/paymob/create — Generate Paymob checkout link
    */
   createPaymobOrder: async (orderId: string) => {
-    return apiPost<CreatePaymobOrderResponse, { orderId: string }>(
-      "/orders/paymob/create",
-      { orderId },
-    );
+    return apiPost<CreatePaymobOrderResponse>(`/orders/${orderId}/paymob/create`);
   },
 
   /**
-   * POST /orders/paymob/verify — Verify Paymob payment outcome
+   * POST /orders/:orderId/paymob/verify — Verify Paymob payment outcome
    */
   verifyPaymobPayment: async (payload: {
     orderId: string;
     success?: boolean | string;
     transactionId?: string | number;
   }) => {
+    const { orderId, ...verification } = payload;
     return apiPost<
       Order,
-      {
-        orderId: string;
-        success?: boolean | string;
-        transactionId?: string | number;
-      }
-    >("/orders/paymob/verify", payload);
+      { success?: boolean | string; transactionId?: string | number }
+    >(`/orders/${orderId}/paymob/verify`, verification);
   },
 
   /**

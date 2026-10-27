@@ -14,6 +14,7 @@ const errorHandler = (
   next: NextFunction,
 ) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  console.error("Internal Server Error caught:", err);
   return res.status(statusCode).json({ message: err.message });
 };
 

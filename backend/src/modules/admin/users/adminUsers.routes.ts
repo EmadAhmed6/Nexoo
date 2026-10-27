@@ -4,7 +4,10 @@ import {
   unbanUser,
   toggleAdminStatus,
 } from "./adminUsers.controller.js";
-import { verifyAdminToken } from "../../../middlewares/verifyToken.js";
+import {
+  verifyAdminToken,
+  verifySuperAdminToken,
+} from "../../../middlewares/verifyToken.js";
 
 const router = express.Router();
 
@@ -20,6 +23,6 @@ router
 
 router
   .route("/:userId/toggle-admin")
-  .patch(verifyAdminToken, toggleAdminStatus);
+  .patch(verifySuperAdminToken, toggleAdminStatus);
 
 export default router;

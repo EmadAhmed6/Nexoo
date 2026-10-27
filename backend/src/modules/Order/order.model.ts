@@ -183,19 +183,17 @@ const OrderSchema = new Schema<IOrder>(
         type: Date,
       },
       paymentResult: {
-        type: {
-          id: {
-            type: String,
-          },
-          status: {
-            type: String,
-          },
-          update_time: {
-            type: String,
-          },
-          email_address: {
-            type: String,
-          },
+        id: {
+          type: String,
+        },
+        status: {
+          type: String,
+        },
+        update_time: {
+          type: String,
+        },
+        email_address: {
+          type: String,
         },
       },
     },

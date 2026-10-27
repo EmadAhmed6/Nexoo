@@ -16,7 +16,10 @@ const getCart = asyncHandler(async (req, res) => {
         .limit(Number(limit))
         .skip((Number(page) - 1) * Number(limit));
     if (!cart) {
-        sendError(res, 404, "Cart is empty");
+        successMsg(res, 200, "Cart is empty", {
+            cartItems: [],
+            totalPrice: 0,
+        });
         return;
     }
     const validItems = cart.cartItems.filter((item) => item.product != null);
@@ -26,7 +29,10 @@ const getCart = asyncHandler(async (req, res) => {
         await cart.save();
     }
     if (cart.cartItems.length === 0) {
-        sendError(res, 404, "Cart is empty");
+        successMsg(res, 200, "Cart is empty", {
+            cartItems: [],
+            totalPrice: 0,
+        });
         return;
     }
     successMsg(res, 200, "Cart fetched successfully", cart);
@@ -196,7 +202,10 @@ const clearCart = asyncHandler(async (req, res) => {
     const userId = req.user?.id;
     const cart = await Cart.findOne({ userId });
     if (!cart) {
-        sendError(res, 404, "Cart was not found");
+        successMsg(res, 200, "Cart cleared successfully", {
+            totalPrice: 0,
+            cartItems: [],
+        });
         return;
     }
     await Cart.findByIdAndDelete(cart._id);

@@ -94,6 +94,21 @@ const verifyAdminToken = (req, res, next) => {
         }
     });
 };
+const verifySuperAdminToken = (req, res, next) => {
+    verifyToken(req, res, () => {
+        if (!req.user) {
+            sendError(res, 401, "Unauthorized");
+            return;
+        }
+        if (req.user?.role === "SuperAdmin") {
+            next();
+        }
+        else {
+            sendError(res, 403, "Not Authorized");
+            return;
+        }
+    });
+};
 const verifyProductOwner = async (req, res, next) => {
     verifyToken(req, res, async () => {
         try {
@@ -202,5 +217,5 @@ const verifyTicketOwner = async (req, res, next) => {
         }
     });
 };
-export { verifyToken, verifyAuthorizedToken, verifyAdminToken, verifyProductOwner, verifyCartOwner, verifyOrderOwner, verifyTicketOwner, checkUserBan, };
+export { verifyToken, verifyAuthorizedToken, verifyAdminToken, verifyProductOwner, verifyCartOwner, verifyOrderOwner, verifyTicketOwner, verifySuperAdminToken, checkUserBan, };
 //# sourceMappingURL=verifyToken.js.map

@@ -1,8 +1,8 @@
 // POST   /orders
 // GET    /orders
 // GET    /orders/{orderId}
-// POST   /orders/paymob/create
-// POST   /orders/paymob/verify
+// POST   /orders/{orderId}/paymob/create
+// POST   /orders/{orderId}/paymob/verify
 // POST   /orders/paymob/webhook
 // PUT    /orders/{orderId}
 // DELETE /orders/{orderId}
@@ -210,10 +210,10 @@
  *         description: Order was not found
  */
 
-// POST /orders/paymob/create
+// POST /orders/{orderId}/paymob/create
 /**
  * @swagger
- * /orders/paymob/create:
+ * /orders/{orderId}/paymob/create:
  *   post:
  *     summary: Create Paymob checkout session
  *     description: Initiate a Paymob Unified Checkout intention for an existing unpaid order and obtain the checkoutUrl.
@@ -221,18 +221,14 @@
  *       - Orders
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - orderId
- *             properties:
- *               orderId:
- *                 type: string
- *                 example: 67092147385a812bf0e54321
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the order to pay for
+ *         example: 67092147385a812bf0e54321
  *     responses:
  *       200:
  *         description: Paymob checkout session created successfully
@@ -264,10 +260,10 @@
  *         description: Order not found
  */
 
-// POST /orders/paymob/verify
+// POST /orders/{orderId}/paymob/verify
 /**
  * @swagger
- * /orders/paymob/verify:
+ * /orders/{orderId}/paymob/verify:
  *   post:
  *     summary: Verify Paymob payment
  *     description: Verify payment status returned from Paymob redirect. Updates order payment status to paid if successful.
@@ -275,6 +271,14 @@
  *       - Orders
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Nexoo order ID to verify
+ *         example: 67092147385a812bf0e54321
  *     requestBody:
  *       required: true
  *       content:
@@ -282,11 +286,8 @@
  *           schema:
  *             type: object
  *             required:
- *               - orderId
+ *               - success
  *             properties:
- *               orderId:
- *                 type: string
- *                 example: 67092147385a812bf0e54321
  *               success:
  *                 type: string
  *                 example: "true"

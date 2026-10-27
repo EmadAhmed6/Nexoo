@@ -41,6 +41,7 @@ axiosClient.interceptors.response.use(
   async (error: AxiosError<ApiErrorResponse>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
+      _refreshFailed?: boolean;
     };
 
     if (typeof window !== "undefined" && originalRequest) {
@@ -62,6 +63,7 @@ axiosClient.interceptors.response.use(
                   `${BASE_URL}/auth/refresh`,
                   {
                     withCredentials: true,
+                    timeout: 15000,
                     headers: {
                       Accept: "application/json",
                     },
@@ -75,10 +77,17 @@ axiosClient.interceptors.response.use(
                   setAuthToken(newAccessToken);
                   return newAccessToken;
                 }
-                return null;
-              } catch (refreshErr) {
                 removeAuthToken();
                 window.dispatchEvent(new CustomEvent("nexo:unauthorized"));
+                return null;
+              } catch (refreshErr) {
+                const status = axios.isAxiosError(refreshErr)
+                  ? refreshErr.response?.status
+                  : undefined;
+                if (status && [400, 401, 403].includes(status)) {
+                  removeAuthToken();
+                  window.dispatchEvent(new CustomEvent("nexo:unauthorized"));
+                }
                 return null;
               } finally {
                 refreshPromise = null;
@@ -94,14 +103,19 @@ axiosClient.interceptors.response.use(
             }
             return axiosClient(originalRequest);
           }
+          originalRequest._refreshFailed = true;
         } catch (refreshErr) {
-          removeAuthToken();
-          window.dispatchEvent(new CustomEvent("nexo:unauthorized"));
+          originalRequest._refreshFailed = true;
           return Promise.reject(refreshErr);
         }
       }
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      if (
+        error.response?.status === 401 &&
+        originalRequest._retry &&
+        !originalRequest._refreshFailed &&
+        !isAuthUrl
+      ) {
         removeAuthToken();
         window.dispatchEvent(new CustomEvent("nexo:unauthorized"));
       }

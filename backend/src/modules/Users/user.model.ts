@@ -162,11 +162,13 @@ UserSchema.methods.generateAccessToken = function (this: IUser): string {
   );
 };
 
+UserSchema.methods.generateToken = UserSchema.methods.generateAccessToken;
+
 UserSchema.methods.generateRefreshToken = function (this: IUser): string {
   return jwt.sign(
     { id: this._id },
     process.env.JWT_REFRESH_SECRET_KEY as string,
-    { expiresIn: "7d" },
+    { expiresIn: "30d" },
   );
 };
 

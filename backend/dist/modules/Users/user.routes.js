@@ -1,13 +1,18 @@
 import express from "express";
-import { deleteUser, GetUserById, getUsers, updateUser, getUserAddress, addUserAddress, updateUserAddress, deleteUserAddress, changePassword, } from "./user.controller.js";
-import { verifyToken, verifyAuthorizedToken, verifyAdminToken, } from "../../middlewares/verifyToken.js";
+import { deleteUser, GetUserById, getUsers, updateUser, deleteUserProfile, getUserAddress, addUserAddress, updateUserAddress, deleteUserAddress, changePassword, } from "./user.controller.js";
+import { verifyToken, verifyAuthorizedToken, } from "../../middlewares/verifyToken.js";
+import upload from "../../middlewares/multer.js";
 const router = express.Router();
-router.route("/").get(verifyAdminToken, getUsers);
+router.route("/").get(verifyToken, getUsers);
 router
     .route("/:userId")
     .get(verifyToken, GetUserById)
-    .put(verifyAuthorizedToken, updateUser)
+    .put(verifyAuthorizedToken, upload.single("profilePicture"), updateUser)
     .delete(verifyAuthorizedToken, deleteUser);
+// Profile picture delete
+router
+    .route("/:userId/profile-picture")
+    .delete(verifyAuthorizedToken, deleteUserProfile);
 router
     .route("/:userId/addresses")
     .post(verifyAuthorizedToken, addUserAddress)
