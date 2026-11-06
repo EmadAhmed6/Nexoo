@@ -78,18 +78,6 @@ const UserSchema = new Schema({
         type: Date,
         default: null,
     },
-    refreshToken: {
-        type: String,
-        select: false,
-    },
-    otp: {
-        type: String,
-        select: false,
-    },
-    otpExpired: {
-        type: Date,
-        select: false,
-    },
 }, { timestamps: true });
 UserSchema.methods.generateAccessToken = function () {
     return jwt.sign({

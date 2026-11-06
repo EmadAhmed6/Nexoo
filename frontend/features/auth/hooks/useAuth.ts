@@ -28,10 +28,10 @@ export function useRegister() {
       const token = data?.accessToken;
       if (token) {
         setAuthToken(token);
+        setUser(data);
+        queryClient.invalidateQueries({ queryKey: ["user"] });
+        queryClient.invalidateQueries({ queryKey: ["authMe"] });
       }
-      setUser(data);
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-      queryClient.invalidateQueries({ queryKey: ["authMe"] });
     },
   });
 }

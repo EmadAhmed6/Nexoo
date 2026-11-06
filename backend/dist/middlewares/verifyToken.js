@@ -7,7 +7,7 @@ import { Ticket } from "../modules/Ticket/ticket.model.js";
 import { User } from "../modules/Users/user.model.js";
 const checkUserBan = async (req, res, next) => {
     try {
-        const userId = req.user?.id || req.user?.userId;
+        const userId = req.user?.id;
         if (!userId) {
             return next();
         }

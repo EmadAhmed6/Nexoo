@@ -97,10 +97,6 @@ const deleteUser = asyncHandler(async (req, res) => {
         sendError(res, 403, "Only SuperAdmin can delete Admin");
         return;
     }
-    if (currentUser?._id?.toString() === user?._id?.toString()) {
-        sendError(res, 400, "You cannot delete yourself");
-        return;
-    }
     await user.deleteOne();
     successMsg(res, 200, "User deleted successfully", null);
 });

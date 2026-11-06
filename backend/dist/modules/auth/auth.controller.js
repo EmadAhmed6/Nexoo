@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import { sendError, successMsg } from "../../middlewares/errors.js";
 import { User, validateForgotPassword, validateLogin, validateRegister, validateResetPassword, validateVerifyOtp, validateResendOtp, } from "../Users/user.model.js";
 import { sendEmail, generateResetPasswordEmailHtml, generateVerifyOtpEmailHtml, } from "../../config/Email.js";
+import { redis } from "../../config/redis.js";
+import crypto from "node:crypto";
 // HANDLE REFRESH TOKEN
 const handleRefreshToken = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies?.refreshToken;
@@ -15,16 +17,21 @@ const handleRefreshToken = asyncHandler(async (req, res) => {
     if (!userId) {
         try {
             const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
-            userId = decoded.id || decoded.userId;
+            userId = decoded.userId;
         }
         catch {
             sendError(res, 403, "Invalid Refresh Token");
             return;
         }
     }
-    const user = await User.findById(userId).select("+refreshToken");
-    if (!user || user.refreshToken !== refreshToken) {
+    const storedRefreshToken = await redis.get(`refresh_token:${userId}`);
+    if (!storedRefreshToken || storedRefreshToken !== refreshToken) {
         sendError(res, 403, "Invalid Refresh Token");
+        return;
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+        sendError(res, 403, "User was not found or banned");
         return;
     }
     const newAccessToken = user.generateAccessToken();
@@ -45,7 +52,7 @@ const register = asyncHandler(async (req, res) => {
     const genSalt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(req.body.password, genSalt);
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
+    await redis.setEx(`otp:${req.body.email}`, 600, generatedOtp);
     const newUser = new User({
         fullName: req.body.fullName,
         username: req.body.username,
@@ -54,25 +61,13 @@ const register = asyncHandler(async (req, res) => {
         phone: req.body.phone,
         provider: "local",
         isVerified: false,
-        otp: generatedOtp,
-        otpExpired,
     });
     const finalUser = await newUser.save();
-    const accessToken = finalUser.generateAccessToken();
-    const refreshToken = finalUser.generateRefreshToken();
     await sendEmail(finalUser.email, "Verify Your Email - Nexoo", generateVerifyOtpEmailHtml(finalUser.username, generatedOtp));
-    finalUser.refreshToken = refreshToken;
     await finalUser.save();
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.ENV === "production",
-        sameSite: "strict",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-    const { password, otp: _otp, otpExpired: _otpExp, ...others } = finalUser.toObject();
+    const { password, ...others } = finalUser.toObject();
     successMsg(res, 201, "User registered successfully", {
         ...others,
-        accessToken,
     });
 });
 // LOGIN
@@ -111,9 +106,7 @@ const login = asyncHandler(async (req, res) => {
         }
     }
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
-    user.otp = generatedOtp;
-    user.otpExpired = otpExpired;
+    await redis.setEx(`otp:${req.body.email}`, 600, generatedOtp);
     await user.save();
     await sendEmail(user.email, "Verify Your Email - Nexoo", generateVerifyOtpEmailHtml(user.username, generatedOtp));
     successMsg(res, 200, "Check your email for verification.", null);
@@ -127,29 +120,29 @@ const verifyOtp = asyncHandler(async (req, res) => {
         return;
     }
     const { otp, email } = req.body;
+    const cachedOtp = await redis.get(`otp:${email}`);
+    if (!cachedOtp || cachedOtp !== otp) {
+        sendError(res, 400, "Invalid or expired OTP");
+        return;
+    }
     const user = await User.findOne({ email }).select("+otp +otpExpired");
     if (!user) {
         sendError(res, 404, "User was not found");
         return;
     }
-    if (user.otp !== otp || !user.otpExpired || user.otpExpired < new Date()) {
-        sendError(res, 400, "Invalid or expired OTP");
-        return;
-    }
     user.isVerified = true;
-    user.otp = undefined;
-    user.otpExpired = undefined;
+    await user.save();
+    await redis.del(`otp:${email}`);
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
-    user.refreshToken = refreshToken;
-    await user.save();
+    await redis.setEx(`refresh_token:${user.id}`, 604800, refreshToken);
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.ENV === "production",
         sameSite: "strict",
         maxAge: 30 * 24 * 60 * 60 * 1000,
     });
-    const { password, otp: _, otpExpired: __, ...others } = user.toObject();
+    const { password, ...others } = user.toObject();
     successMsg(res, 200, "OTP verified successfully", {
         ...others,
         accessToken,
@@ -163,20 +156,24 @@ const resendOtp = asyncHandler(async (req, res) => {
         return;
     }
     const email = req.body.email;
-    const user = await User.findOne({ email }).select("+otp +otpExpired");
+    const user = await User.findOne({ email });
     if (!user) {
         sendError(res, 404, "User not found");
         return;
     }
     if (user.isVerified) {
-        sendError(res, 404, "Account is already verified");
+        sendError(res, 400, "Account is already verified");
+        return;
+    }
+    const cooldownKey = `resend_cooldown:${email}`;
+    const existingCooldown = await redis.get(cooldownKey);
+    if (existingCooldown) {
+        sendError(res, 429, "Please wait a minute before requesting another OTP.");
         return;
     }
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
-    user.otp = generatedOtp;
-    user.otpExpired = otpExpired;
-    await user.save();
+    await redis.setEx(`otp:${email}`, 600, generatedOtp);
+    await redis.setEx(cooldownKey, 60, "locked");
     await sendEmail(user.email, "Verify Your Email - Nexoo", generateVerifyOtpEmailHtml(user.username, generatedOtp));
     successMsg(res, 200, "OTP sent successfully", null);
 });
@@ -192,16 +189,17 @@ const forgotPassword = asyncHandler(async (req, res) => {
         sendError(res, 404, "User is not exist");
         return;
     }
-    const secret = process.env.JWT_SECRET_KEY;
-    if (!secret) {
-        sendError(res, 500, "Server configuration error");
+    const cooldownKey = `forgot_cooldown:${user.email}`;
+    const existingCooldown = await redis.get(cooldownKey);
+    if (existingCooldown) {
+        sendError(res, 429, "Please wait a minute before requesting another reset link.");
         return;
     }
-    const token = await jwt.sign({ email: user.email, id: user._id }, secret, {
-        expiresIn: "10m",
-    });
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    await redis.setEx(`reset_token:${resetToken}`, 600, user.id.toString());
+    await redis.setEx(cooldownKey, 60, "locked");
     const FRONTENDUrl = `${process.env.FRONTEND_URL}`;
-    const link = `${FRONTENDUrl}/auth/reset-password?token=${token}&email=${user.email}`;
+    const link = `${FRONTENDUrl}/auth/reset-password?token=${resetToken}&email=${user.email}`;
     await sendEmail(user.email, "Reset Password Link - Nexoo", generateResetPasswordEmailHtml(user.username, link));
     successMsg(res, 200, "If an account with this email exists, a password reset link has been sent.", null);
 });
@@ -217,25 +215,25 @@ const resetPassword = asyncHandler(async (req, res) => {
         sendError(res, 400, "No token provided");
         return;
     }
-    const secret = process.env.JWT_SECRET_KEY;
-    if (!secret) {
-        sendError(res, 500, "server error");
-        return;
-    }
     try {
-        const decoded = jwt.verify(token, secret);
-        const user = await User.findById(decoded.id);
+        const userId = await redis.get(`reset_token:${token}`);
+        if (!userId) {
+            sendError(res, 400, "Invalid or expired reset token");
+            return;
+        }
+        const user = await User.findById(userId);
         if (!user) {
             sendError(res, 404, "user not found");
             return;
         }
-        if (user.email !== decoded.email) {
-            sendError(res, 400, "Invalid token");
+        if (req.body.email && user.email !== req.body.email) {
+            sendError(res, 400, "Invalid reset token for this email");
             return;
         }
         const genSalt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, genSalt);
-        user.refreshToken = undefined;
+        await redis.del(`refresh_token:${user.id}`);
+        await redis.del(`reset_token:${token}`);
         await user.save();
         successMsg(res, 200, "Password reset successfully", null);
     }
@@ -269,7 +267,13 @@ const getAuthMe = asyncHandler(async (req, res) => {
 const logout = asyncHandler(async (req, res) => {
     const refreshToken = req.cookies?.refreshToken;
     if (refreshToken) {
-        await User.findOneAndUpdate({ refreshToken }, { $unset: { refreshToken: 1 } });
+        try {
+            const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
+            await redis.del(`refresh_token:${decoded.userId}`);
+        }
+        catch (err) {
+            console.log("Token verification failed during logout, clearing cookie anyway.");
+        }
     }
     res.clearCookie("refreshToken", {
         httpOnly: true,

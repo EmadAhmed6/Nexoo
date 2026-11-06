@@ -312,7 +312,7 @@ const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   }
 
   try {
-    const userId = await redis.get(`refresh_token:${token}`);
+    const userId = await redis.get(`reset_token:${token}`);
     if (!userId) {
       sendError(res, 400, "Invalid or expired reset token");
       return;
@@ -320,6 +320,10 @@ const resetPassword = asyncHandler(async (req: Request, res: Response) => {
     const user = await User.findById(userId);
     if (!user) {
       sendError(res, 404, "user not found");
+      return;
+    }
+    if (req.body.email && user.email !== req.body.email) {
+      sendError(res, 400, "Invalid reset token for this email");
       return;
     }
 

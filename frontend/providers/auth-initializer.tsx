@@ -14,6 +14,12 @@ export function AuthInitializer() {
   useEffect(() => {
     const handleUnauthorized = () => {
       logout();
+      if (typeof window !== "undefined") {
+        const path = window.location.pathname;
+        if (path.includes("/auth/")) {
+          return;
+        }
+      }
       const callbackUrl = `${window.location.pathname}${window.location.search}`;
       router.replace(
         `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
@@ -29,6 +35,10 @@ export function AuthInitializer() {
   useEffect(() => {
     if (checkedRef.current) return;
     checkedRef.current = true;
+
+    if (typeof window !== "undefined" && window.location.pathname.includes("/auth/")) {
+      return;
+    }
 
     const token = getAuthToken();
     if (!token && !user) return;

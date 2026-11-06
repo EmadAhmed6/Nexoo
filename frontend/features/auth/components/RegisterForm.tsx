@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -60,8 +59,8 @@ export function RegisterForm() {
           description: "A verification code has been sent to your email.",
         });
         setTimeout(() => {
-          router.push(`/auth/verify-otp?email=${encodeURIComponent(data.email)}`);
-        }, 1200);
+          router.replace(`/auth/verify-otp?email=${encodeURIComponent(data.email)}`);
+        }, 1000);
       },
       onError: (err) => {
         const msg =
