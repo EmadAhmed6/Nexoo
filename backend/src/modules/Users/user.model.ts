@@ -41,12 +41,10 @@ export interface IUser extends IUserSchema, Document {
   phone: string;
   provider: "local" | "google";
   role: "User" | "Admin" | "SuperAdmin";
-
   isVerified: boolean;
   isActive: boolean;
   isBanned: boolean;
   banExpires?: Date;
-  refreshToken: string | undefined;
   profilePicture: {
     publicId: string;
     url: string;
@@ -79,7 +77,6 @@ const UserSchema = new Schema<IUser>(
       type: String,
       trim: true,
     },
-
     addresses: [
       {
         street: { type: String, required: true },
@@ -130,18 +127,6 @@ const UserSchema = new Schema<IUser>(
     banExpires: {
       type: Date,
       default: null,
-    },
-    refreshToken: {
-      type: String,
-      select: false,
-    },
-    otp: {
-      type: String,
-      select: false,
-    },
-    otpExpired: {
-      type: Date,
-      select: false,
     },
   },
   { timestamps: true },

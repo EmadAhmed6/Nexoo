@@ -43,3 +43,4 @@ const getActiveBanners = asyncHandler(
 );
 
 export { getActiveBanners };
+

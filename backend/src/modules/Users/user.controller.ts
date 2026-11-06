@@ -141,11 +141,6 @@ const deleteUser = asyncHandler(
       return;
     }
 
-    if (currentUser?._id?.toString() === user?._id?.toString()) {
-      sendError(res, 400, "You cannot delete yourself");
-      return;
-    }
-
     await user.deleteOne();
     successMsg(res, 200, "User deleted successfully", null);
   },

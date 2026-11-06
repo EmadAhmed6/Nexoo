@@ -12,7 +12,7 @@ const checkUserBan = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = req.user?.id || req.user?.userId;
+    const userId = req.user?.id;
     if (!userId) {
       return next();
     }

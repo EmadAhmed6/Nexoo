@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: nexo_api_container
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/Nexo
+      - CI=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - mongo
+    networks:
+      - nexo-network
+
+  mongo:
+    image: mongo:latest
+    container_name: nexo_mongo_container
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - nexo-network
+  redis:
+    image: redis:alpine
+    container_name: nexo_redis_container
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nexo-network
+      
+
+networks:
+  nexo-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  redis_data: {}

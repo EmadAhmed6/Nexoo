@@ -1,11 +1,5 @@
 import { z } from "zod";
-import {
-  ILoginSchema,
-  IRegisterSchema,
-  LoginSchema,
-  passwordSchema,
-  RegisterSchema,
-} from "../Auth/auth.schema.js";
+import { passwordSchema } from "../Auth/auth.schema.js";
 
 const UserSchema = z.object({
   username: z

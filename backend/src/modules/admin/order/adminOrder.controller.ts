@@ -203,6 +203,7 @@ const getOrderOverview = asyncHandler(async (req: Request, res: Response) => {
   ]);
 
   const totalPaidAmount = paidOrders[0]?.total || 0;
+  const report = await User.aggregate([]);
   successMsg(res, 200, "Stats fetched Succeed", {
     totalOrders,
     pendingOrders,

@@ -57,12 +57,6 @@ interface IOrderStatusHistory {
   note?: string;
 }
 
-// interface IOrderStatusHistory {
-//   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
-//   timestamp: Date;
-//   note?: string;
-// }
-
 interface IOrder extends Document {
   user: Types.ObjectId;
   orderItems: IOrderItem[];

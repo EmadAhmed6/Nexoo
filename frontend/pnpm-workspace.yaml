@@ -3,3 +3,6 @@ allowBuilds:
   '@swc/core': false
   sharp: false
   unrs-resolver: false
+public-hoist-pattern:
+  - "*next*"
+  - "*swc*"
