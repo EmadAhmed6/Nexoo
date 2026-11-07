@@ -9,16 +9,16 @@ const redis = createClient({
   },
 });
 
-redis.on("error", (err) => console.error("Redis Client Error ❌", err));
+redis.on("error", (err) => console.error("Redis Client Error ", err));
 
 const connectToRedis = async () => {
   try {
     if (!redis.isOpen) {
       await redis.connect();
     }
-    console.log("Connected to Redis successfully! 🚀");
+    console.log("Connected to Redis successfully!");
   } catch (err) {
-    console.error("Redis connection failed: ❌", err);
+    console.error("Redis connection failed: ", err);
   }
 };
 

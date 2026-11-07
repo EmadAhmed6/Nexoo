@@ -50,15 +50,16 @@ const verifyToken = async (req, res, next) => {
         return;
     }
     const secret = process.env.JWT_SECRET_KEY;
+    let decode;
     try {
-        const decode = jwt.verify(token, secret);
-        req.user = decode;
-        await checkUserBan(req, res, next);
+        decode = jwt.verify(token, secret);
     }
     catch (err) {
-        sendError(res, 403, "Invalid or expired token");
+        sendError(res, 401, "Invalid or expired token");
         return;
     }
+    req.user = decode;
+    await checkUserBan(req, res, next);
 };
 const verifyAuthorizedToken = (req, res, next) => {
     verifyToken(req, res, () => {

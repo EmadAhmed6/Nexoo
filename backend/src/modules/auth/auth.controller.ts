@@ -36,7 +36,7 @@ const handleRefreshToken = asyncHandler(async (req: Request, res: Response) => {
         refreshToken,
         process.env.JWT_REFRESH_SECRET_KEY as string,
       ) as { id?: string; userId?: string };
-      userId = decoded.userId;
+      userId = decoded.id || decoded.userId;
     } catch {
       sendError(res, 403, "Invalid Refresh Token");
       return;
@@ -65,22 +65,23 @@ const register = asyncHandler(async (req: Request, res: Response) => {
     sendError(res, 400, error?.issues[0]?.message || "Something went wrong");
     return;
   }
-
-  const user = await User.findOne({ email: req.body.email });
+  const email = req.body.email;
+  const user = await User.findOne({ email: email });
   if (user) {
     sendError(res, 400, "User is already exist");
     return;
   }
+
   const genSalt = await bcrypt.genSalt(10);
   req.body.password = await bcrypt.hash(req.body.password, genSalt);
 
   const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-  await redis.setEx(`otp:${req.body.email}`, 600, generatedOtp);
+  await redis.setEx(`otp:${email}`, 600, generatedOtp);
 
   const newUser = new User({
     fullName: req.body.fullName,
     username: req.body.username,
-    email: req.body.email,
+    email: email,
     password: req.body.password,
     phone: req.body.phone,
     provider: "local",
@@ -88,17 +89,12 @@ const register = asyncHandler(async (req: Request, res: Response) => {
   });
 
   const finalUser = await newUser.save();
-
   await sendEmail(
     finalUser.email,
     "Verify Your Email - Nexoo",
     generateVerifyOtpEmailHtml(finalUser.username, generatedOtp),
   );
-
-  await finalUser.save();
-
   const { password, ...others } = finalUser.toObject();
-
   successMsg(res, 201, "User registered successfully", {
     ...others,
   });
@@ -107,12 +103,13 @@ const register = asyncHandler(async (req: Request, res: Response) => {
 // LOGIN
 const login = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const email = req.body.email;
     const { error, success } = validateLogin(req.body);
     if (!success) {
       sendError(res, 400, error?.issues[0]?.message || "Something went wrong");
       return;
     }
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: email });
     if (!user) {
       sendError(res, 400, "User is not exist");
       return;
@@ -150,8 +147,8 @@ const login = asyncHandler(
     }
 
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    await redis.setEx(`otp:${req.body.email}`, 600, generatedOtp);
-    await user.save();
+    await redis.setEx(`otp:${email}`, 600, generatedOtp);
+
     await sendEmail(
       user.email,
       "Verify Your Email - Nexoo",
@@ -171,6 +168,7 @@ const verifyOtp = asyncHandler(
       sendError(res, 400, error?.issues[0]?.message || "Something went wrong");
       return;
     }
+
     const { otp, email } = req.body;
     const cachedOtp = await redis.get(`otp:${email}`);
     if (!cachedOtp || cachedOtp !== otp) {
@@ -178,11 +176,12 @@ const verifyOtp = asyncHandler(
       return;
     }
 
-    const user = await User.findOne({ email }).select("+otp +otpExpired");
+    const user = await User.findOne({ email });
     if (!user) {
       sendError(res, 404, "User was not found");
       return;
     }
+    
     user.isVerified = true;
     await user.save();
 
@@ -226,7 +225,6 @@ const resendOtp = asyncHandler(
       sendError(res, 400, "Account is already verified");
       return;
     }
-
     const cooldownKey = `resend_cooldown:${email}`;
     const existingCooldown = await redis.get(cooldownKey);
     if (existingCooldown) {
@@ -275,7 +273,6 @@ const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
     );
     return;
   }
-
   const resetToken = crypto.randomBytes(32).toString("hex");
   await redis.setEx(`reset_token:${resetToken}`, 600, user.id.toString());
 
@@ -374,7 +371,10 @@ const logout = asyncHandler(async (req: Request, res: Response) => {
         refreshToken,
         process.env.JWT_REFRESH_SECRET_KEY!,
       );
-      await redis.del(`refresh_token:${decoded.userId}`);
+      const userId = decoded?.id || decoded?.userId;
+      if (userId) {
+        await redis.del(`refresh_token:${userId}`);
+      }
     } catch (err) {
       console.log(
         "Token verification failed during logout, clearing cookie anyway.",

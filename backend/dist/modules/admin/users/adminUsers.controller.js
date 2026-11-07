@@ -19,11 +19,11 @@ const banUser = asyncHandler(async (req, res) => {
         sendError(res, 404, "User was not found");
         return;
     }
-    if (user.role === "SuperAdmin") {
+    if (user.role?.toLowerCase() === "superadmin") {
         sendError(res, 403, "Access denied: Cannot ban a SuperAdmin");
         return;
     }
-    if (user.role === "Admin" && currentUser?.role !== "SuperAdmin") {
+    if (user.role?.toLowerCase() === "admin" && currentUser?.role?.toLowerCase() !== "superadmin") {
         sendError(res, 403, "Access denied: Only SuperAdmin can manage other Admins");
         return;
     }
@@ -46,11 +46,11 @@ const unbanUser = asyncHandler(async (req, res) => {
         sendError(res, 404, "User was not found");
         return;
     }
-    if (user.role === "SuperAdmin" && currentUser?.role !== "SuperAdmin") {
+    if (user.role?.toLowerCase() === "superadmin" && currentUser?.role?.toLowerCase() !== "superadmin") {
         sendError(res, 403, "Access denied: Cannot unban a SuperAdmin");
         return;
     }
-    if (user.role === "Admin" && currentUser?.role !== "SuperAdmin") {
+    if (user.role?.toLowerCase() === "admin" && currentUser?.role?.toLowerCase() !== "superadmin") {
         sendError(res, 403, "Access denied: Only SuperAdmin can manage other Admins");
         return;
     }
@@ -70,11 +70,11 @@ const toggleAdminStatus = asyncHandler(async (req, res) => {
         sendError(res, 400, "Access denied: You cannot change your own role status");
         return;
     }
-    if (user.role === "SuperAdmin") {
+    if (user.role?.toLowerCase() === "superadmin") {
         sendError(res, 403, "Access denied: Cannot modify SuperAdmin role");
         return;
     }
-    if (currentUser.role !== "SuperAdmin") {
+    if (currentUser?.role?.toLowerCase() !== "superadmin") {
         sendError(res, 403, "Access denied: Only SuperAdmin can manage Admin roles");
         return;
     }

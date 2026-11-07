@@ -24,12 +24,12 @@ const banUser = asyncHandler(
       return;
     }
 
-    if (user.role === "SuperAdmin") {
+    if (user.role?.toLowerCase() === "superadmin") {
       sendError(res, 403, "Access denied: Cannot ban a SuperAdmin");
       return;
     }
 
-    if (user.role === "Admin" && currentUser?.role !== "SuperAdmin") {
+    if (user.role?.toLowerCase() === "admin" && currentUser?.role?.toLowerCase() !== "superadmin") {
       sendError(
         res,
         403,
@@ -68,11 +68,11 @@ const unbanUser = asyncHandler(
       return;
     }
 
-    if (user.role === "SuperAdmin" && currentUser?.role !== "SuperAdmin") {
+    if (user.role?.toLowerCase() === "superadmin" && currentUser?.role?.toLowerCase() !== "superadmin") {
       sendError(res, 403, "Access denied: Cannot unban a SuperAdmin");
       return;
     }
-    if (user.role === "Admin" && currentUser?.role !== "SuperAdmin") {
+    if (user.role?.toLowerCase() === "admin" && currentUser?.role?.toLowerCase() !== "superadmin") {
       sendError(
         res,
         403,
@@ -109,12 +109,12 @@ const toggleAdminStatus = asyncHandler(
       return;
     }
     
-    if (user.role === "SuperAdmin") {
+    if (user.role?.toLowerCase() === "superadmin") {
       sendError(res, 403, "Access denied: Cannot modify SuperAdmin role");
       return;
     }
 
-    if (currentUser.role !== "SuperAdmin") {
+    if (currentUser?.role?.toLowerCase() !== "superadmin") {
       sendError(
         res,
         403,

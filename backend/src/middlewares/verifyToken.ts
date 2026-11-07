@@ -56,14 +56,16 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   const secret = process.env.JWT_SECRET_KEY!;
+  let decode: JwtPayload;
   try {
-    const decode = jwt.verify(token, secret) as JwtPayload;
-    req.user = decode;
-    await checkUserBan(req, res, next);
+    decode = jwt.verify(token, secret) as JwtPayload;
   } catch (err) {
-    sendError(res, 403, "Invalid or expired token");
+    sendError(res, 401, "Invalid or expired token");
     return;
   }
+
+  req.user = decode;
+  await checkUserBan(req, res, next);
 };
 
 const verifyAuthorizedToken = (

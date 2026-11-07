@@ -1,6 +1,0 @@
-{
-	"dependencies": {
-		"js-cookies": "^1.0.4",
-		"redis": "^6.3.1"
-	}
-}

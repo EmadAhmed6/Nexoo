@@ -17,7 +17,7 @@ const handleRefreshToken = asyncHandler(async (req, res) => {
     if (!userId) {
         try {
             const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
-            userId = decoded.userId;
+            userId = decoded.id || decoded.userId;
         }
         catch {
             sendError(res, 403, "Invalid Refresh Token");
@@ -39,12 +39,13 @@ const handleRefreshToken = asyncHandler(async (req, res) => {
 });
 // REGISTER
 const register = asyncHandler(async (req, res) => {
+    const email = req.body.email;
     const { error, success } = validateRegister(req.body);
     if (!success) {
         sendError(res, 400, error?.issues[0]?.message || "Something went wrong");
         return;
     }
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: email });
     if (user) {
         sendError(res, 400, "User is already exist");
         return;
@@ -52,11 +53,11 @@ const register = asyncHandler(async (req, res) => {
     const genSalt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(req.body.password, genSalt);
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    await redis.setEx(`otp:${req.body.email}`, 600, generatedOtp);
+    await redis.setEx(`otp:${email}`, 600, generatedOtp);
     const newUser = new User({
         fullName: req.body.fullName,
         username: req.body.username,
-        email: req.body.email,
+        email: email,
         password: req.body.password,
         phone: req.body.phone,
         provider: "local",
@@ -72,12 +73,13 @@ const register = asyncHandler(async (req, res) => {
 });
 // LOGIN
 const login = asyncHandler(async (req, res) => {
+    const email = req.body.email;
     const { error, success } = validateLogin(req.body);
     if (!success) {
         sendError(res, 400, error?.issues[0]?.message || "Something went wrong");
         return;
     }
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: email });
     if (!user) {
         sendError(res, 400, "User is not exist");
         return;
@@ -106,8 +108,7 @@ const login = asyncHandler(async (req, res) => {
         }
     }
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    await redis.setEx(`otp:${req.body.email}`, 600, generatedOtp);
-    await user.save();
+    await redis.setEx(`otp:${email}`, 600, generatedOtp);
     await sendEmail(user.email, "Verify Your Email - Nexoo", generateVerifyOtpEmailHtml(user.username, generatedOtp));
     successMsg(res, 200, "Check your email for verification.", null);
     return;
@@ -125,7 +126,7 @@ const verifyOtp = asyncHandler(async (req, res) => {
         sendError(res, 400, "Invalid or expired OTP");
         return;
     }
-    const user = await User.findOne({ email }).select("+otp +otpExpired");
+    const user = await User.findOne({ email });
     if (!user) {
         sendError(res, 404, "User was not found");
         return;
@@ -269,7 +270,10 @@ const logout = asyncHandler(async (req, res) => {
     if (refreshToken) {
         try {
             const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
-            await redis.del(`refresh_token:${decoded.userId}`);
+            const userId = decoded?.id || decoded?.userId;
+            if (userId) {
+                await redis.del(`refresh_token:${userId}`);
+            }
         }
         catch (err) {
             console.log("Token verification failed during logout, clearing cookie anyway.");

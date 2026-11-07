@@ -56,7 +56,13 @@ axiosClient.interceptors.response.use(
         url.includes("/auth/refresh") ||
         url.includes("/auth/logout");
 
-      if (error.response?.status === 401 && !isAuthUrl && !originalRequest._retry) {
+      const isTokenExpired =
+        error.response?.status === 401 ||
+        (error.response?.status === 403 &&
+          typeof (error.response?.data as any)?.message === "string" &&
+          (error.response.data as any).message.toLowerCase().includes("token"));
+
+      if (isTokenExpired && !isAuthUrl && !originalRequest._retry) {
         originalRequest._retry = true;
 
         try {
@@ -115,7 +121,7 @@ axiosClient.interceptors.response.use(
       }
 
       if (
-        error.response?.status === 401 &&
+        (error.response?.status === 401 || isTokenExpired) &&
         originalRequest._retry &&
         !originalRequest._refreshFailed &&
         !isAuthUrl
