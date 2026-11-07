@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -45,7 +45,7 @@ const ROLE_STYLES: Record<string, { label: string; color: string; bg: string }> 
   },
 };
 
-export default function AdminUserDetailPage() {
+function AdminUserDetailContent() {
   const locale = useLocale();
   const t = useTranslations("admin");
   const tCommon = useTranslations("common");
@@ -379,5 +379,19 @@ export default function AdminUserDetailPage() {
         noticeText={t("userErasedNotice")}
       />
     </div>
+  );
+}
+
+export default function AdminUserDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[70vh] flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <AdminUserDetailContent />
+    </Suspense>
   );
 }

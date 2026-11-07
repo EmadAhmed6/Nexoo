@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { usePathname, useRouter } from "@/i18n/routing";
 import { useAppStore } from "@/store/use-app-store";
 import { useLocale, useTranslations } from "next-intl";
@@ -212,10 +212,12 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen flex bg-bgPrimary">
-      <AdminSidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+      <Suspense fallback={null}>
+        <AdminSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+      </Suspense>
 
       <div className={`flex-1 flex flex-col min-w-0 ${locale === "ar" ? "lg:pr-64" : "lg:pl-64"}`}>
         {/* Top bar */}

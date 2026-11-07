@@ -1,7 +1,7 @@
-import { createClient } from "redis";
+import { createClient, RedisClientType } from "redis";
 import "dotenv/config";
 
-const redis = createClient({
+const redis: RedisClientType = createClient({
   url: `redis://${process.env.REDIS_USERNAME || "default"}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT || 6379}/0`,
   socket: {
     host: process.env.REDIS_HOST,

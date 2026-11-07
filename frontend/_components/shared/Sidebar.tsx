@@ -33,7 +33,7 @@ interface SidebarProps {
   selectedCategory?: string;
 }
 
-export function Sidebar({
+function SidebarContent({
   className,
   onSelectCategory,
   selectedCategory,
@@ -234,5 +234,13 @@ export function Sidebar({
         onClose={() => setCreateModalOpen(false)}
       />
     </>
+  );
+}
+
+export function Sidebar(props: SidebarProps) {
+  return (
+    <React.Suspense fallback={<aside className={props.className} />}>
+      <SidebarContent {...props} />
+    </React.Suspense>
   );
 }
