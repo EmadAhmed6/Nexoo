@@ -21,7 +21,6 @@ import {
   Calendar,
   Save,
   Loader2,
-  Sparkles,
   LayoutDashboard,
   Package,
   Trash2,
@@ -176,7 +175,7 @@ function ProfileContent() {
       <div>
         <h1 className="text-3xl font-black text-textPrimary tracking-tight flex items-center gap-2.5">
           <span>{isOtherUser ? t("userProfileTitle") : t("title")}</span>
-          <Sparkles className="w-5 h-5 text-primary" />
+          <UserIcon className="w-6 h-6 text-primary" />
         </h1>
         <p className="text-sm text-textSecondary mt-1">
           {isOtherUser

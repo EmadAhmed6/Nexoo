@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AlertCircle, RefreshCw, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertCircle, RefreshCw, Flame, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import { useProducts } from "../hooks/useProducts";
 import { Product, ProductFilters } from "../types/product.types";
@@ -76,7 +76,7 @@ export function ProductGrid({ filters, onPageChange }: ProductGridProps) {
             className="flex items-center gap-2"
           >
             <span>{t("featuredCollection")}</span>
-            <Sparkles className="w-4 h-4 text-primary" />
+            <Flame className="w-4 h-4 text-primary" />
           </Text>
           <Text size="xs" color="secondary" className="mt-0.5">
             {t("featuredSubtitle")}

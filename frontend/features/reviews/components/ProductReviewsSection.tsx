@@ -10,7 +10,6 @@ import {
   Trash2,
   Loader2,
   CheckCircle2,
-  Sparkles,
   AlertTriangle,
   X,
 } from "lucide-react";
@@ -187,7 +186,7 @@ export function ProductReviewsSection({
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
+            <MessageSquare className="w-3.5 h-3.5" />
             <span>{t("customerOpinions")}</span>
           </div>
           <Text as="h2" size="2xl" font="black" className="tracking-tight text-textPrimary">

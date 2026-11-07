@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Package,
-  Sparkles,
   Plus,
   ShoppingBag,
   LogOut,
@@ -58,7 +57,7 @@ function SidebarContent({
     {
       label: t("products"),
       href: "/#products",
-      icon: Sparkles,
+      icon: ShoppingBag,
       isActive:
         pathname === "/" && selectedCategory && selectedCategory !== "All",
     },

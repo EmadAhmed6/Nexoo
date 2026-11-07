@@ -501,7 +501,7 @@ export function Navbar() {
                   <nav className="space-y-1">
                     {[
                       { label: t("home"), href: "/", icon: Home },
-                      { label: t("products"), href: "/#products", icon: Sparkles },
+                      { label: t("products"), href: "/#products", icon: ShoppingBag },
                       ...(isAuthenticated ? [
                         { label: t("profile"), href: "/profile", icon: UserIcon },
                         { label: t("notifications"), href: "/notifications", icon: Bell },

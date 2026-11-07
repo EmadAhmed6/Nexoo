@@ -13,7 +13,8 @@ import {
   Truck,
   RotateCcw,
   CheckCircle2,
-  Sparkles,
+  Star,
+  Tag,
 } from "lucide-react";
 import { Banner } from "@/features/banners/types/banner.types";
 import { useActiveBanners } from "@/features/banners/hooks/useBanners";
@@ -205,7 +206,7 @@ function HeroSlide({
         <div className="lg:col-span-7 flex flex-col items-start text-left space-y-5">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#fbbf24]/25 bg-[#fbbf24]/[0.08] text-[#fbbf24] text-xs font-bold shadow-sm backdrop-blur-md">
-            <Sparkles className="w-3.5 h-3.5" />
+            <Star className="w-3.5 h-3.5 fill-[#fbbf24]/30" />
             <span>{featuredBadge}</span>
           </div>
 
@@ -266,7 +267,7 @@ function HeroSlide({
               {/* Floating info card overlay */}
               <div className="absolute bottom-4 left-4 right-4 p-3.5 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/[0.08] shadow-xl flex items-center gap-3 pointer-events-none">
                 <div className="w-10 h-10 rounded-xl bg-[#fbbf24]/15 border border-[#fbbf24]/30 flex items-center justify-center text-[#fbbf24] font-black shrink-0">
-                  <Sparkles className="w-5 h-5" />
+                  <Tag className="w-5 h-5" />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-white line-clamp-1">
