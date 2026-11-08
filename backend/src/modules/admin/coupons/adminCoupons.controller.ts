@@ -6,12 +6,31 @@ import {
   validateCreateCoupon,
   validateUpdateCoupon,
 } from "../../Coupon/coupon.model.js";
+import { redis } from "../../../config/redis.js";
 
 // GET ALL COUPONS
 const getCoupons = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const query: Record<string, any> = {};
     const { search, isActive, discountType } = req.query;
+    const queryParamsString = JSON.stringify({
+      search,
+      isActive,
+      discountType,
+    });
+    const cacheKey = `admin:coupons:${queryParamsString}`;
+
+    const cachedCoupons = await redis.get(cacheKey);
+    if (cachedCoupons) {
+      successMsg(
+        res,
+        200,
+        "Coupons fetched successfully",
+        JSON.parse(cachedCoupons),
+        "cache",
+      );
+      return;
+    }
 
     if (search && typeof search === "string" && search.trim() !== "") {
       query.couponCode = { $regex: search, $options: "i" };
@@ -31,6 +50,7 @@ const getCoupons = asyncHandler(
       sendError(res, 404, "No Coupons found");
       return;
     }
+    await redis.set(cacheKey, JSON.stringify(coupons), { EX: 600 });
     successMsg(res, 200, "Coupons fetched successfully", coupons);
   },
 );
@@ -78,6 +98,10 @@ const createCoupon = asyncHandler(
       expireDate: new Date(expireDate),
     });
     const savedCoupon = await newCoupon.save();
+    const keys = await redis.keys("admin:coupons:*");
+    if (keys.length > 0) {
+      await redis.del(keys);
+    }
     successMsg(res, 201, "Coupon created successfully", savedCoupon);
   },
 );
@@ -141,6 +165,10 @@ const updateCoupon = asyncHandler(
       },
       { new: true, runValidators: true },
     );
+    const keys = await redis.keys("admin:coupons:*");
+    if (keys.length > 0) {
+      await redis.del(keys);
+    }
 
     successMsg(res, 200, "Coupon updated successfully", updatedCoupon);
   },
@@ -161,6 +189,11 @@ const deleteCoupon = asyncHandler(
       return;
     }
     await Coupon.findByIdAndDelete(couponId);
+    const keys = await redis.keys("admin:coupons:*");
+    if (keys.length > 0) {
+      await redis.del(keys);
+    }
+
     successMsg(res, 200, "Coupon deleted successfully", null);
   },
 );

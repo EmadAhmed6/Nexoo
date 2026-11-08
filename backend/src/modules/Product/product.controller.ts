@@ -9,6 +9,7 @@ import {
 } from "./product.model.js";
 import cloudinary from "../../config/cloudinary.js";
 import { createNotification } from "../Notification/notification.controller.js";
+import { redis } from "../../config/redis.js";
 
 export interface IProductQuery {
   minPrice?: string;
@@ -62,6 +63,13 @@ const createProduct = asyncHandler(
       userId: req.user?.id,
     });
 
+    const keys = await redis.keys("products:all:*");
+    const suggestionKeys = await redis.keys("suggestions:*");
+    const allKeys = [...keys, ...suggestionKeys];
+    if (allKeys.length > 0) {
+      await redis.del(allKeys);
+    }
+
     const finalProduct = await newProduct.save();
     successMsg(res, 201, "Product created successfully", finalProduct);
   },
@@ -83,6 +91,29 @@ const getAllProducts = asyncHandler(
       maxRating,
       hasDiscount,
     } = req.query as IProductQuery;
+
+    const cacheKey = `products:all:${JSON.stringify({
+      minPrice,
+      maxPrice,
+      category,
+      search,
+      inStock,
+      minRating,
+      maxRating,
+      hasDiscount,
+    })}`;
+
+    const cachedProducts = await redis.get(cacheKey);
+    if (cachedProducts) {
+      successMsg(
+        res,
+        200,
+        "Products fetched successfully",
+        JSON.parse(cachedProducts),
+        "cache",
+      );
+      return;
+    }
 
     const query: any = {};
 
@@ -140,13 +171,16 @@ const getAllProducts = asyncHandler(
       .limit(productPerPage);
 
     const totalProducts = await Product.countDocuments(query);
-
-    successMsg(res, 200, "Products fetched successfully", {
+    const productPayload = {
       products,
       currentPage: page,
       totalPages: Math.ceil(totalProducts / productPerPage),
       totalProducts,
-    });
+    };
+
+    redis.set(cacheKey, JSON.stringify(productPayload), { EX: 300 });
+
+    successMsg(res, 200, "Products fetched successfully", productPayload);
   },
 );
 
@@ -154,15 +188,30 @@ const getAllProducts = asyncHandler(
 const getProductById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const productId = req.params.productId as string;
+    const cacheKey = `products:${productId}`;
+    const cachedProduct = await redis.get(cacheKey);
+    if (cachedProduct) {
+      successMsg(
+        res,
+        200,
+        "Product fetched successfully",
+        JSON.parse(cachedProduct),
+        "cache",
+      );
+      return;
+    }
+
     const product = await Product.findById(productId);
     if (!product) {
       sendError(res, 404, "No Product found with this id");
       return;
     }
+
+    await redis.set(cacheKey, JSON.stringify(product), { EX: 300 });
     successMsg(res, 200, "Product fetched successfully", product);
   },
 );
-
+// UPDATE PRODUCT
 const updateProduct = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateUpdateProduct(req.body);
@@ -226,6 +275,11 @@ const updateProduct = asyncHandler(
       sendError(res, 500, "Failed to update Product");
       return;
     }
+
+    const keys = await redis.keys("products:all:*");
+    const allKeys = [`products:${productId}`, ...keys];
+
+    await redis.del(allKeys);
     successMsg(res, 200, "Product updated successfully", updatedProduct);
   },
 );
@@ -239,11 +293,17 @@ const deleteProduct = asyncHandler(
       sendError(res, 404, "No Product found with this id");
       return;
     }
+
+    const keys = await redis.keys("products:all:*");
+    const allKeys = [`products:${productId}`, ...keys];
+
     await Product.findByIdAndDelete(productId);
+    await redis.del(allKeys);
     successMsg(res, 200, "Product deleted successfully", null);
   },
 );
-//
+
+// TOGGLE PRODUCT LIKE
 const toggleLikeProduct = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const productId = req.params.productId as string;
@@ -270,6 +330,8 @@ const toggleLikeProduct = asyncHandler(
         sendError(res, 500, "Failed to Unlike Product");
         return;
       }
+      const keys = await redis.keys("products:all:*");
+      await redis.del([`products:${productId}`, ...keys]);
       successMsg(res, 200, "Product unliked successfully", updatedProduct);
     } else {
       updatedProduct = await Product.findByIdAndUpdate(
@@ -301,6 +363,9 @@ const toggleLikeProduct = asyncHandler(
         }
       }
 
+      const keys = await redis.keys("products:all:*");
+      await redis.del([`products:${productId}`, ...keys]);
+
       successMsg(res, 200, "Product liked successfully", updatedProduct);
     }
   },
@@ -328,8 +393,17 @@ const updateStockAfterPayment = async (orderItems: any[]) => {
         product.isOutOfStock = true;
       }
       await product.save();
+      const keys = await redis.keys("products:all:*");
+      const keysToDel = [`products:${productId}`, ...keys];
+      if (keysToDel.length > 0) {
+        await redis.del(keysToDel);
+      }
     } catch (err) {
-      console.error("Failed to update stock after payment for item:", item, err);
+      console.error(
+        "Failed to update stock after payment for item:",
+        item,
+        err,
+      );
     }
   }
 };
@@ -343,6 +417,18 @@ const getProductSuggestions = asyncHandler(
         products: [],
         categories: [],
       });
+      return;
+    }
+    const cacheKey = `suggestion:${q}`;
+    const cachedSuggestions = await redis.get(cacheKey);
+    if (cachedSuggestions) {
+      successMsg(
+        res,
+        200,
+        " Suggestions fetched successfully",
+        JSON.parse(cachedSuggestions),
+        "cache",
+      );
       return;
     }
 
@@ -372,13 +458,17 @@ const getProductSuggestions = asyncHandler(
         { category: { $regex: safeRegex, $options: "i" } },
       ],
     })
-      .select("title description category price priceAfterDiscount productImages stock")
+      .select(
+        "title description category price priceAfterDiscount productImages stock",
+      )
       .limit(6);
-
-    successMsg(res, 200, "Suggestions fetched successfully", {
+    const productResponse = {
       products,
       categories: matchingCategories,
-    });
+    };
+
+    await redis.set(cacheKey, JSON.stringify(productResponse), { EX: 600 });
+    successMsg(res, 200, "Suggestions fetched successfully", productResponse);
   },
 );
 
@@ -392,4 +482,3 @@ export {
   toggleLikeProduct,
   updateStockAfterPayment,
 };
-

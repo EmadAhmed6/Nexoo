@@ -5,6 +5,7 @@ import { Types } from "mongoose";
 import { sendError, successMsg } from "../../middlewares/errors.js";
 import Wishlist from "./wishlist.model.js";
 import { Product } from "../Product/product.model.js";
+import { redis } from "../../config/redis.js";
 
 const POPULATE_PRODUCT_FIELDS =
   "title description price priceAfterDiscount productImages category stock ratingAverage ratingQuantity likes likesCount";
@@ -16,7 +17,17 @@ const getWishlist = asyncHandler(
       sendError(res, 401, "Unauthorized");
       return;
     }
-
+    const cacheKey = `wishlist:${userId}`;
+    const cachedWishlist = await redis.get(cacheKey);
+    if (cachedWishlist) {
+      successMsg(
+        res,
+        200,
+        "Wishlist fetched successfully",
+        JSON.parse(cachedWishlist),
+        "cache",
+      );
+    }
     let wishlist = await Wishlist.findOne({ user: userId }).populate({
       path: "products",
       select: POPULATE_PRODUCT_FIELDS,
@@ -31,6 +42,8 @@ const getWishlist = asyncHandler(
         await wishlist.save();
       }
     }
+
+    await redis.set(cacheKey, JSON.stringify(wishlist), { EX: 600 });
 
     successMsg(res, 200, "Wishlist fetched successfully", wishlist);
   },
@@ -64,6 +77,8 @@ const addToWishlist = asyncHandler(
       return;
     }
 
+    const keys = await redis.keys(`wishlist:${userId}`);
+
     successMsg(res, 200, "Added to wishlist successfully", wishlist);
   },
 );
@@ -95,6 +110,7 @@ const removeFromWishlist = asyncHandler(
       sendError(res, 404, "No Wishlist found for this user");
       return;
     }
+    await redis.del(`wishlist:${userId}`);
 
     successMsg(res, 200, "Removed from wishlist successfully", wishlist);
   },
@@ -114,6 +130,7 @@ const clearWishlist = asyncHandler(
       { new: true, upsert: true },
     );
 
+    await redis.del(`wishlist:${userId}`);
     successMsg(res, 200, "Wishlist cleared successfully", wishlist);
   },
 );

@@ -8,6 +8,7 @@ import {
   validateCreateBanner,
   validateUpdateBanner,
 } from "../../Banner/banner.model.js";
+import { redis } from "../../../config/redis.js";
 
 // GET ALL BANNERS
 const getAllBanners = asyncHandler(
@@ -16,6 +17,19 @@ const getAllBanners = asyncHandler(
     const currentPage = Number(page) || 1;
     const limitPage = Number(limit) || 10;
     const filter: Record<string, any> = {};
+    const cacheKey = `admin:banners:${position}`;
+
+    const cachedBanners = await redis.get(cacheKey);
+    if (cachedBanners) {
+      successMsg(
+        res,
+        200,
+        "Banners fetched successfully",
+        JSON.parse(cachedBanners),
+        "cache",
+      );
+      return;
+    }
 
     if (position && typeof position === "string" && position !== "all") {
       filter.position = position;
@@ -40,6 +54,7 @@ const getAllBanners = asyncHandler(
       .skip((currentPage - 1) * limitPage)
       .limit(limitPage);
 
+    await redis.set(cacheKey, JSON.stringify(banners), { EX: 600 });
     successMsg(res, 200, "Banners fetched successfully", banners);
   },
 );
@@ -49,12 +64,25 @@ const getBannerById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const bannerId = req.params.bannerId;
     const banner = await Banner.findById(bannerId);
+    const cacheKey = `banner:${bannerId}`;
+
+    const cachedBanner = await redis.get(cacheKey);
+    if (cachedBanner) {
+      successMsg(
+        res,
+        200,
+        "Banner fetched successfully",
+        JSON.parse(cachedBanner),
+        "cache",
+      );
+      return;
+    }
 
     if (!banner) {
       sendError(res, 404, "Banner not found");
       return;
     }
-
+    await redis.set(cacheKey, JSON.stringify(banner), { EX: 600 });
     successMsg(res, 200, "Banner fetched successfully", banner);
   },
 );
@@ -112,6 +140,7 @@ const createBanner = asyncHandler(
       });
 
       const finalBanner = await banner.save();
+      await redis.del(`banners:${finalBanner.position}`);
       successMsg(res, 201, "Banner created successfully", finalBanner);
     } catch (err: any) {
       if (file.path && fs.existsSync(file.path)) {
@@ -188,6 +217,7 @@ const updateBanner = asyncHandler(
       if (data.endDate !== undefined) banner.endDate = data.endDate;
 
       const updatedBanner = await banner.save();
+      await redis.del(`admin:banners:${data.position}`);
       successMsg(res, 200, "Banner updated successfully", updatedBanner);
     } catch (err: any) {
       if (file?.path && fs.existsSync(file.path)) {
@@ -221,12 +251,25 @@ const deleteBanner = asyncHandler(
     }
 
     await banner.deleteOne();
+    await redis.del(`admin:banners:${banner.position}`);
     successMsg(res, 200, "Banner deleted successfully", null);
   },
 );
 
 // GET BANNER OVERVIEW
 const getBannerOverview = asyncHandler(async (req: Request, res: Response) => {
+  const cacheKey = "admin:banners:overview";
+  const cachedOverview = await redis.get(cacheKey);
+  if (cachedOverview) {
+    successMsg(
+      res,
+      200,
+      "Banner overview fetched successfully",
+      JSON.parse(cachedOverview),
+      "cache",
+    );
+    return;
+  }
   const activeBanners = await Banner.countDocuments({ isActive: true });
   const totalBanners = await Banner.countDocuments();
   const inactiveBanners = totalBanners - activeBanners;
@@ -239,14 +282,21 @@ const getBannerOverview = asyncHandler(async (req: Request, res: Response) => {
   const heroProductBanners = await Banner.countDocuments({
     position: "hero_product",
   });
-  successMsg(res, 200, "Banner overview fetched successfully", {
+  const overviewResponse = {
     activeBanners,
     totalBanners,
     inactiveBanners,
     heroHomeBanners,
     heroCategoryBanners,
     heroProductBanners,
-  });
+  };
+  await redis.set(cacheKey, JSON.stringify(overviewResponse), { EX: 600 });
+  successMsg(
+    res,
+    200,
+    "Banner overview fetched successfully",
+    overviewResponse,
+  );
 });
 
 export {

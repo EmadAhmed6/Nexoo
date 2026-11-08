@@ -2,11 +2,27 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import { sendError, successMsg } from "../../../middlewares/errors.js";
 import { Ticket } from "../../../modules/Ticket/ticket.model.js";
+import { redis } from "../../../config/redis.js";
+import { RedisSentinel } from "redis";
 
 // GET ALL TICKET
 const getAllTickets = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { status, search } = req.query;
+    const queryParamsString = JSON.stringify({ status, search });
+    const cacheKey = `admin:tickets:${queryParamsString}`;
+
+    const cachedTickets = await redis.get(cacheKey);
+    if (cachedTickets) {
+      successMsg(
+        res,
+        200,
+        "Tickets fetched successfully",
+        JSON.parse(cachedTickets),
+        "cache",
+      );
+      return;
+    }
     const query: Record<string, any> = {};
     if (status && typeof status === "string" && status !== "all") {
       query.status = status;
@@ -17,6 +33,8 @@ const getAllTickets = asyncHandler(
     const tickets = await Ticket.find(query)
       .populate("user", "firstName lastName email")
       .sort({ createdAt: -1 });
+
+    await redis.set(cacheKey, JSON.stringify(tickets), { EX: 600 });
     successMsg(res, 200, "Tickets fetched successfully", tickets);
   },
 );
@@ -43,12 +61,29 @@ const updateTicketStatus = asyncHandler(
 
     ticket.status = status;
     await ticket.save();
+    const keys = await redis.keys("admin:tickets:*");
+    if (keys.length > 0) {
+      await redis.del(keys);
+    }
     successMsg(res, 200, "Ticket updated successfully", ticket);
   },
 );
 
 // GET TICKET OVERVIEW
 const getTicketOverview = asyncHandler(async (req: Request, res: Response) => {
+  const cacheKey = "admin:tickets:overview";
+
+  const cachedOverview = await redis.get(cacheKey);
+  if (cachedOverview) {
+    successMsg(
+      res,
+      200,
+      "Ticket Stats fetched successfully",
+      JSON.parse(cachedOverview),
+      "cache",
+    );
+    return;
+  }
   const totalTickets = await Ticket.countDocuments();
   const openTickets = await Ticket.countDocuments({ status: "open" });
   const inprogressTickets = await Ticket.countDocuments({
@@ -56,13 +91,17 @@ const getTicketOverview = asyncHandler(async (req: Request, res: Response) => {
   });
   const resolvedTickets = await Ticket.countDocuments({ status: "resolved" });
   const closedTickets = await Ticket.countDocuments({ status: "closed" });
-  successMsg(res, 200, "Ticket overview fetched successfully", {
+  
+  const ticketStats = {
     totalTickets,
     openTickets,
     inprogressTickets,
     resolvedTickets,
     closedTickets,
-  });
+  };
+
+  await redis.set(cacheKey, JSON.stringify(ticketStats), { EX: 600 });
+  successMsg(res, 200, "Ticket overview fetched successfully", ticketStats);
 });
 
 export { getAllTickets, updateTicketStatus, getTicketOverview };

@@ -4,6 +4,7 @@ import { sendError, successMsg } from "../../../middlewares/errors.js";
 import { Order } from "../../Order/order.model.js";
 import { User } from "../../Users/user.model.js";
 import { Notification } from "../../Notification/notification.model.js";
+import { redis } from "../../../config/redis.js";
 
 interface IOrderQuery {
   orderStatus?: string;
@@ -183,6 +184,19 @@ const updateOrderStatus = asyncHandler(
 
 // GET ORDER STATS
 const getOrderOverview = asyncHandler(async (req: Request, res: Response) => {
+  const cacheKey = "admin:orders:overview";
+
+  const cachedOverview = await redis.get(cacheKey);
+  if (cachedOverview) {
+    successMsg(
+      res,
+      200,
+      "Order Stats fetched successfully",
+      JSON.parse(cachedOverview),
+      "cache",
+    );
+    return;
+  }
   const totalOrders = await Order.countDocuments();
   const pendingOrders = await Order.countDocuments({
     "orderStatus.status": "Pending",
@@ -203,15 +217,17 @@ const getOrderOverview = asyncHandler(async (req: Request, res: Response) => {
   ]);
 
   const totalPaidAmount = paidOrders[0]?.total || 0;
-  const report = await User.aggregate([]);
-  successMsg(res, 200, "Stats fetched Succeed", {
+  const statsData = {
     totalOrders,
     pendingOrders,
     deliveredOrders,
     processingOrders,
     cancelledOrders,
     totalPaidAmount,
-  });
+  };
+  
+  await redis.set(cacheKey, JSON.stringify(statsData), { EX: 600 });
+  successMsg(res, 200, "Stats fetched Successfully", statsData);
 });
 
 export { getOrders, getOrderById, updateOrderStatus, getOrderOverview };

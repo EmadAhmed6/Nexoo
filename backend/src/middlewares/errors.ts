@@ -30,10 +30,11 @@ const successMsg = (
   statusCode: number,
   successMessage: string,
   data: any,
+  source: string = "database",
 ) => {
   return res
     .status(statusCode)
-    .json({ success: true, message: successMessage, data });
+    .json({ success: true, message: successMessage, source, data });
 };
 
 export { notFound, errorHandler, sendError, successMsg };

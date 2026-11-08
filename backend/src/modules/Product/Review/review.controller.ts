@@ -10,14 +10,26 @@ import {
 import { Product } from "../product.model.js";
 import { updateProductRatingStats } from "./calculateProductRating.js";
 import { createNotification } from "../../Notification/notification.controller.js";
+import { redis } from "../../../config/redis.js";
 
 // GET PRODUCT REVIEWS
 const getProductReviews = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const productId = req.params.productId;
+    const cacheKey = `reviews:${productId}`;
+    const cachedReviews = await redis.get(cacheKey);
     if (!productId) {
       sendError(res, 400, "Product ID is required");
       return;
+    }
+    if (cachedReviews) {
+      successMsg(
+        res,
+        200,
+        "Reviews fetched successfully",
+        JSON.parse(cachedReviews),
+        "cache",
+      );
     }
 
     const product = await Product.findById(productId);
@@ -30,6 +42,7 @@ const getProductReviews = asyncHandler(
       .populate("user", "fullName username profilePicture email role")
       .sort({ createdAt: -1 });
 
+    await redis.set(cacheKey, JSON.stringify(reviews), { EX: 600 });
     successMsg(res, 200, "Reviews fetched successfully", reviews);
   },
 );
@@ -104,6 +117,9 @@ const createReview = asyncHandler(
       });
     }
 
+    const keys = [`reviews:${productId}`, `products:${productId}`];
+    await redis.del(keys);
+
     successMsg(
       res,
       isNewReview ? 201 : 200,
@@ -165,6 +181,9 @@ const updateReview = asyncHandler(
       "fullName username profilePicture email role",
     );
 
+    const keys = [`reviews:${productId}`, `products:${productId}`];
+    await redis.del(keys);
+
     successMsg(res, 200, "Review updated successfully", {
       review,
       productRating: stats.ratingAverage,
@@ -204,6 +223,12 @@ const deleteReview = asyncHandler(
     await review.deleteOne();
 
     const stats = await updateProductRatingStats(targetProductId);
+    
+    const keysToDel = [
+      `reviews:${targetProductId}`,
+      `products:${targetProductId}`,
+    ];
+    await redis.del(keysToDel);
 
     successMsg(res, 200, "Review deleted successfully", {
       productRating: stats.ratingAverage,
